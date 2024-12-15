@@ -4,20 +4,24 @@
 
 @layer base {
 	body {
-		@apply text-gray-700 dark:bg-gray-700 dark:text-gray-200;
+		font-family: 'SF Pro', 'Inter', sans-serif;
+		@apply bg-emerald-50 text-gray-700 dark:bg-emerald-950 dark:text-gray-200;
 	}
+
 	input,
 	textarea {
-		@apply border-2 border-green-800 p-2 focus:border-green-500 focus-visible:outline-none;
+		@apply border-2 border-emerald-700 p-2 focus:border-emerald-500 focus-visible:outline-none dark:border-emerald-200 dark:bg-emerald-50 dark:text-gray-700;
 	}
+
 	input {
 		@apply h-[36px];
 	}
+
 	select {
-		@apply h-[36px] min-w-[120px] border-2 border-green-800 p-2 focus:border-green-500 focus-visible:outline-none;
+		@apply h-[36px] min-w-[120px] border-2 border-emerald-700 p-2 focus:border-emerald-500 focus-visible:outline-none dark:border-emerald-200 dark:bg-emerald-50 dark:text-gray-700;
 	}
 
 	button {
-		@apply w-fit rounded-sm bg-green-100 p-2;
+		@apply w-fit rounded-sm bg-emerald-100 p-2 text-gray-700 transition-colors hover:bg-emerald-200 dark:text-gray-700;
 	}
 }

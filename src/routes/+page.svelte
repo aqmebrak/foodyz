@@ -1,10 +1,16 @@
-<h1>Welcome to SvelteKit</h1>
-<p>
-	Visit
-	<a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation
-</p>
+<script lang="ts">
+	import type { PageData } from './$types';
 
-<a
-	class="block w-fit cursor-pointer border-2 border-solid border-green-500 p-2 hover:bg-green-50/5"
-	href="/recipes/add">Add a recipe</a
->
+	let { data }: { data: PageData } = $props();
+</script>
+
+<div class="mt-8 flex flex-col gap-4 p-4">
+	<h2 class="text-2xl underline">Liste des recettes:</h2>
+	<ul class="flex flex-col gap-2 pl-8">
+		{#each data.recipes as recipe}
+			<li class="list-square">
+				<a class="underline hover:no-underline" href={`/recipes/${recipe.id}`}>{recipe.name}</a>
+			</li>
+		{/each}
+	</ul>
+</div>

@@ -1,41 +1,80 @@
 import { db } from '$lib/server/db';
-import { recipes, instructions, ingredientToRecipes } from '$lib/server/db/schema';
+import { recipes, instructions, recipeIngredients } from '$lib/server/db/schema';
 
 export async function POST({ request }) {
-	// get body and parse json
 	const data = await request.json();
 
-	// const data = await event.request.formData();
-
 	if (data) {
-		// insert recipe
-		const recipeId = await db
-			.insert(recipes)
-			.values({
-				name: data.name
-			})
-			.returning({ insertedId: recipes.id });
+		const {
+			name: nameDraft,
+			notes,
+			ingredients: ingredientsDraft,
+			instructions: instructionsDraft
+		}: {
+			name: string;
+			notes: string;
+			prepTime: number;
+			cookTime: number;
+			servings: number;
+			ingredients: { id: number; unitId: number; quantity: number }[];
+			instructions: string[];
+		} = data;
 
-		// then update ingredientToRecipes table
-		await db.insert(ingredientToRecipes).values(
-			data.ingredients.map((ingredient) => ({
-				ingredientId: ingredient.id,
-				recipeId: recipeId[0].insertedId,
-				unitId: ingredient.unitId
-			}))
-		);
+		try {
+			// Start a transaction to ensure all operations succeed or fail together
+			const result = await db.transaction(async (tx) => {
+				try {
+					// 1. Insert the recipe
+					const [insertedRecipe] = await tx
+						.insert(recipes)
+						.values({
+							name: nameDraft,
+							notes,
+							prepTime: 15,
+							cookTime: 12,
+							servings: 24
+						})
+						.returning();
 
-		// steps/instructions
-		await db.insert(instructions).values(
-			data.instructions.map((instruction, index) => ({
-				recipeId: recipeId[0].insertedId,
-				step: index,
-				description: instruction
-			}))
-		);
+					// 3. Link the ingredient to the recipe
+					const insertedIngredients = ingredientsDraft.map(async (ingr) => {
+						return await tx
+							.insert(recipeIngredients)
+							.values({
+								recipeId: insertedRecipe.id,
+								ingredientId: ingr.id,
+								quantity: ingr.quantity.toString(),
+								unitId: ingr.unitId
+							})
+							.returning();
+					});
 
-		return new Response('Success', { status: 200 });
+					// 4. Add an instruction
+					const insertedInstructions = instructionsDraft.map(async (instruc, index) => {
+						return await tx
+							.insert(instructions)
+							.values({
+								recipeId: insertedRecipe.id,
+								description: instruc,
+								stepOrder: index
+							})
+							.returning();
+					});
+
+					return { insertedRecipe, insertedIngredients, insertedInstructions };
+				} catch (e) {
+					console.log(e);
+					tx.rollback();
+				}
+			});
+
+			console.log('Recipe created successfully:', result);
+			return new Response(result?.toString(), { status: 400 });
+		} catch (error) {
+			console.error('Error creating recipe:', error);
+			throw error;
+		}
+	} else {
+		return new Response('No data', { status: 400 });
 	}
-
-	return new Response('No data', { status: 400 });
 }

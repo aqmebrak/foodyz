@@ -4,7 +4,11 @@ export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 
 	theme: {
-		extend: {}
+		extend: {
+			listStyleType: {
+				square: 'square'
+			}
+		}
 	},
 	darkMode: 'selector',
 

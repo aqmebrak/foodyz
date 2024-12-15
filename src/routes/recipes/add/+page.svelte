@@ -1,9 +1,25 @@
 <script lang="ts">
-	import type { LayoutData } from './$types';
+	import type { PageData } from './$types';
 
-	let { data }: { data: LayoutData } = $props();
+	let { data }: { data: PageData } = $props();
 
-	let recipeIngredient = $state({
+	type IngredientDraft = {
+		name: string;
+		id: number | null;
+		quantity: number;
+		unitId: number | null;
+	};
+	type FormValues = {
+		name: string;
+		notes: string;
+		ingredients: IngredientDraft[];
+		instructions: string[];
+		prepTime: number | null;
+		cookTime: number | null;
+		servings: number | null;
+	};
+
+	let recipeIngredient: IngredientDraft = $state({
 		name: '',
 		id: null,
 		quantity: 0,
@@ -12,10 +28,14 @@
 
 	let recipeInstruction = $state('');
 
-	let formValues = $state({
+	let formValues: FormValues = $state({
 		name: '',
+		notes: '',
 		ingredients: [],
-		instructions: []
+		instructions: [],
+		prepTime: null,
+		cookTime: null,
+		servings: null
 	});
 
 	const addIngredient = () => {
@@ -65,12 +85,27 @@
 	};
 </script>
 
-<h1 class="py-4 text-3xl">Ajouter une recette</h1>
+<h1 class="py-4 text-center text-3xl">Ajouter une recette</h1>
 
 <form onsubmit={sendRecipe} class="flex flex-col gap-4">
 	<div class="flex flex-col gap-2">
 		<label class="text-sm" for="title">Titre:</label>
 		<input type="text" name="title" bind:value={formValues.name} />
+		<div class="flex gap-4">
+			<label class="flex flex-col text-sm" for="prepTime"
+				>Preparation time (min):
+				<input type="number" name="prepTime" bind:value={formValues.prepTime} />
+			</label>
+			<label class="flex flex-col text-sm" for="cookTime">
+				Cooking time (min):
+				<input type="number" name="cookTime" bind:value={formValues.cookTime} />
+			</label>
+			<label class="flex flex-col text-sm" for="servings">
+				Servings:
+				<input type="number" name="servings" bind:value={formValues.servings} />
+			</label>
+		</div>
+		<textarea name="notes" bind:value={formValues.notes}></textarea>
 	</div>
 
 	<hr class="h-[1px] w-full bg-white" />
@@ -97,7 +132,7 @@
 		<ul class="">
 			{#each formValues.ingredients as ingredient, index}
 				<li>
-					{ingredient.name} -- {ingredient.quantity} -- {ingredient.unit}
+					{ingredient.name} -- {ingredient.quantity} -- {ingredient.unitId}
 					<button type="button" onclick={() => removeIngredient(index)}>Remove</button>
 				</li>
 			{/each}

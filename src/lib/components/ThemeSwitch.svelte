@@ -22,7 +22,14 @@
 
 	onMount(() => {
 		isDarkMode = localStorage.getItem('theme') === 'dark';
-		toggleDarkMode();
+
+		if (isDarkMode) {
+			document.documentElement.classList.toggle(
+				'dark',
+				localStorage.theme === 'dark' ||
+					(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+			);
+		}
 	});
 
 	const {

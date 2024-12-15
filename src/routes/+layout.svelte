@@ -2,8 +2,10 @@
 	import '../app.css';
 	import { createMenubar, melt } from '@melt-ui/svelte';
 	import { ThemeSwitch } from '$lib/index';
+	import type { LayoutData } from './$types';
+	import type { Snippet } from 'svelte';
 
-	let { children } = $props();
+	let { children, data }: { children: Snippet<[]>; data: LayoutData } = $props();
 
 	const {
 		elements: { menubar },
@@ -26,7 +28,7 @@
 </svlete:head>
 
 <header
-	class="mx-auto flex w-full max-w-[1440px] items-center gap-4 border border-solid border-green-200 px-4 md:px-6 lg:px-8"
+	class="mx-auto flex w-full max-w-[1440px] items-center gap-4 border border-solid border-emerald-200 px-4 md:px-6 lg:px-8"
 >
 	<div class="order-2 flex gap-2 p-2 md:order-1">
 		<img
@@ -39,31 +41,34 @@
 		</h1>
 	</div>
 	<!-- MENU -->
-	<div class="order-1 md:order-2" use:melt={$menubar}>
-		<button
-			use:melt={$trigger}
-			class="border-green-500 bg-green-100 text-xl md:text-2xl dark:bg-green-900 dark:hover:bg-green-800"
-			>Menu</button
-		>
+	<div class="order-1 text-base md:order-2" use:melt={$menubar}>
+		<button use:melt={$trigger} class="">Actions</button>
 		<div
 			use:melt={$menu}
-			class="flex flex-col border border-solid border-green-500 bg-green-100 text-xl md:text-2xl dark:bg-green-900"
+			class="flex flex-col border border-solid border-emerald-500 bg-emerald-100 dark:bg-emerald-900"
 		>
 			<a
 				{...$item}
 				use:item
-				class="cursor-pointer border-b border-green-500 p-4 hover:bg-white dark:hover:bg-green-800"
+				class="cursor-pointer border-b border-emerald-500 p-2 hover:bg-white dark:hover:bg-emerald-800"
 				href="/init">Reset</a
 			>
 			<a
 				{...$item}
 				use:item
-				class="cursor-pointer p-4 hover:bg-white dark:hover:bg-green-800"
+				class="cursor-pointer p-2 hover:bg-white dark:hover:bg-emerald-800"
 				href="/recipes/add">Add</a
 			>
 		</div>
 	</div>
-	<div class="order-3 ml-auto">
+	<!-- RECIPES -->
+	<div class="order-3">
+		{#each data.recipes as recipe}
+			{recipe.name}
+		{/each}
+	</div>
+	<!--  TOGGLE DARK MODE  -->
+	<div class="order-4 ml-auto">
 		<ThemeSwitch />
 	</div>
 </header>
