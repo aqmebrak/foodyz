@@ -63,12 +63,10 @@ export async function POST({ request }) {
 
 					return { insertedRecipe, insertedIngredients, insertedInstructions };
 				} catch (e) {
-					console.log(e);
 					tx.rollback();
 				}
 			});
 
-			console.log('Recipe created successfully:', result);
 			return new Response(result?.toString(), { status: 400 });
 		} catch (error) {
 			console.error('Error creating recipe:', error);
