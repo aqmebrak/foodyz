@@ -5,7 +5,6 @@
 	import { Clock, Users, Flame, ChefHat } from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
-	console.log(data.ingredients);
 </script>
 
 <!-- display recipe info -->

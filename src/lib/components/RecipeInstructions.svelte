@@ -16,10 +16,6 @@
 	};
 
 	const isInstructionChecked = (index: string) => checkedInstructions.find((i) => i === index);
-
-	$effect(() => {
-		console.log(checkedInstructions);
-	});
 </script>
 
 <div class="flex flex-col gap-2">

@@ -70,7 +70,6 @@
 	};
 
 	const sendRecipe = async () => {
-		console.log(formValues);
 		try {
 			await fetch('/recipes/add', {
 				method: 'POST',
