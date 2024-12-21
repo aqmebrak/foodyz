@@ -4,7 +4,7 @@
 	let { data }: { data: PageData } = $props();
 </script>
 
-<div class="mt-8 flex flex-col gap-4 p-4">
+<div class="mt-4 flex flex-col gap-4 p-4">
 	<h2 class="text-2xl underline">Liste des recettes:</h2>
 	<ul class="flex flex-col gap-2 pl-8">
 		{#each data.recipes as recipe}

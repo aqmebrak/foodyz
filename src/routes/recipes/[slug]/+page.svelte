@@ -20,15 +20,15 @@
 
 	{#if data.recipe.notes}
 		<div class="border border-solid border-emerald-200 p-2">
-			<h3 class="text-lg font-semibold tracking-widest">Notes</h3>
-			<p class="whitespace-pre-line">{@html data.recipe.notes}</p>
+			<h3 class="pb-1 font-semibold tracking-widest">Notes</h3>
+			<p class="whitespace-pre-line text-sm">{@html data.recipe.notes}</p>
 		</div>
 	{/if}
 
 	<!-- display recipe ingredient list -->
 	<div class="flex flex-col gap-2">
 		<h3 class="text-xl font-semibold tracking-widest">Ingredients</h3>
-		<ul class="ml-4">
+		<ul class="ml-4 list-square">
 			{#each data.ingredients as ingredient}
 				<li>
 					{ingredient.quantity}

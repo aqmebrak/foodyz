@@ -7,6 +7,9 @@ export default {
 		extend: {
 			listStyleType: {
 				square: 'square'
+			},
+			colors: {
+				lavender: '#9d49d6'
 			}
 		}
 	},

@@ -4,6 +4,9 @@
 	import { ThemeSwitch } from '$lib/index';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
+	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+
+	injectSpeedInsights();
 
 	let { children, data }: { children: Snippet<[]>; data: LayoutData } = $props();
 
@@ -30,19 +33,19 @@
 <header
 	class="mx-auto flex w-full max-w-[1440px] items-center gap-4 border border-solid border-emerald-200 px-4 md:px-6 lg:px-8"
 >
-	<div class="order-2 flex gap-2 p-2 md:order-1">
+	<div class="order-2 flex items-center justify-center gap-2 p-2 md:order-1">
 		<img
 			src="/logo.png"
 			alt="logo"
 			class="h-full w-1/4 object-contain md:max-h-[52px] md:w-full md:max-w-[300px]"
 		/>
-		<h1 class="text-xl font-semibold md:whitespace-nowrap md:text-4xl">
-			Les recettes de la Barnière
+		<h1 class="text-center text-xl font-semibold md:whitespace-nowrap md:text-4xl">
+			<a href="/">Les recettes de la Barnière</a>
 		</h1>
 	</div>
 	<!-- MENU -->
-	<div class="order-1 text-base md:order-2" use:melt={$menubar}>
-		<button use:melt={$trigger} class="">Actions</button>
+	<!-- <div class="order-1 text-base md:order-2" use:melt={$menubar}>
+		<button use:melt={$trigger} class="">|||</button>
 		<div
 			use:melt={$menu}
 			class="flex flex-col border border-solid border-emerald-500 bg-emerald-100 dark:bg-emerald-900"
@@ -60,13 +63,7 @@
 				href="/recipes/add">Add</a
 			>
 		</div>
-	</div>
-	<!-- RECIPES -->
-	<div class="order-3">
-		{#each data.recipes as recipe}
-			{recipe.name}
-		{/each}
-	</div>
+	</div> -->
 	<!--  TOGGLE DARK MODE  -->
 	<div class="order-4 ml-auto">
 		<ThemeSwitch />
