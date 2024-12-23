@@ -1,33 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import IngredientsPicker from './IngredientsPicker.svelte';
+	import type { FormValues } from './types';
 
 	let { data }: { data: PageData } = $props();
 
-	type IngredientDraft = {
-		name: string;
-		id: number | null;
-		quantity: number;
-		unitId: number | null;
-	};
-	type FormValues = {
-		name: string;
-		notes: string;
-		ingredients: IngredientDraft[];
-		instructions: string[];
-		prepTime: number | null;
-		cookTime: number | null;
-		servings: number | null;
-	};
-
-	let recipeIngredient: IngredientDraft = $state({
-		name: '',
-		id: null,
-		quantity: 0,
-		unitId: null
-	});
-
 	let recipeInstruction = $state('');
-
 	let formValues: FormValues = $state({
 		name: '',
 		notes: '',
@@ -37,28 +15,6 @@
 		cookTime: null,
 		servings: null
 	});
-
-	const addIngredient = () => {
-		if (
-			recipeIngredient.name !== '' &&
-			recipeIngredient.quantity !== 0 &&
-			recipeIngredient.unitId !== null
-		) {
-			formValues.ingredients = [...formValues.ingredients, recipeIngredient];
-			recipeIngredient = {
-				name: '',
-				id: null,
-				quantity: 0,
-				unitId: null
-			};
-		} else {
-			// error display here
-		}
-	};
-
-	const removeIngredient = (index: number) => {
-		formValues.ingredients = formValues.ingredients.filter((_, i) => i !== index);
-	};
 
 	const addInstruction = () => {
 		formValues.instructions = [...formValues.instructions, recipeInstruction];
@@ -109,34 +65,7 @@
 
 	<hr class="h-[1px] w-full bg-white" />
 
-	<div class="flex flex-col gap-2">
-		<h2 class="py-2 text-2xl">Ingredients</h2>
-
-		<div class="flex flex-wrap items-center gap-2">
-			<select placeholder="" class="w-full" bind:value={recipeIngredient}>
-				<option value={null} selected>Selectionner un ingrédient</option>
-				{#each data.ingredients as ingredient}
-					<option value={ingredient}>{ingredient.name}</option>
-				{/each}
-			</select>
-			<input type="number" bind:value={recipeIngredient.quantity} />
-			<select class="w-full" bind:value={recipeIngredient.unitId}>
-				{#each data.units as unit}
-					<option value={unit.id}>{unit.name}</option>
-				{/each}
-			</select>
-			<button type="button" onclick={addIngredient}>Add ingredient</button>
-		</div>
-
-		<ul class="">
-			{#each formValues.ingredients as ingredient, index}
-				<li>
-					{ingredient.name} -- {ingredient.quantity} -- {ingredient.unitId}
-					<button type="button" onclick={() => removeIngredient(index)}>Remove</button>
-				</li>
-			{/each}
-		</ul>
-	</div>
+	<IngredientsPicker bind:formValues units={data.units} ingredients={data.ingredients} />
 
 	<hr class="h-[1px] w-full bg-white" />
 

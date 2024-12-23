@@ -1,0 +1,234 @@
+<script lang="ts">
+	import { fly } from 'svelte/transition';
+	import { createCombobox, melt, type ComboboxOptionProps } from '@melt-ui/svelte';
+	import { ChevronDown, ChevronUp, Check } from 'lucide-svelte';
+	import type { PageData } from './$types';
+	import type { FormValues, IngredientDraft } from './types';
+
+	type Units = {
+		id: string;
+		name: string;
+	};
+
+	let {
+		formValues = $bindable(),
+		units,
+		ingredients
+	}: {
+		formValues: FormValues;
+		units: PageData['units'];
+		ingredients: PageData['ingredients'];
+	} = $props();
+
+	let ingredientQuantity = $state(null);
+
+	// Ingredients
+	const {
+		elements: { menu, input, option, label },
+		states: { open, inputValue, touchedInput, selected },
+		helpers: { isSelected }
+	} = createCombobox<IngredientDraft>({
+		forceVisible: true
+	});
+
+	let filtreredIngredients = $derived.by(() => {
+		if ($touchedInput) {
+			return ingredients.filter((ingredient) =>
+				ingredient.name.toLowerCase().includes($inputValue.toLowerCase())
+			);
+		}
+		return ingredients;
+	});
+
+	$effect(() => {
+		if (!$open) {
+			$inputValue = $selected?.label ?? '';
+		}
+	});
+
+	let filteredUnits = $derived.by(() => {
+		if ($touchedInputUnits) {
+			return units.filter((unit) =>
+				unit.name.toLowerCase().includes($inputValueUnits.toLowerCase())
+			);
+		}
+
+		return units;
+	});
+
+	$effect(() => {
+		if (!$openUnits) {
+			$inputValueUnits = $selectedUnits?.label ?? '';
+		}
+	});
+
+	// Units
+	const {
+		elements: { menu: menuUnits, input: inputUnits, option: optionUnits, label: labelUnits },
+		states: {
+			open: openUnits,
+			inputValue: inputValueUnits,
+			touchedInput: touchedInputUnits,
+			selected: selectedUnits
+		},
+		helpers: { isSelected: isSelectedUnits }
+	} = createCombobox<Units>({
+		forceVisible: true
+	});
+
+	const addIngredient = () => {
+		if (
+			$selected != null &&
+			$selected.label &&
+			$selected.value &&
+			ingredientQuantity != null &&
+			($inputValueUnits != null || $inputValueUnits != '')
+		) {
+			formValues.ingredients = [
+				...formValues.ingredients,
+				{
+					name: $selected.label,
+					id: Number($selected.value),
+					quantity: ingredientQuantity,
+					unitId: Number($inputValueUnits)
+				}
+			];
+			ingredientQuantity = null;
+		} else {
+			// error display here
+		}
+	};
+
+	const removeIngredient = (index: number) => {
+		formValues.ingredients = formValues.ingredients.filter((_, i) => i !== index);
+	};
+</script>
+
+<div class="flex flex-col gap-2">
+	<h2 class="py-2 text-2xl">Ingredients</h2>
+
+	<!-- Ingredients -->
+	<div class="flex flex-col gap-1">
+		<!-- svelte-ignore a11y_label_has_associated_control - $label contains the 'for' attribute -->
+		<label use:melt={$label}>
+			<span class="text-magnum-900 text-sm font-medium">Choisir un ingrédient</span>
+		</label>
+
+		<div class="relative">
+			<input
+				use:melt={$input}
+				class="flex h-10 items-center justify-between bg-white
+                px-3 pr-12 text-black"
+				placeholder="Best book ever"
+			/>
+			<div class="text-magnum-900 absolute right-2 top-1/2 z-10 -translate-y-1/2">
+				{#if $open}
+					<ChevronUp class="size-4" />
+				{:else}
+					<ChevronDown class="size-4" />
+				{/if}
+			</div>
+		</div>
+	</div>
+	{#if $open}
+		<ul
+			class=" z-10 flex max-h-[300px] flex-col overflow-hidden"
+			use:melt={$menu}
+			transition:fly={{ duration: 150, y: -5 }}
+		>
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+			<div
+				class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black"
+				tabindex="0"
+			>
+				{#each filtreredIngredients as ingredient, index (index)}
+					<li
+						use:melt={$option({ value: ingredient.id, label: ingredient.name })}
+						class="hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 relative cursor-pointer scroll-my-2 py-2 pl-4 pr-4 data-[disabled]:opacity-50"
+					>
+						{#if $isSelected(ingredient)}
+							<div class="check text-magnum-900 absolute left-2 top-1/2 z-10">
+								<Check class="size-4" />
+							</div>
+						{/if}
+						<div class="pl-4">
+							<span class="font-medium">{ingredient.name}</span>
+						</div>
+					</li>
+				{:else}
+					<li class="relative cursor-pointer py-1 pl-8 pr-4">No results found</li>
+				{/each}
+			</div>
+		</ul>
+	{/if}
+
+	<input type="number" bind:value={ingredientQuantity} />
+
+	<!-- Units  -->
+	<div class="flex flex-col gap-1">
+		<!-- svelte-ignore a11y_label_has_associated_control - $label contains the 'for' attribute -->
+		<label use:melt={$labelUnits}>
+			<span class="text-magnum-900 text-sm font-medium">Choisir une unité</span>
+		</label>
+
+		<div class="relative">
+			<input
+				use:melt={$inputUnits}
+				class="flex h-10 items-center justify-between bg-white
+                px-3 pr-12 text-black"
+				placeholder="Best book ever"
+			/>
+			<div class="text-magnum-900 absolute right-2 top-1/2 z-10 -translate-y-1/2">
+				{#if $openUnits}
+					<ChevronUp class="size-4" />
+				{:else}
+					<ChevronDown class="size-4" />
+				{/if}
+			</div>
+		</div>
+	</div>
+	{#if $openUnits}
+		<ul
+			class=" z-10 flex max-h-[300px] flex-col overflow-hidden"
+			use:melt={$menuUnits}
+			transition:fly={{ duration: 150, y: -5 }}
+		>
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+			<div
+				class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black"
+				tabindex="0"
+			>
+				{#each filteredUnits as unit, index (index)}
+					<li
+						use:melt={$optionUnits({ value: unit.id, label: unit.name })}
+						class="hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 relative cursor-pointer scroll-my-2 py-2 pl-4 pr-4 data-[disabled]:opacity-50"
+					>
+						{#if $isSelectedUnits(unit)}
+							<div class="check text-magnum-900 absolute left-2 top-1/2 z-10">
+								<Check class="size-4" />
+							</div>
+						{/if}
+						<div class="pl-4">
+							<span class="font-medium">{unit.name}</span>
+						</div>
+					</li>
+				{:else}
+					<li class="relative cursor-pointer py-1 pl-8 pr-4">No results found</li>
+				{/each}
+			</div>
+		</ul>
+	{/if}
+
+	<button type="button" onclick={addIngredient}>Add ingredient</button>
+
+	<ul class="">
+		{#each formValues.ingredients as ingredient, index}
+			<li>
+				{ingredient.name} -- {ingredient.quantity} -- {units.find(
+					(unit) => unit.id === ingredient.unitId
+				)?.name}
+				<button type="button" onclick={() => removeIngredient(index)}>Remove</button>
+			</li>
+		{/each}
+	</ul>
+</div>

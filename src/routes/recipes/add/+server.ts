@@ -62,8 +62,9 @@ export async function POST({ request }) {
 					});
 
 					return { insertedRecipe, insertedIngredients, insertedInstructions };
-				} catch (e) {
+				} catch (e: unknown) {
 					tx.rollback();
+					return new Response((e as Error)?.message, { status: 400 });
 				}
 			});
 
