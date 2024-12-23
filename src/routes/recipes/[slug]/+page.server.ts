@@ -11,7 +11,7 @@ import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 export const load = (async ({ params }) => {
-	if (params.slug != null) {
+	if (params.slug != null && !Number.isNaN(Number(params.slug))) {
 		const recipe = await db
 			.select({
 				id: recipes.id,
