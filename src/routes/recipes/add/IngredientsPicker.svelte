@@ -46,6 +46,20 @@
 		}
 	});
 
+	// Units
+	const {
+		elements: { menu: menuUnits, input: inputUnits, option: optionUnits, label: labelUnits },
+		states: {
+			open: openUnits,
+			inputValue: inputValueUnits,
+			touchedInput: touchedInputUnits,
+			selected: selectedUnits
+		},
+		helpers: { isSelected: isSelectedUnits }
+	} = createCombobox<Units>({
+		forceVisible: true
+	});
+
 	let filteredUnits = $derived.by(() => {
 		if ($touchedInputUnits) {
 			return units.filter((unit) =>
@@ -60,20 +74,6 @@
 		if (!$openUnits) {
 			$inputValueUnits = $selectedUnits?.label ?? '';
 		}
-	});
-
-	// Units
-	const {
-		elements: { menu: menuUnits, input: inputUnits, option: optionUnits, label: labelUnits },
-		states: {
-			open: openUnits,
-			inputValue: inputValueUnits,
-			touchedInput: touchedInputUnits,
-			selected: selectedUnits
-		},
-		helpers: { isSelected: isSelectedUnits }
-	} = createCombobox<Units>({
-		forceVisible: true
 	});
 
 	const addIngredient = () => {
