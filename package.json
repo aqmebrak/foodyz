@@ -14,9 +14,10 @@
 		"test": "npm run test:unit -- --run && npm run test:e2e",
 		"test:e2e": "playwright test",
 		"db:start": "docker compose up",
-		"db:push": "dotenv -e .env.prod drizzle-kit push",
-		"db:migrate": "dotenv -e .env.prod drizzle-kit migrate",
-		"db:studio": "dotenv -e .env.prod drizzle-kit studio"
+		"db:push": "drizzle-kit push",
+		"db:migrate": "drizzle-kit migrate",
+		"db:migrate-prod": "dotenv -e .env.prod drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
 		"@melt-ui/pp": "^0.3.2",

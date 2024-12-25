@@ -64,6 +64,8 @@
 			>
 		</div>
 	</div> -->
+	<a class="order-4" href="/recipes/add">Ajouter</a>
+
 	<!--  TOGGLE DARK MODE  -->
 	<div class="order-4 ml-auto">
 		<ThemeSwitch />

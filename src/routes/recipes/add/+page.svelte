@@ -44,23 +44,28 @@
 
 <form onsubmit={sendRecipe} class="flex flex-col gap-4">
 	<div class="flex flex-col gap-2">
-		<label class="text-sm" for="title">Titre:</label>
-		<input type="text" name="title" bind:value={formValues.name} />
-		<div class="flex gap-4">
-			<label class="flex flex-col text-sm" for="prepTime"
-				>Preparation time (min):
-				<input type="number" name="prepTime" bind:value={formValues.prepTime} />
-			</label>
-			<label class="flex flex-col text-sm" for="cookTime">
-				Cooking time (min):
-				<input type="number" name="cookTime" bind:value={formValues.cookTime} />
-			</label>
-			<label class="flex flex-col text-sm" for="servings">
-				Servings:
-				<input type="number" name="servings" bind:value={formValues.servings} />
-			</label>
+		<div class="flex flex-col gap-2">
+			<label class="text-sm" for="title">Titre:</label>
+			<input type="text" name="title" bind:value={formValues.name} />
 		</div>
-		<textarea name="notes" bind:value={formValues.notes}></textarea>
+		<div class="flex w-full flex-wrap items-center gap-2">
+			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
+				<label for="prepTime">Temps de préparation (min):</label>
+				<input type="number" name="prepTime" bind:value={formValues.prepTime} />
+			</div>
+			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
+				<label for="cookTime">Temps de cuisson (min):</label>
+				<input type="number" name="cookTime" bind:value={formValues.cookTime} />
+			</div>
+			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
+				<label for="servings">Portions:</label>
+				<input type="number" name="servings" bind:value={formValues.servings} />
+			</div>
+		</div>
+		<div class="flex flex-col gap-2">
+			<label for="notes" class="text-sm">Notes:</label>
+			<textarea name="notes" bind:value={formValues.notes}></textarea>
+		</div>
 	</div>
 
 	<hr class="h-[1px] w-full bg-white" />

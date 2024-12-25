@@ -4,7 +4,7 @@ const VERCEL_ENV = process.env.VERCEL_ENV;
 const isProd = VERCEL_ENV === 'production';
 dotenv.config({
 	// because of that correct read of env
-	path: isProd ? '.env.prod' : '.env.prod'
+	path: isProd ? '.env.prod' : '.env.local'
 });
 
 // console.log('ENV', process.env);
