@@ -26,7 +26,7 @@
 		"@playwright/test": "^1.45.3",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-vercel": "^5.5.2",
-		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/kit": "^2.15.1",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
 		"@types/node": "^22.10.0",
 		"@vercel/postgres": "^0.10.0",
