@@ -3,7 +3,7 @@
 	import { createCombobox, melt, type ComboboxOptionProps } from '@melt-ui/svelte';
 	import { ChevronDown, ChevronUp, Check } from 'lucide-svelte';
 	import type { PageData } from './$types';
-	import type { FormValues, IngredientDraft } from './types';
+	import type { FormValues } from './types';
 
 	type Units = {
 		id: string;
@@ -11,11 +11,11 @@
 	};
 
 	let {
-		formValues = $bindable(),
+		ingredientsForm = $bindable(),
 		units,
 		ingredients
 	}: {
-		formValues: FormValues;
+		ingredientsForm: FormValues['ingredients'];
 		units: PageData['units'];
 		ingredients: PageData['ingredients'];
 	} = $props();
@@ -27,7 +27,7 @@
 		elements: { menu, input, option, label },
 		states: { open, inputValue, touchedInput, selected },
 		helpers: { isSelected }
-	} = createCombobox<IngredientDraft>({
+	} = createCombobox<FormValues['ingredients']>({
 		forceVisible: true
 	});
 
@@ -84,8 +84,8 @@
 			ingredientQuantity != null &&
 			$selectedUnits != null
 		) {
-			formValues.ingredients = [
-				...formValues.ingredients,
+			ingredientsForm = [
+				...ingredientsForm,
 				{
 					name: $selected.label,
 					id: Number($selected.value),
@@ -97,10 +97,15 @@
 		} else {
 			// error display here
 		}
+
+		// reset inputs
+		$inputValue = '';
+		$inputValueUnits = '';
+		ingredientQuantity = null;
 	};
 
 	const removeIngredient = (index: number) => {
-		formValues.ingredients = formValues.ingredients.filter((_, i) => i !== index);
+		ingredientsForm = ingredientsForm.filter((_, i) => i !== index);
 	};
 </script>
 
@@ -163,10 +168,10 @@
 		{/if}
 
 		<div class="flex w-full flex-col gap-1 sm:w-1/4">
-			<label for="quantity">
+			<label>
 				<span class="text-sm">Quantité</span>
 			</label>
-			<input name="quantity" type="number" bind:value={ingredientQuantity} />
+			<input type="number" bind:value={ingredientQuantity} />
 		</div>
 		<!-- Units  -->
 		<div class="flex w-full flex-col gap-1">
@@ -226,10 +231,12 @@
 	<button type="button" onclick={addIngredient}>Add ingredient</button>
 
 	<ul class="">
-		{#each formValues.ingredients as ingredient, index}
+		{#each ingredientsForm as ingredient, index}
 			<li class="ml-8 list-disc">
 				{ingredient.name}: {ingredient.quantity}{units.find((unit) => unit.id === ingredient.unitId)
-					?.name}
+					?.name !== '(empty)'
+					? units.find((unit) => unit.id === ingredient.unitId)?.name
+					: ''}
 				<button
 					type="button"
 					class="bg-transparent text-sm text-red-500 underline hover:bg-transparent hover:no-underline"

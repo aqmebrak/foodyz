@@ -1,16 +1,4 @@
-export type IngredientDraft = {
-	name: string;
-	id: number | null;
-	quantity: number;
-	unitId: number | null;
-};
+import { z } from 'zod';
+import type { validationSchemaRecipe } from '../validationSchemaRecipe';
 
-export type FormValues = {
-	name: string;
-	notes: string;
-	ingredients: IngredientDraft[];
-	instructions: string[];
-	prepTime: number | null;
-	cookTime: number | null;
-	servings: number | null;
-};
+export type FormValues = z.infer<typeof validationSchemaRecipe>;

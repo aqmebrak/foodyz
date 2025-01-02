@@ -1,76 +1,105 @@
 <script lang="ts">
-	import type { PageData } from './$types';
 	import IngredientsPicker from './IngredientsPicker.svelte';
 	import type { FormValues } from './types';
+	import { superForm } from 'sveltekit-superforms';
+	import SuperDebug from 'sveltekit-superforms';
 
-	let { data }: { data: PageData } = $props();
+	let { data } = $props();
+
+	// Client API:
+	const { form, errors, constraints, message, enhance } = superForm(data.form);
 
 	let recipeInstruction = $state('');
-	let formValues: FormValues = $state({
-		name: '',
-		notes: '',
-		ingredients: [],
-		instructions: [],
-		prepTime: null,
-		cookTime: null,
-		servings: null
-	});
 
 	const addInstruction = () => {
-		formValues.instructions = [...formValues.instructions, recipeInstruction];
+		$form.instructions = [...$form.instructions, recipeInstruction];
 		recipeInstruction = '';
 	};
 
 	const removeInstruction = (index: number) => {
-		formValues.instructions = formValues.instructions.filter((_, i) => i !== index);
+		$form.instructions = $form.instructions.filter((_, i) => i !== index);
 	};
 
-	const sendRecipe = async () => {
-		try {
-			await fetch('/recipes/add', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(formValues)
-			});
-		} catch (e) {
-			console.error(e);
-		}
-	};
+	$effect(() => {
+		console.log($errors);
+	});
 </script>
 
+<SuperDebug data={$form} />
 <h1 class="py-4 text-center text-3xl">Ajouter une recette</h1>
-
-<form onsubmit={sendRecipe} class="flex flex-col gap-4">
+{#if $message}
+	<p class="error">{$message}</p>
+{/if}
+<form class="flex flex-col gap-4" method="POST" use:enhance>
 	<div class="flex flex-col gap-2">
 		<div class="flex flex-col gap-2">
 			<label class="text-sm" for="title">Titre:</label>
-			<input type="text" name="title" bind:value={formValues.name} />
+			<input
+				type="text"
+				name="name"
+				required
+				bind:value={$form.name}
+				{...$constraints.name}
+				aria-invalid={$errors.name ? 'true' : undefined}
+			/>
+			{#if $errors.name}<span class="text-xs text-red-400">{$errors.name}</span>{/if}
 		</div>
 		<div class="flex w-full flex-wrap items-center gap-2">
 			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
 				<label for="prepTime">Temps de préparation (min):</label>
-				<input type="number" name="prepTime" bind:value={formValues.prepTime} />
+				<input
+					type="number"
+					{...$constraints.prepTime}
+					name="prepTime"
+					bind:value={$form.prepTime}
+					aria-invalid={$errors.prepTime ? 'true' : undefined}
+				/>
+				{#if $errors.prepTime}<span class="text-xs text-red-400">{$errors.prepTime}</span>{/if}
 			</div>
 			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
 				<label for="cookTime">Temps de cuisson (min):</label>
-				<input type="number" name="cookTime" bind:value={formValues.cookTime} />
+				<input
+					type="number"
+					{...$constraints.cookTime}
+					name="cookTime"
+					bind:value={$form.cookTime}
+					aria-invalid={$errors.cookTime ? 'true' : undefined}
+				/>
+				{#if $errors.cookTime}<span class="text-xs text-red-400">{$errors.cookTime}</span>{/if}
 			</div>
 			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
 				<label for="servings">Portions:</label>
-				<input type="number" name="servings" bind:value={formValues.servings} />
+				<input
+					type="number"
+					name="servings"
+					{...$constraints.servings}
+					bind:value={$form.servings}
+					aria-invalid={$errors.servings ? 'true' : undefined}
+				/>
+				{#if $errors.servings}<span class="text-xs text-red-400">{$errors.servings}</span>{/if}
 			</div>
 		</div>
 		<div class="flex flex-col gap-2">
 			<label for="notes" class="text-sm">Notes:</label>
-			<textarea name="notes" bind:value={formValues.notes}></textarea>
+			<textarea
+				name="notes"
+				{...$constraints.notes}
+				bind:value={$form.notes}
+				aria-invalid={$errors.notes ? 'true' : undefined}
+			></textarea>
+			{#if $errors.notes}<span class="text-xs text-red-400">{$errors.notes}</span>{/if}
 		</div>
 	</div>
 
 	<hr class="h-[1px] w-full bg-white" />
 
-	<IngredientsPicker bind:formValues units={data.units} ingredients={data.ingredients} />
+	<IngredientsPicker
+		bind:ingredientsForm={$form.ingredients}
+		units={data.units}
+		ingredients={data.ingredients}
+	/>
+	{#if $errors.ingredients}<span class="text-xs text-red-400">{$errors.ingredients._errors}</span
+		>{/if}
 
 	<hr class="h-[1px] w-full bg-white" />
 
@@ -83,17 +112,20 @@
 		</div>
 
 		<ol>
-			{#each formValues.instructions as instruction, index}
+			{#each $form.instructions as instruction, index}
 				<li>
 					{instruction}
 					<button type="button" onclick={() => removeInstruction(index)}>X</button>
 				</li>
 			{/each}
 		</ol>
+		{#if $errors.instructions}<span class="text-xs text-red-400"
+				>{$errors.instructions._errors}</span
+			>{/if}
 	</div>
 
-	<input name="ingredients[]" value={JSON.stringify(formValues.ingredients)} type="hidden" />
-	<input name="steps[]" value={JSON.stringify(formValues.instructions)} type="hidden" />
+	<input name="ingredients[]" value={JSON.stringify($form.ingredients)} type="hidden" />
+	<input name="steps[]" value={JSON.stringify($form.instructions)} type="hidden" />
 
 	<hr class="h-[1px] w-full bg-white" />
 
