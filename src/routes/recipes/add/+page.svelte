@@ -41,7 +41,7 @@
 			{#if $errors.name}<span class="text-xs text-red-400">{$errors.name}</span>{/if}
 		</div>
 		<div class="flex w-full flex-wrap items-center gap-2">
-			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
+			<div class="flex w-full flex-1 flex-col gap-2 text-sm sm:w-1/4">
 				<label for="prepTime">Temps de préparation (min):</label>
 				<input
 					type="number"
@@ -52,7 +52,7 @@
 				/>
 				{#if $errors.prepTime}<span class="text-xs text-red-400">{$errors.prepTime}</span>{/if}
 			</div>
-			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
+			<div class="flex w-full flex-1 flex-col gap-2 text-sm sm:w-1/4">
 				<label for="cookTime">Temps de cuisson (min):</label>
 				<input
 					type="number"
@@ -63,7 +63,7 @@
 				/>
 				{#if $errors.cookTime}<span class="text-xs text-red-400">{$errors.cookTime}</span>{/if}
 			</div>
-			<div class="flex flex-1 flex-col gap-2 text-sm sm:w-1/4">
+			<div class="flex w-full flex-1 flex-col gap-2 text-sm sm:w-1/4">
 				<label for="servings">Portions:</label>
 				<input
 					type="number"
