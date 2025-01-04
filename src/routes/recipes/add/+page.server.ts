@@ -96,7 +96,8 @@ export const actions: Actions = {
 			if (error instanceof Error) {
 				// Check for specific database errors
 				if (error.message.includes('unique constraint')) {
-					setError(form, 'name', 'A recipe with this name already exists');
+					if (error.message.includes('recipes_name_unique'))
+						setError(form, 'name', 'A recipe with this name already exists');
 				} else {
 					errorMessage = error.message;
 				}
