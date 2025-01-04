@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { superValidate } from 'sveltekit-superforms';
+import { superValidate, setError } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import {
 	recipes,
@@ -9,49 +9,54 @@ import {
 	units
 } from '$lib/server/db/schema';
 import { redirect, fail } from '@sveltejs/kit';
-import type { Actions, PageServerLoad, RequestEvent } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { validationSchemaRecipe } from '../validationSchemaRecipe';
 
 export const load: PageServerLoad = async () => {
-	const list = await db.select().from(ingredients).orderBy(ingredients.name);
-	const unitsList = await db.select().from(units);
-	const form = await superValidate(zod(validationSchemaRecipe));
+	try {
+		const [ingredientsList, unitsList, form] = await Promise.all([
+			db.select().from(ingredients).orderBy(ingredients.name),
+			db.select().from(units),
+			superValidate(zod(validationSchemaRecipe))
+		]);
 
-	return {
-		ingredients: list,
-		units: unitsList,
-		form
-	};
+		return {
+			ingredients: ingredientsList,
+			units: unitsList,
+			form
+		};
+	} catch (error) {
+		console.error('Failed to load recipe data:', error);
+		// In a load function, throwing an error will trigger SvelteKit's error boundary
+		throw error;
+	}
 };
 
 export const actions: Actions = {
-	default: async ({ request }: RequestEvent) => {
+	default: async ({ request }) => {
 		const form = await superValidate(request, zod(validationSchemaRecipe));
-		console.log(form);
 
 		if (!form.valid) {
 			return fail(400, { form });
 		}
 
-		let result = null;
 		try {
-			// Start a transaction to ensure all operations succeed or fail together
-			result = await db.transaction(async (tx) => {
-				try {
-					// 1. Insert the recipe
-					const [insertedRecipe] = await tx
-						.insert(recipes)
-						.values({
-							name: form.data.name,
-							notes: form.data.notes,
-							prepTime: 15,
-							cookTime: 12,
-							servings: 24
-						})
-						.returning();
+			const result = await db.transaction(async (tx) => {
+				// 1. Insert the recipe
+				const [insertedRecipe] = await tx
+					.insert(recipes)
+					.values({
+						name: form.data.name,
+						notes: form.data.notes,
+						prepTime: 15,
+						cookTime: 12,
+						servings: 24
+					})
+					.returning();
 
-					// 3. Link the ingredient to the recipe
-					const insertedIngredients = form.data.ingredients.map(
+				// 3. Link the ingredient to the recipe
+				const insertedIngredients = await Promise.all(
+					form.data.ingredients.map(
 						async (ingr) =>
 							await tx
 								.insert(recipeIngredients)
@@ -62,10 +67,12 @@ export const actions: Actions = {
 									unitId: ingr.unitId
 								})
 								.returning()
-					);
+					)
+				);
 
-					// 4. Add an instruction
-					const insertedInstructions = form.data.instructions.map(
+				// 4. Add an instruction
+				const insertedInstructions = await Promise.all(
+					form.data.instructions.map(
 						async (instruc, index) =>
 							await tx
 								.insert(instructions)
@@ -75,22 +82,30 @@ export const actions: Actions = {
 									stepOrder: index
 								})
 								.returning()
-					);
+					)
+				);
 
-					return { insertedRecipe, insertedIngredients, insertedInstructions };
-				} catch (e: unknown) {
-					console.log(e, e?.message);
-					tx.rollback();
-					// return new Response(JSON.stringify((e as Error)?.message), { status: 400 });
-				}
+				return { insertedRecipe, insertedIngredients, insertedInstructions };
 			});
-		} catch (error: unknown) {
-			return fail(422, { form, error: 'not found' });
-		}
-		if (result) {
-			redirect(302, '/recipes/' + result?.insertedRecipe.id);
-		} else {
-			return fail(422, { form, error: 'not found' });
+			// If we get here, the transaction succeeded
+			throw redirect(302, `/recipes/${result.insertedRecipe.id}`);
+		} catch (error) {
+			console.error('Transaction failed:', error);
+			// Provide more specific error messages based on error type
+			let errorMessage = 'Unknown error occurred';
+			if (error instanceof Error) {
+				// Check for specific database errors
+				if (error.message.includes('unique constraint')) {
+					setError(form, 'name', 'A recipe with this name already exists');
+				} else {
+					errorMessage = error.message;
+				}
+			}
+
+			return fail(422, {
+				form,
+				error: errorMessage ? `Failed to create recipe: ${errorMessage}` : undefined
+			});
 		}
 	}
 } satisfies Actions;

@@ -79,8 +79,8 @@
 	const addIngredient = () => {
 		if (
 			$selected != null &&
-			$selected.label &&
-			$selected.value &&
+			$selected.label != null &&
+			$selected.value != null &&
 			ingredientQuantity != null &&
 			$selectedUnits != null
 		) {
@@ -94,14 +94,15 @@
 				}
 			];
 			ingredientQuantity = null;
+			// reset inputs
+			$inputValue = '';
+			$selected = undefined;
+			$inputValueUnits = '';
+			$selectedUnits = undefined;
+			ingredientQuantity = null;
 		} else {
 			// error display here
 		}
-
-		// reset inputs
-		$inputValue = '';
-		$inputValueUnits = '';
-		ingredientQuantity = null;
 	};
 
 	const removeIngredient = (index: number) => {

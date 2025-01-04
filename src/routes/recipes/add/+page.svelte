@@ -2,12 +2,13 @@
 	import IngredientsPicker from './IngredientsPicker.svelte';
 	import type { FormValues } from './types';
 	import { superForm } from 'sveltekit-superforms';
-	import SuperDebug from 'sveltekit-superforms';
 
 	let { data } = $props();
 
 	// Client API:
-	const { form, errors, constraints, message, enhance } = superForm(data.form);
+	const { form, errors, constraints, message, validate, enhance } = superForm(data.form, {
+		dataType: 'json'
+	});
 
 	let recipeInstruction = $state('');
 
@@ -19,13 +20,8 @@
 	const removeInstruction = (index: number) => {
 		$form.instructions = $form.instructions.filter((_, i) => i !== index);
 	};
-
-	$effect(() => {
-		console.log($errors);
-	});
 </script>
 
-<SuperDebug data={$form} />
 <h1 class="py-4 text-center text-3xl">Ajouter une recette</h1>
 {#if $message}
 	<p class="error">{$message}</p>
@@ -98,8 +94,9 @@
 		units={data.units}
 		ingredients={data.ingredients}
 	/>
-	{#if $errors.ingredients}<span class="text-xs text-red-400">{$errors.ingredients._errors}</span
-		>{/if}
+	{#if $errors.ingredients && $form.ingredients.length === 0}
+		<span class="text-xs text-red-400">{$errors.ingredients._errors}</span>
+	{/if}
 
 	<hr class="h-[1px] w-full bg-white" />
 
@@ -124,8 +121,8 @@
 			>{/if}
 	</div>
 
-	<input name="ingredients[]" value={JSON.stringify($form.ingredients)} type="hidden" />
-	<input name="steps[]" value={JSON.stringify($form.instructions)} type="hidden" />
+	<input name="ingredients" value={$form.ingredients} type="hidden" />
+	<input name="steps" value={$form.instructions} type="hidden" />
 
 	<hr class="h-[1px] w-full bg-white" />
 
