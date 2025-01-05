@@ -138,7 +138,7 @@
 		</div>
 		{#if $open}
 			<ul
-				class=" z-10 flex max-h-[300px] flex-col overflow-hidden"
+				class="z-10 flex max-h-[300px] flex-col overflow-hidden"
 				use:melt={$menu}
 				transition:fly={{ duration: 150, y: -5 }}
 			>

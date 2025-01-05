@@ -26,7 +26,7 @@
 {#if $message}
 	<p class="error">{$message}</p>
 {/if}
-<form class="flex flex-col gap-4" method="POST" use:enhance>
+<form id="recipe" class="flex flex-col gap-4" method="POST" use:enhance>
 	<div class="flex flex-col gap-2">
 		<div class="flex flex-col gap-2">
 			<label class="text-sm" for="title">Titre:</label>
@@ -116,15 +116,18 @@
 				</li>
 			{/each}
 		</ol>
-		{#if $errors.instructions}<span class="text-xs text-red-400"
-				>{$errors.instructions._errors}</span
-			>{/if}
+		{#if $errors.instructions && $form.instructions.length === 0}
+			<span class="text-xs text-red-400">
+				{$errors.instructions._errors}
+			</span>
+		{/if}
 	</div>
 
 	<input name="ingredients" value={$form.ingredients} type="hidden" />
 	<input name="steps" value={$form.instructions} type="hidden" />
-
-	<hr class="h-[1px] w-full bg-white" />
-
-	<button type="submit">Save</button>
 </form>
+<div class="sticky bottom-0 left-0 -mx-4">
+	<div class="bg-emerald-900/75 p-4 backdrop-blur-xl sm:bg-inherit sm:backdrop-blur-none">
+		<button class="w-full" type="submit" form="recipe">Save</button>
+	</div>
+</div>
