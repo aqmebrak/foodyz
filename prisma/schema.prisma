@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  image       String?
+  recipes     Recipe[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Recipe {
+  id            String             @id @default(cuid())
+  title         String
+  slug          String             @unique
+  description   String?
+  instructions  String
+  prepTime      Int                // in minutes
+  cookTime      Int                // in minutes
+  servings      Int
+  difficulty    Difficulty         @default(EASY)
+  published     Boolean            @default(false)
+  featuredImage String?            // relative path: /images/recipes/<file>
+  categoryId    String
+  category      Category           @relation(fields: [categoryId], references: [id])
+  ingredients   RecipeIngredient[]
+  tags          RecipeTag[]
+  images        RecipeImage[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model Ingredient {
+  id        String             @id @default(cuid())
+  name      String             @unique
+  slug      String             @unique
+  recipes   RecipeIngredient[]
+  units     IngredientUnit[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model Unit {
+  id                String             @id @default(cuid())
+  name              String             @unique // e.g. "gram"
+  abbreviation      String             @unique // e.g. "g"
+  ingredients       IngredientUnit[]
+  recipeIngredients RecipeIngredient[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+// Junction: Recipe ↔ Ingredient (with quantity, unit, notes, order)
+model RecipeIngredient {
+  id           String     @id @default(cuid())
+  recipeId     String
+  ingredientId String
+  unitId       String?
+  quantity     Float
+  notes        String?
+  order        Int        @default(0)
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  unit         Unit?      @relation(fields: [unitId], references: [id])
+
+  @@unique([recipeId, ingredientId, order])
+}
+
+// Junction: Ingredient ↔ Unit (valid units per ingredient, with conversion factor for scaling)
+model IngredientUnit {
+  id               String     @id @default(cuid())
+  ingredientId     String
+  unitId           String
+  conversionFactor Float      @default(1.0) // multiply to convert to base unit
+  ingredient       Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  unit             Unit       @relation(fields: [unitId], references: [id])
+
+  @@unique([ingredientId, unitId])
+}
+
+model Tag {
+  id      String      @id @default(cuid())
+  name    String      @unique
+  slug    String      @unique
+  recipes RecipeTag[]
+}
+
+// Junction: Recipe ↔ Tag
+model RecipeTag {
+  recipeId String
+  tagId    String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id])
+
+  @@id([recipeId, tagId])
+}
+
+model RecipeImage {
+  id         String   @id @default(cuid())
+  recipeId   String
+  url        String   // relative path: /images/recipes/<file>
+  alt        String?
+  order      Int      @default(0)
+  isFeatured Boolean  @default(false)
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}

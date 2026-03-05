@@ -32,7 +32,6 @@ foodyz/
 ├── next.config.ts
 ├── tailwind.config.ts
 ├── tsconfig.json
-├── middleware.ts                 # protects /admin/* routes via Auth.js
 ├── prisma/
 │   ├── schema.prisma
 │   ├── seed.ts
@@ -42,6 +41,7 @@ foodyz/
 │       ├── recipes/
 │       └── categories/
 └── src/
+├───| middleware.ts                 # protects /admin/* routes via Auth.js
     ├── app/
     │   ├── layout.tsx            # Root layout (html, body, fonts)
     │   ├── page.tsx              # Homepage
