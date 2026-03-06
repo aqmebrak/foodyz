@@ -341,18 +341,23 @@ async function main() {
   // ---------------------------------------------------------------------------
   // Admin user
   // ---------------------------------------------------------------------------
-  const hashedPassword = await bcrypt.hash("admin1234", 12);
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminEmail || !adminPassword) {
+    throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD must be set in .env");
+  }
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
   await db.user.upsert({
-    where: { email: "admin@foodyz.app" },
-    update: {},
+    where: { email: adminEmail },
+    update: { password: hashedPassword },
     create: {
-      email: "admin@foodyz.app",
+      email: adminEmail,
       password: hashedPassword,
       name: "Admin",
       role: Role.ADMIN,
     },
   });
-  console.log("  ✓ Admin user (email: admin@foodyz.app, password: admin1234)");
+  console.log(`  ✓ Admin user (email: ${adminEmail})`);
 
   console.log("\nSeeding complete.");
 }

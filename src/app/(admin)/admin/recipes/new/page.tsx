@@ -1,0 +1,36 @@
+import Link from "next/link";
+import { getAllCategories, getAllIngredients, getAllUnits } from "@/actions/recipe";
+import { RecipeForm } from "@/components/admin/RecipeForm";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "New Recipe — Admin" };
+
+export default async function NewRecipePage() {
+  const [categories, ingredients, units] = await Promise.all([
+    getAllCategories(),
+    getAllIngredients(),
+    getAllUnits(),
+  ]);
+
+  return (
+    <div className="p-6 sm:p-8 max-w-3xl">
+      <div className="mb-6">
+        <Button variant="ghost" size="sm" asChild className="-ml-2 mb-3">
+          <Link href="/admin/recipes">
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Recipes
+          </Link>
+        </Button>
+        <h1 className="text-2xl font-bold text-gray-900">New recipe</h1>
+      </div>
+
+      <RecipeForm
+        categories={categories}
+        ingredients={ingredients}
+        units={units}
+      />
+    </div>
+  );
+}
