@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,6 +11,8 @@ import {
   LogOut,
   UtensilsCrossed,
   Scale,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/actions/auth";
@@ -17,37 +20,20 @@ import { logoutAction } from "@/actions/auth";
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/recipes", label: "Recipes", icon: BookOpen, exact: false },
-  {
-    href: "/admin/categories",
-    label: "Categories",
-    icon: Tag,
-    exact: false,
-  },
-  {
-    href: "/admin/ingredients",
-    label: "Ingredients",
-    icon: Package,
-    exact: false,
-  },
-  {
-    href: "/admin/units",
-    label: "Units",
-    icon: Scale,
-    exact: false,
-  },
+  { href: "/admin/categories", label: "Categories", icon: Tag, exact: false },
+  { href: "/admin/ingredients", label: "Ingredients", icon: Package, exact: false },
+  { href: "/admin/units", label: "Units", icon: Scale, exact: false },
 ];
 
-export function AdminSidebar() {
+function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-56 min-h-screen bg-emerald-950 flex flex-col shrink-0">
+    <>
       <div className="px-5 py-5 border-b border-emerald-800/60">
-        <Link href="/admin" className="flex items-center gap-2.5">
+        <Link href="/admin" className="flex items-center gap-2.5" onClick={onNavClick}>
           <UtensilsCrossed className="w-5 h-5 text-emerald-400" />
-          <span className="font-bold text-white text-base tracking-tight">
-            Foodyz
-          </span>
+          <span className="font-bold text-white text-base tracking-tight">Foodyz</span>
           <span className="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest mt-0.5">
             admin
           </span>
@@ -63,6 +49,7 @@ export function AdminSidebar() {
             <Link
               key={href}
               href={href}
+              onClick={onNavClick}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 isActive
@@ -88,6 +75,64 @@ export function AdminSidebar() {
           </button>
         </form>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function AdminSidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3 bg-emerald-950 border-b border-emerald-800/60">
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          className="text-emerald-300 hover:text-white transition-colors"
+          aria-label="Open navigation"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <Link href="/admin" className="flex items-center gap-2">
+          <UtensilsCrossed className="w-4 h-4 text-emerald-400" />
+          <span className="font-bold text-white text-sm tracking-tight">Foodyz</span>
+          <span className="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest">
+            admin
+          </span>
+        </Link>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/50"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className={cn(
+          "md:hidden fixed top-0 left-0 bottom-0 z-50 w-56 bg-emerald-950 flex flex-col transition-transform duration-200",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => setMobileOpen(false)}
+          className="absolute top-3 right-3 text-emerald-400 hover:text-white transition-colors"
+          aria-label="Close navigation"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <SidebarNav onNavClick={() => setMobileOpen(false)} />
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-56 min-h-screen bg-emerald-950 flex-col shrink-0">
+        <SidebarNav />
+      </aside>
+    </>
   );
 }

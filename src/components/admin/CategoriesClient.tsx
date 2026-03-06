@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import type { Resolver } from "react-hook-form";
 import { categorySchema, type CategoryFormValues } from "@/lib/validations/category";
 import { createCategory, updateCategory, deleteCategory } from "@/actions/category";
 import { slugify } from "@/lib/utils";
-import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, X } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -196,8 +196,8 @@ export function CategoriesClient({ categories }: CategoriesClientProps) {
             </TableHeader>
             <TableBody>
               {categories.map((category) => (
-                <>
-                  <TableRow key={category.id}>
+                <Fragment key={category.id}>
+                  <TableRow>
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell className="hidden sm:table-cell text-gray-500 text-sm font-mono">
                       {category.slug}
@@ -253,7 +253,7 @@ export function CategoriesClient({ categories }: CategoriesClientProps) {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))}
             </TableBody>
           </Table>

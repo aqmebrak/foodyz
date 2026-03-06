@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import type { Resolver } from "react-hook-form";
@@ -169,8 +169,8 @@ export function UnitsClient({ units }: UnitsClientProps) {
             </TableHeader>
             <TableBody>
               {units.map((unit) => (
-                <>
-                  <TableRow key={unit.id}>
+                <Fragment key={unit.id}>
+                  <TableRow>
                     <TableCell className="font-medium">{unit.name}</TableCell>
                     <TableCell className="text-gray-500 text-sm font-mono">
                       {unit.abbreviation}
@@ -222,7 +222,7 @@ export function UnitsClient({ units }: UnitsClientProps) {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))}
             </TableBody>
           </Table>
