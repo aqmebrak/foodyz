@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { getPublishedRecipes } from "@/actions/recipe";
 import { RecipeGrid } from "@/components/recipes/RecipeGrid";

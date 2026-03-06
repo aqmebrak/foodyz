@@ -165,6 +165,12 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 - [ ] **10.5** Write Prisma query tests for critical Server Actions
 - [ ] **10.6** Lighthouse audit — fix CLS, LCP, accessibility issues
 
+
+## Phase 11 - UX enhancements
+
+- [] **11.1** Improve mobile recipe page interactions: do not make the menubar sticky on mobile
+- [] **11.2** Keep the buttons "jump to ingredients" "steps" sticky at the bottom of the screen on mobile when scrolling through a recipe. make them a little bit smaller and add icons to them.
+
 ---
 
 ## Quick Reference
