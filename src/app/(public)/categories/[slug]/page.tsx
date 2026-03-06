@@ -1,16 +1,11 @@
 import { notFound } from "next/navigation";
-import { getCategoryBySlug, getRecipesByCategory, getAllCategorySlugs } from "@/actions/recipe";
+import { getCategoryBySlug, getRecipesByCategory } from "@/actions/recipe";
 import { RecipeGrid } from "@/components/recipes/RecipeGrid";
 import { Breadcrumbs } from "@/components/shared/Breadcrumbs";
 import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAllCategorySlugs();
-  return slugs.map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

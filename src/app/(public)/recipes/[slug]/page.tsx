@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getRecipeBySlug, getAllPublishedSlugs } from "@/actions/recipe";
+import { getRecipeBySlug } from "@/actions/recipe";
 import { Breadcrumbs } from "@/components/shared/Breadcrumbs";
 import { IngredientChecklist } from "@/components/recipes/IngredientChecklist";
 import { formatDuration } from "@/lib/utils";
@@ -11,11 +11,6 @@ import type { Difficulty } from "@prisma/client";
 
 interface Props {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAllPublishedSlugs();
-  return slugs.map((r) => ({ slug: r.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -67,7 +62,7 @@ export default async function RecipeDetailPage({ params }: Props) {
       </div>
 
       {/* Hero image */}
-      <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-emerald-50 mb-6">
+      <div className="relative aspect-video rounded-2xl overflow-hidden bg-emerald-50 mb-6">
         {recipe.featuredImage ? (
           <Image
             src={recipe.featuredImage}
@@ -78,7 +73,7 @@ export default async function RecipeDetailPage({ params }: Props) {
             sizes="(max-width: 672px) 100vw, 672px"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
+          <div className="absolute inset-0 bg-linear-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
             <span className="text-7xl select-none">🍽️</span>
           </div>
         )}
@@ -183,7 +178,7 @@ export default async function RecipeDetailPage({ params }: Props) {
         <ol className="space-y-5">
           {steps.map((step, i) => (
             <li key={i} className="flex gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white text-sm font-bold flex items-center justify-center mt-0.5">
+              <span className="shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white text-sm font-bold flex items-center justify-center mt-0.5">
                 {i + 1}
               </span>
               <p className="text-gray-800 text-base leading-relaxed pt-1">
