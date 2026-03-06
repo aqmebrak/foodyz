@@ -9,6 +9,7 @@ import {
   Package,
   LogOut,
   UtensilsCrossed,
+  Scale,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/actions/auth";
@@ -26,6 +27,12 @@ const navItems = [
     href: "/admin/ingredients",
     label: "Ingredients",
     icon: Package,
+    exact: false,
+  },
+  {
+    href: "/admin/units",
+    label: "Units",
+    icon: Scale,
     exact: false,
   },
 ];
