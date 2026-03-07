@@ -1,8 +1,9 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { ingredientSchema, type IngredientFormValues } from "@/lib/validations/category";
 import { revalidatePath } from "next/cache";
+
+import { db } from "@/lib/db";
+import { type IngredientFormValues,ingredientSchema } from "@/lib/validations/category";
 
 export async function getIngredients() {
   return db.ingredient.findMany({ orderBy: { name: "asc" } });

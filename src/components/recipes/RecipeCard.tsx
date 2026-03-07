@@ -1,8 +1,9 @@
-import Link from "next/link";
-import Image from "next/image";
 import { Clock, Users } from "lucide-react";
-import { formatDuration } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
 import type { Difficulty } from "@prisma/client";
+
+import { formatDuration } from "@/lib/utils";
 
 const difficultyStyles: Record<Difficulty, string> = {
   EASY: "bg-emerald-50 text-emerald-700",

@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth";
 import { logoutAction } from "@/actions/auth";
+import { auth } from "@/lib/auth";
 
 export default async function AdminDashboardPage() {
   const session = await auth();

@@ -1,9 +1,10 @@
+import bcrypt from "bcryptjs";
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";
-import { authConfig } from "@/lib/auth.config";
 import type { Role } from "@prisma/client";
+
+import { authConfig } from "@/lib/auth.config";
+import { db } from "@/lib/db";
 
 // ---------------------------------------------------------------------------
 // Type augmentation — adds `id` and `role` to the session user

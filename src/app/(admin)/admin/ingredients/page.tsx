@@ -1,6 +1,7 @@
+import type { Metadata } from "next";
+
 import { getIngredients } from "@/actions/ingredient";
 import { IngredientsClient } from "@/components/admin/IngredientsClient";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Ingredients — Admin" };
 

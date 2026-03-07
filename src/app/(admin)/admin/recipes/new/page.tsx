@@ -1,9 +1,10 @@
+import { ChevronLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+
 import { getAllCategories, getAllIngredients, getAllUnits } from "@/actions/recipe";
 import { RecipeForm } from "@/components/admin/RecipeForm";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "New Recipe — Admin" };
 

@@ -1,15 +1,16 @@
-import { notFound } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
 import {
-  getRecipeForAdmin,
   getAllCategories,
   getAllIngredients,
   getAllUnits,
+  getRecipeForAdmin,
 } from "@/actions/recipe";
 import { RecipeForm } from "@/components/admin/RecipeForm";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
-import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ id: string }>;

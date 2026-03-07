@@ -161,7 +161,6 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 - [ ] **10.1** Add `robots.txt` and `sitemap.xml` (use Next.js Metadata API)
 - [ ] **10.2** Add Open Graph image generation for recipe pages (`opengraph-image.tsx`)
 - [ ] **10.3** Rate-limit the login Server Action (prevent brute force)
-- [ ] **10.4** Add `zod-form-data` or `conform` for progressive-enhancement form handling
 - [ ] **10.5** Write Prisma query tests for critical Server Actions
 - [ ] **10.6** Lighthouse audit — fix CLS, LCP, accessibility issues
 

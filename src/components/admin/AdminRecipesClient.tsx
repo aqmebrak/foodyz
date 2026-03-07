@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+
+import { deleteRecipe } from "@/actions/recipe";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { SearchBar } from "@/components/shared/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,10 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { SearchBar } from "@/components/shared/SearchBar";
-import { deleteRecipe } from "@/actions/recipe";
-import { Plus, Pencil, Trash2 } from "lucide-react";
 
 interface Recipe {
   id: string;

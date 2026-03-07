@@ -1,8 +1,9 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { categorySchema, type CategoryFormValues } from "@/lib/validations/category";
 import { revalidatePath } from "next/cache";
+
+import { db } from "@/lib/db";
+import { type CategoryFormValues,categorySchema } from "@/lib/validations/category";
 
 export async function getCategories() {
   return db.category.findMany({ orderBy: { name: "asc" } });

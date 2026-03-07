@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
 import { getCategoryBySlug, getRecipesByCategory } from "@/actions/recipe";
 import { RecipeGrid } from "@/components/recipes/RecipeGrid";
 import { Breadcrumbs } from "@/components/shared/Breadcrumbs";
-import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string }>;

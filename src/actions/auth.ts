@@ -1,8 +1,9 @@
 "use server";
 
-import { signIn, signOut } from "@/lib/auth";
-import { AuthError } from "next-auth";
 import { headers } from "next/headers";
+import { AuthError } from "next-auth";
+
+import { signIn, signOut } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function loginAction(

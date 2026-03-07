@@ -1,13 +1,14 @@
 "use client";
 
+import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Fragment, useState, useTransition } from "react";
+import type { Resolver } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import type { Resolver } from "react-hook-form";
-import { ingredientSchema, type IngredientFormValues } from "@/lib/validations/category";
-import { createIngredient, updateIngredient, deleteIngredient } from "@/actions/ingredient";
-import { slugify } from "@/lib/utils";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+
+import { createIngredient, deleteIngredient,updateIngredient } from "@/actions/ingredient";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,7 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -26,7 +26,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { slugify } from "@/lib/utils";
+import { type IngredientFormValues,ingredientSchema } from "@/lib/validations/category";
 
 interface Ingredient {
   id: string;

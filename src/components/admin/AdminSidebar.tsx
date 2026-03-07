@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   BookOpen,
-  Tag,
-  Package,
+  LayoutDashboard,
   LogOut,
-  UtensilsCrossed,
-  Scale,
   Menu,
+  Package,
+  Scale,
+  Tag,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
 import { logoutAction } from "@/actions/auth";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },

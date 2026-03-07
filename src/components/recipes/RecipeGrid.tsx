@@ -1,5 +1,6 @@
-import { RecipeCard } from "@/components/recipes/RecipeCard";
 import type { Difficulty } from "@prisma/client";
+
+import { RecipeCard } from "@/components/recipes/RecipeCard";
 
 interface RecipeGridProps {
   recipes: Array<{

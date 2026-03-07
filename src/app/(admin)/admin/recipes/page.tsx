@@ -1,6 +1,7 @@
+import type { Metadata } from "next";
+
 import { getAllRecipesAdmin } from "@/actions/recipe";
 import { AdminRecipesClient } from "@/components/admin/AdminRecipesClient";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Recipes — Admin" };
 

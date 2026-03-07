@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { getAllPublishedSlugs, getAllCategorySlugs } from "@/actions/recipe";
+
+import { getAllCategorySlugs,getAllPublishedSlugs } from "@/actions/recipe";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.AUTH_URL ?? "http://localhost:3000";

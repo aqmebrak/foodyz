@@ -1,13 +1,14 @@
-import { notFound } from "next/navigation";
+import { ChefHat, Clock, Timer,Users } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { getRecipeBySlug } from "@/actions/recipe";
-import { Breadcrumbs } from "@/components/shared/Breadcrumbs";
-import { IngredientChecklist } from "@/components/recipes/IngredientChecklist";
-import { formatDuration } from "@/lib/utils";
-import { Clock, ChefHat, Users, Timer } from "lucide-react";
-import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import type { Difficulty } from "@prisma/client";
+
+import { getRecipeBySlug } from "@/actions/recipe";
+import { IngredientChecklist } from "@/components/recipes/IngredientChecklist";
+import { Breadcrumbs } from "@/components/shared/Breadcrumbs";
+import { formatDuration } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ slug: string }>;

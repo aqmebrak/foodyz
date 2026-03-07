@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic";
 
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+
 import { getPublishedRecipes } from "@/actions/recipe";
 import { RecipeGrid } from "@/components/recipes/RecipeGrid";
-import { ArrowRight } from "lucide-react";
 
 export default async function HomePage() {
   const recipes = await getPublishedRecipes();

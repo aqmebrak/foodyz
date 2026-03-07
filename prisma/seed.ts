@@ -1,7 +1,7 @@
-import { PrismaClient, Difficulty, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { Difficulty, PrismaClient, Role } from "@prisma/client";
 
 const db = new PrismaClient();
 

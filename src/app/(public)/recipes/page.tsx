@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
+
 import { getPublishedRecipes } from "@/actions/recipe";
 import { RecipeGrid } from "@/components/recipes/RecipeGrid";
 import { Pagination } from "@/components/shared/Pagination";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Recipes",

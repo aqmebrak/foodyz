@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useEffect,useState } from "react";
+
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 
 interface SearchBarProps {
