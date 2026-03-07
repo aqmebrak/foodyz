@@ -1,9 +1,8 @@
 "use server";
 
-import { writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { join } from "path";
+import { put } from "@vercel/blob";
 
 import { db } from "@/lib/db";
 import { type RecipeFormValues,recipeSchema } from "@/lib/validations/recipe";
@@ -197,19 +196,14 @@ export async function uploadRecipeImage(formData: FormData) {
   const file = formData.get("file") as File | null;
   if (!file || file.size === 0) return { error: "No file provided" };
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const relativePath = `/images/recipes/${filename}`;
-  const fullPath = join(process.cwd(), "public", relativePath);
+  const filename = `recipes/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   try {
-    await writeFile(fullPath, buffer);
+    const blob = await put(filename, file, { access: "public" });
+    return { path: blob.url };
   } catch (e) {
     console.error(e);
-    return { error: "Failed to save image file." };
+    return { error: "Failed to upload image." };
   }
-
-  return { path: relativePath };
 }

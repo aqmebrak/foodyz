@@ -176,6 +176,10 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 - [] **12.1** Search functionality on the public recipes page
 - [] **12.2** Admin: on desktop, list recipes and when selecting a recipe displays the edit form on the right side of the screen (split view) 
 
+## Phase 13 - 
+- [] **13.1** Like for the ingredients, add a tick step action to the recipe steps, so that when you are cooking you can tick off each step as you go. This state should be kept in local storage so that it persists across page reloads but is not shared between users (not stored in the database).
+- [] **13.2** add a mechanism that allow the user to divide or muliply the ingredient quantities based on the number of servings they want to make. This could be a Plus and Minus button next to the servings field in the recipe details page. When the user clicks on the Plus button, it multiplies the ingredient quantities by +1 one serving and updates the displayed quantities accordingly. When they click on the Minus button, it reduces the quantities by -1 serving and updates the displayed quantities accordingly. The original quantities should be stored as a reference so that the user can always go back to the default values.
+
 ---
 
 ## Quick Reference
