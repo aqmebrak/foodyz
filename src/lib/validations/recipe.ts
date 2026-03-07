@@ -3,7 +3,7 @@ import { z } from "zod";
 export const ingredientRowSchema = z.object({
   ingredientId: z.string().min(1, "Select an ingredient"),
   unitId: z.string().optional(),
-  quantity: z.coerce.number().positive("Must be greater than 0"),
+  quantity: z.coerce.number().min(0, "Quantity must be at least 0"),
   notes: z.string().optional(),
 });
 

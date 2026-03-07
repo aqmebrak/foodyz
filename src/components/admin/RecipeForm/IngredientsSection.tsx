@@ -93,7 +93,6 @@ export function IngredientsSection({
                       <Input
                         type="number"
                         step="0.01"
-                        min="0.01"
                         placeholder="Qty"
                         {...field}
                       />
@@ -178,7 +177,7 @@ export function IngredientsSection({
         variant="outline"
         size="sm"
         onClick={() =>
-          append({ ingredientId: "", quantity: 1, unitId: "", notes: "" })
+          append({ ingredientId: "", quantity: 0, unitId: "", notes: "" })
         }
       >
         <Plus className="w-4 h-4 mr-1.5" />

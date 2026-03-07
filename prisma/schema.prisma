@@ -59,7 +59,7 @@ model Recipe {
   servings      Int
   difficulty    Difficulty         @default(EASY)
   published     Boolean            @default(false)
-  featuredImage String?            // relative path: /images/recipes/<file>
+  featuredImage String?            // Vercel blob url
   categoryId    String
   category      Category           @relation(fields: [categoryId], references: [id])
   ingredients   RecipeIngredient[]
