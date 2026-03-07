@@ -169,8 +169,12 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 
 - [] **11.1** Improve mobile recipe page interactions: do not make the menubar sticky on mobile
 - [] **11.2** Keep the buttons "jump to ingredients" "steps" sticky at the bottom of the screen on mobile when scrolling through a recipe. make them a little bit smaller and add icons to them.
-- [] **11.3** Add a "jump to top" button that appears when the user scrolls down on mobile, to quickly navigate back to the top of the recipe page.
-- [] **11.4** Admin: Add filter fields: categories, difficulty, prep time, cook time, servings, published status
+- [] **11.4** Admin recipes list: Add filter fields: categories, difficulty, prep time, cook time, servings, published status
+
+
+## Phase 12 - Additional features
+- [] **12.1** Search functionality on the public recipes page
+- [] **12.2** Admin: on desktop, list recipes and when selecting a recipe displays the edit form on the right side of the screen (split view) 
 
 ---
 

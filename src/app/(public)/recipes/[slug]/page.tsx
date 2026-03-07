@@ -1,4 +1,4 @@
-import { ChefHat, Clock, Timer,Users } from "lucide-react";
+import { BookOpen, ChefHat, Clock, ShoppingBasket, Timer, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,7 +50,8 @@ export default async function RecipeDetailPage({ params }: Props) {
     .filter(Boolean);
 
   return (
-    <article className="max-w-2xl mx-auto px-4 sm:px-6 pb-16">
+    <>
+    <article className="max-w-2xl mx-auto px-4 sm:px-6 pb-28 sm:pb-16">
       {/* Breadcrumb */}
       <div className="py-5">
         <Breadcrumbs
@@ -144,22 +145,6 @@ export default async function RecipeDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Jump link — mobile cooking helper */}
-      <div className="flex gap-3 mb-10 sm:hidden">
-        <a
-          href="#instructions"
-          className="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-xl text-sm transition-colors"
-        >
-          Jump to steps
-        </a>
-        <a
-          href="#ingredients"
-          className="flex-1 text-center border border-emerald-200 text-emerald-700 font-medium py-3 rounded-xl text-sm hover:bg-emerald-50 transition-colors"
-        >
-          Ingredients
-        </a>
-      </div>
-
       {/* Ingredients */}
       <section id="ingredients" className="mb-10">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
@@ -190,5 +175,26 @@ export default async function RecipeDetailPage({ params }: Props) {
         </ol>
       </section>
     </article>
+
+    {/* Sticky bottom jump bar — mobile only */}
+    <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 backdrop-blur-sm border-t border-emerald-100 px-4 py-2">
+      <div className="max-w-2xl mx-auto flex gap-3">
+        <a
+          href="#instructions"
+          className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-xl text-xs transition-colors"
+        >
+          <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
+          Steps
+        </a>
+        <a
+          href="#ingredients"
+          className="flex-1 flex items-center justify-center gap-1.5 border border-emerald-200 text-emerald-700 font-medium py-2 rounded-xl text-xs hover:bg-emerald-50 transition-colors"
+        >
+          <ShoppingBasket className="w-3.5 h-3.5" aria-hidden="true" />
+          Ingredients
+        </a>
+      </div>
+    </div>
+    </>
   );
 }

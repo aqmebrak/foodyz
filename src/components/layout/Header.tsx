@@ -5,12 +5,11 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/recipes", label: "Recipes" },
   { href: "/categories", label: "Categories" },
-  { href: "/admin", label: "Admin" },
 ];
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-emerald-100">
+    <header className="sm:sticky sm:top-0 sm:z-50 bg-white/95 backdrop-blur-sm border-b border-emerald-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <UtensilsCrossed className="w-5 h-5 text-emerald-600 group-hover:text-emerald-700 transition-colors" aria-hidden="true" />

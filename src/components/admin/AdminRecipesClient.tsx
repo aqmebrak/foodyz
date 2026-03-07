@@ -23,6 +23,9 @@ interface Recipe {
   title: string;
   published: boolean;
   difficulty: string;
+  prepTime: number;
+  cookTime: number;
+  servings: number;
   category: { name: string };
 }
 
@@ -32,14 +35,33 @@ const difficultyBadge: Record<string, string> = {
   HARD: "bg-red-100 text-red-800",
 };
 
+const selectClass =
+  "h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring text-gray-700";
+
 export function AdminRecipesClient({ recipes }: { recipes: Recipe[] }) {
   const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [status, setStatus] = useState("");
+  const [maxPrepTime, setMaxPrepTime] = useState("");
+  const [maxCookTime, setMaxCookTime] = useState("");
+  const [maxServings, setMaxServings] = useState("");
 
-  const filtered = query.trim()
-    ? recipes.filter((r) =>
-        r.title.toLowerCase().includes(query.toLowerCase())
-      )
-    : recipes;
+  const categories = [...new Map(recipes.map((r) => [r.category.name, r.category.name])).values()].sort();
+
+  const filtered = recipes.filter((r) => {
+    if (query.trim() && !r.title.toLowerCase().includes(query.toLowerCase())) return false;
+    if (category && r.category.name !== category) return false;
+    if (difficulty && r.difficulty !== difficulty) return false;
+    if (status === "published" && !r.published) return false;
+    if (status === "draft" && r.published) return false;
+    if (maxPrepTime && r.prepTime > Number(maxPrepTime)) return false;
+    if (maxCookTime && r.cookTime > Number(maxCookTime)) return false;
+    if (maxServings && r.servings > Number(maxServings)) return false;
+    return true;
+  });
+
+  const hasFilters = query || category || difficulty || status || maxPrepTime || maxCookTime || maxServings;
 
   return (
     <div className="p-6 sm:p-8 max-w-6xl">
@@ -58,12 +80,47 @@ export function AdminRecipesClient({ recipes }: { recipes: Recipe[] }) {
         </Button>
       </div>
 
-      <div className="mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         <SearchBar
           placeholder="Filter by title…"
           onSearch={setQuery}
           className="max-w-xs"
         />
+        <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value)}>
+          <option value="">All categories</option>
+          {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select className={selectClass} value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+          <option value="">All levels</option>
+          <option value="EASY">Easy</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HARD">Hard</option>
+        </select>
+        <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="">Any status</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+        <select className={selectClass} value={maxPrepTime} onChange={(e) => setMaxPrepTime(e.target.value)}>
+          <option value="">Prep: any</option>
+          <option value="15">Prep ≤ 15 min</option>
+          <option value="30">Prep ≤ 30 min</option>
+          <option value="60">Prep ≤ 60 min</option>
+        </select>
+        <select className={selectClass} value={maxCookTime} onChange={(e) => setMaxCookTime(e.target.value)}>
+          <option value="">Cook: any</option>
+          <option value="15">Cook ≤ 15 min</option>
+          <option value="30">Cook ≤ 30 min</option>
+          <option value="60">Cook ≤ 60 min</option>
+          <option value="120">Cook ≤ 120 min</option>
+        </select>
+        <select className={selectClass} value={maxServings} onChange={(e) => setMaxServings(e.target.value)}>
+          <option value="">Servings: any</option>
+          <option value="2">≤ 2</option>
+          <option value="4">≤ 4</option>
+          <option value="6">≤ 6</option>
+          <option value="8">≤ 8</option>
+        </select>
       </div>
 
       {recipes.length === 0 ? (
@@ -73,7 +130,7 @@ export function AdminRecipesClient({ recipes }: { recipes: Recipe[] }) {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-base">No recipes match &ldquo;{query}&rdquo;.</p>
+          <p className="text-base">No recipes match {hasFilters ? "the active filters" : "your search"}.</p>
         </div>
       ) : (
         <div className="rounded-lg border border-gray-100 overflow-hidden">
