@@ -2,11 +2,23 @@
 
 import { signIn, signOut } from "@/lib/auth";
 import { AuthError } from "next-auth";
+import { headers } from "next/headers";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function loginAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  const headersList = await headers();
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  const { allowed, retryAfterMs } = checkRateLimit(`login:${ip}`);
+
+  if (!allowed) {
+    const minutes = Math.ceil(retryAfterMs / 60_000);
+    return `Too many login attempts. Please try again in ${minutes} minute${minutes !== 1 ? "s" : ""}.`;
+  }
+
   try {
     await signIn("credentials", {
       email: formData.get("email"),

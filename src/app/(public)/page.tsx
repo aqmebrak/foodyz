@@ -26,7 +26,7 @@ export default async function HomePage() {
             className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3.5 rounded-xl transition-colors"
           >
             Browse all recipes
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </Link>
         </div>
       </section>
@@ -40,7 +40,7 @@ export default async function HomePage() {
               href="/recipes"
               className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1 transition-colors"
             >
-              View all <ArrowRight className="w-3.5 h-3.5" />
+              View all <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
             </Link>
           </div>
           <RecipeGrid recipes={featured} />

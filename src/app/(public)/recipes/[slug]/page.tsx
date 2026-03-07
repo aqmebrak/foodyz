@@ -112,28 +112,28 @@ export default async function RecipeDetailPage({ params }: Props) {
       {/* Metadata grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10 p-4 bg-gray-50 rounded-xl">
         <div className="flex flex-col items-center gap-1 py-2">
-          <Clock className="w-5 h-5 text-emerald-600" />
+          <Clock className="w-5 h-5 text-emerald-600" aria-hidden="true" />
           <span className="text-xs text-gray-500 uppercase tracking-wide">Prep</span>
           <span className="font-semibold text-gray-900 text-sm">
             {formatDuration(recipe.prepTime)}
           </span>
         </div>
         <div className="flex flex-col items-center gap-1 py-2">
-          <Timer className="w-5 h-5 text-emerald-600" />
+          <Timer className="w-5 h-5 text-emerald-600" aria-hidden="true" />
           <span className="text-xs text-gray-500 uppercase tracking-wide">Cook</span>
           <span className="font-semibold text-gray-900 text-sm">
             {formatDuration(recipe.cookTime)}
           </span>
         </div>
         <div className="flex flex-col items-center gap-1 py-2">
-          <Users className="w-5 h-5 text-emerald-600" />
+          <Users className="w-5 h-5 text-emerald-600" aria-hidden="true" />
           <span className="text-xs text-gray-500 uppercase tracking-wide">Serves</span>
           <span className="font-semibold text-gray-900 text-sm">
             {recipe.servings}
           </span>
         </div>
         <div className="flex flex-col items-center gap-1 py-2">
-          <ChefHat className="w-5 h-5 text-emerald-600" />
+          <ChefHat className="w-5 h-5 text-emerald-600" aria-hidden="true" />
           <span className="text-xs text-gray-500 uppercase tracking-wide">Level</span>
           <span
             className={`font-semibold text-xs px-2 py-0.5 rounded-full ${difficultyStyles[recipe.difficulty]}`}

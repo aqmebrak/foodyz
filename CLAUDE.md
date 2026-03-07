@@ -106,6 +106,10 @@ pnpm db:generate  # prisma generate (run after every schema change)
 pnpm db:studio    # open Prisma Studio
 pnpm db:seed      # run prisma/seed.ts
 pnpm db:reset     # prisma migrate reset
+pnpm test:e2e     # run e2e tests with Playwright
+pnpm test:e2e:ui  # run e2e Playwright tests in UI mode
+pnpm test         # run unit tests with vitest
+pnpm test:watch   # run unit tests with vitest in watch mode
 ```
 
 ---

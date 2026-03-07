@@ -73,12 +73,12 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
         )}
         <div className="flex items-center gap-4 mt-auto pt-3 text-xs text-gray-500">
           <span className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            {formatDuration(totalTime)}
+            <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{formatDuration(totalTime)}</span>
           </span>
           <span className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" />
-            {recipe.servings} servings
+            <Users className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{recipe.servings} servings</span>
           </span>
         </div>
       </div>
