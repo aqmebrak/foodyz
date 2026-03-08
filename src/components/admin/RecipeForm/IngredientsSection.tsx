@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import type { RecipeFormValues } from "@/lib/validations/recipe";
 
+import { IngredientCombobox } from "./IngredientCombobox";
 import type { Ingredient, Unit } from "./types";
 
 type FieldArray = UseFieldArrayReturn<RecipeFormValues, "ingredients">;
@@ -29,6 +30,7 @@ interface IngredientsSectionProps {
   remove: FieldArray["remove"];
   ingredients: Ingredient[];
   units: Unit[];
+  onIngredientCreated: (ingredient: Ingredient) => void;
 }
 
 export function IngredientsSection({
@@ -38,6 +40,7 @@ export function IngredientsSection({
   remove,
   ingredients,
   units,
+  onIngredientCreated,
 }: IngredientsSectionProps) {
   return (
     <section className="space-y-4">
@@ -62,20 +65,14 @@ export function IngredientsSection({
                 name={`ingredients.${index}.ingredientId`}
                 render={({ field }) => (
                   <FormItem>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ingredient" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {ingredients.map((ing) => (
-                          <SelectItem key={ing.id} value={ing.id}>
-                            {ing.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <IngredientCombobox
+                        value={field.value}
+                        onChange={field.onChange}
+                        ingredients={ingredients}
+                        onIngredientCreated={onIngredientCreated}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

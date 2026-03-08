@@ -20,7 +20,7 @@ import { DEFAULT_FORM_VALUES } from "./utils";
 
 export function RecipeForm({
   categories,
-  ingredients,
+  ingredients: initialIngredients,
   units,
   defaultValues,
   recipeId,
@@ -28,6 +28,7 @@ export function RecipeForm({
   const isEdit = !!recipeId;
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [ingredientsList, setIngredientsList] = useState(initialIngredients);
 
   const form = useForm<RecipeFormValues>({
     resolver: standardSchemaResolver(recipeSchema) as unknown as Resolver<RecipeFormValues>,
@@ -96,8 +97,13 @@ export function RecipeForm({
           fields={fields}
           append={append}
           remove={remove}
-          ingredients={ingredients}
+          ingredients={ingredientsList}
           units={units}
+          onIngredientCreated={(ing) =>
+            setIngredientsList((prev) =>
+              [...prev, ing].sort((a, b) => a.name.localeCompare(b.name))
+            )
+          }
         />
 
         <SaveBar isPending={isPending} isEdit={isEdit} />

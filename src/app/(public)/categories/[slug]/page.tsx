@@ -29,7 +29,7 @@ export default async function CategoryPage({ params }: Props) {
   if (!category) notFound();
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+    <div className="max-w-6xl mx-auto 2xl:max-w-full 2xl:px-12 px-4 sm:px-6 py-10">
       <Breadcrumbs
         crumbs={[
           { label: "Home", href: "/" },

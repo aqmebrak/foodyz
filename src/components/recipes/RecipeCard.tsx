@@ -39,7 +39,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       href={`/recipes/${recipe.slug}`}
       className="group flex flex-col rounded-xl overflow-hidden border border-gray-100 bg-white hover:shadow-md transition-shadow"
     >
-      <div className="relative aspect-[4/3] bg-emerald-50">
+      <div className="relative aspect-4/3 bg-emerald-50">
         {recipe.featuredImage ? (
           <Image
             src={recipe.featuredImage}
@@ -49,7 +49,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
+          <div className="absolute inset-0 bg-linear-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
             <span className="text-4xl select-none">🍽️</span>
           </div>
         )}

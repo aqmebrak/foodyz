@@ -16,13 +16,13 @@ export async function createIngredient(data: IngredientFormValues) {
   }
 
   try {
-    await db.ingredient.create({ data: parsed.data });
+    const created = await db.ingredient.create({ data: parsed.data });
+    revalidatePath("/admin/ingredients");
+    return { ingredient: { id: created.id, name: created.name } };
   } catch (e) {
     console.error(e);
     return { error: "Failed to create ingredient. The slug may already exist." };
   }
-
-  revalidatePath("/admin/ingredients");
 }
 
 export async function updateIngredient(id: string, data: IngredientFormValues) {

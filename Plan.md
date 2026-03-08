@@ -173,7 +173,7 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 
 
 ## Phase 12 - Additional features
-- [] **12.1** Search functionality on the public recipes page
+- [] **12.1** Search functionality on the public recipes page. don't forget to skip diacritics (same for the admin search). This can be implemented using a simple text input that filters the displayed recipes in real time as the user types. The filtering should be case-insensitive and ignore diacritics to ensure a smooth user experience. For example, searching for "cafe" should match recipes with "café" in the title or description.
 - [] **12.2** Admin: on desktop, list recipes and when selecting a recipe displays the edit form on the right side of the screen (split view) 
 - [] **12.3** Admin: enhanced ingredient Select input: add a search value inside the Select component. Also add the ability to create a new ingredient directly from the Select dropdown (without leaving the recipe form). This could be implemented as an "Add new ingredient" option at the bottom of the dropdown, which opens a small modal or inline form to enter the new ingredient details. Once created, the new ingredient should be automatically selected in the original dropdown.
 

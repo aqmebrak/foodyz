@@ -22,6 +22,11 @@ export function slugify(str: string): string {
  * Formats a duration in minutes to a human-readable string.
  * Example: 90 → "1h 30min" | 45 → "45min"
  */
+/** Strips diacritics and lowercases for accent-insensitive comparisons. */
+export function normalizeStr(str: string): string {
+  return str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+}
+
 export function formatDuration(minutes: number): string {
   if (minutes < 60) return `${minutes}min`;
   const h = Math.floor(minutes / 60);
