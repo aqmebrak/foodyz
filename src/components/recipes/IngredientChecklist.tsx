@@ -85,10 +85,9 @@ export function IngredientChecklist({ ingredients, formatQty }: IngredientCheckl
                     isChecked && "line-through opacity-60"
                   )}
                 >
-                  <span className="font-semibold">
-                    {quantity}
-                    {unitLabel}
-                  </span>{" "}
+                  {item.quantity !== 0 && (
+                    <><span className="font-semibold">{quantity}{unitLabel}</span>{" "}</>
+                  )}
                   {item.ingredient.name}
                   {item.notes && (
                     <span className="text-sm text-gray-400 ml-1">

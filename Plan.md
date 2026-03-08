@@ -192,7 +192,7 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 
 
 ## Phase 15 - 
-- [] **15.1** Admin reciped edit: add ingredients reordering functionality. This can be implemented using drag-and-drop or up/down buttons to allow admins to change the order of ingredients in a recipe. The new order should be saved in the database and reflected on the public recipe page.
+- [] **15.1** Admin recipe edit: add ingredients reordering functionality. This can be implemented using drag-and-drop or up/down buttons to allow admins to change the order of ingredients in a recipe. The new order should be saved in the database and reflected on the public recipe page.
 - [] **15.2** If we entered a quantity of 0 for an ingredient in the recipe form, we should hide the quantity on the public recipe page to avoid confusion (for example "Olive Oil" instead of "0 Olive Oil") since some ingredients may not require a specific quantity.
 
 

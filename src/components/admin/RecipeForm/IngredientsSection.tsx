@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { Control, UseFieldArrayReturn } from "react-hook-form";
 
@@ -29,6 +29,7 @@ interface IngredientsSectionProps {
   fields: FieldArray["fields"];
   append: FieldArray["append"];
   remove: FieldArray["remove"];
+  move: FieldArray["move"];
   ingredients: Ingredient[];
   units: Unit[];
   onIngredientCreated: (ingredient: Ingredient) => void;
@@ -39,6 +40,7 @@ export function IngredientsSection({
   fields,
   append,
   remove,
+  move,
   ingredients,
   units,
   onIngredientCreated,
@@ -66,8 +68,8 @@ export function IngredientsSection({
             key={field.id}
             className="grid grid-cols-12 gap-2 items-start p-3 bg-gray-50 rounded-lg"
           >
-            {/* Ingredient — col 1-5 */}
-            <div className="col-span-12 sm:col-span-5">
+            {/* Ingredient — col 1-4 (sm) */}
+            <div className="col-span-12 sm:col-span-4">
               <FormField
                 control={control}
                 name={`ingredients.${index}.ingredientId`}
@@ -89,8 +91,8 @@ export function IngredientsSection({
               />
             </div>
 
-            {/* Quantity — col 6-7 */}
-            <div className="col-span-4 sm:col-span-2">
+            {/* Quantity — col 5-6 */}
+            <div className="col-span-3 sm:col-span-2">
               <FormField
                 control={control}
                 name={`ingredients.${index}.quantity`}
@@ -113,8 +115,8 @@ export function IngredientsSection({
               />
             </div>
 
-            {/* Unit — col 8-9 */}
-            <div className="col-span-4 sm:col-span-2">
+            {/* Unit — col 7-8 */}
+            <div className="col-span-3 sm:col-span-2">
               <FormField
                 control={control}
                 name={`ingredients.${index}.unitId`}
@@ -146,8 +148,8 @@ export function IngredientsSection({
               />
             </div>
 
-            {/* Notes — col 10-11 */}
-            <div className="col-span-3 sm:col-span-2">
+            {/* Notes — col 9-10 */}
+            <div className="col-span-4 sm:col-span-2">
               <FormField
                 control={control}
                 name={`ingredients.${index}.notes`}
@@ -165,8 +167,32 @@ export function IngredientsSection({
               />
             </div>
 
-            {/* Remove — col 12 */}
-            <div className="col-span-1 flex items-center justify-end pt-0.5">
+            {/* Reorder + Remove — col 11-12 */}
+            <div className="col-span-2 sm:col-span-2 flex items-center justify-end gap-0.5">
+              <div className="flex flex-col">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Move up"
+                  disabled={index === 0}
+                  onClick={() => move(index, index - 1)}
+                  className="h-5 w-7 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                >
+                  <ArrowUp className="w-3 h-3" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Move down"
+                  disabled={index === fields.length - 1}
+                  onClick={() => move(index, index + 1)}
+                  className="h-5 w-7 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                >
+                  <ArrowDown className="w-3 h-3" />
+                </Button>
+              </div>
               <Button
                 type="button"
                 variant="ghost"

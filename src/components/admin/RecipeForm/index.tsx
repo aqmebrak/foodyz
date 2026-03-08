@@ -35,7 +35,7 @@ export function RecipeForm({
     defaultValues: { ...DEFAULT_FORM_VALUES, ...defaultValues },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control: form.control,
     name: "ingredients",
   });
@@ -97,6 +97,7 @@ export function RecipeForm({
           fields={fields}
           append={append}
           remove={remove}
+          move={move}
           ingredients={ingredientsList}
           units={units}
           onIngredientCreated={(ing) =>
