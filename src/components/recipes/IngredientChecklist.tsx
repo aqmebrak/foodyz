@@ -14,9 +14,10 @@ interface Ingredient {
 
 interface IngredientChecklistProps {
   ingredients: Ingredient[];
+  formatQty?: (n: number) => string;
 }
 
-export function IngredientChecklist({ ingredients }: IngredientChecklistProps) {
+export function IngredientChecklist({ ingredients, formatQty }: IngredientChecklistProps) {
   const [checked, setChecked] = useState<Set<string>>(new Set());
 
   function toggle(id: string) {
@@ -39,17 +40,16 @@ export function IngredientChecklist({ ingredients }: IngredientChecklistProps) {
       <ul className="space-y-2">
         {ingredients.map((item) => {
           const isChecked = checked.has(item.id);
-          const quantity =
-            item.quantity % 1 === 0
-              ? item.quantity.toString()
-              : item.quantity.toString();
+          const quantity = formatQty
+            ? formatQty(item.quantity)
+            : parseFloat(item.quantity.toFixed(2)).toString();
           const unitLabel = item.unit ? ` ${item.unit.abbreviation}` : "";
           return (
             <li key={item.id}>
               <button
                 onClick={() => toggle(item.id)}
                 className={cn(
-                  "w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors",
+                  "w-full flex items-start gap-3 p-3 rounded-lg text-left cursor-pointer transition-colors",
                   isChecked
                     ? "bg-emerald-50 text-gray-400"
                     : "hover:bg-gray-50 text-gray-800"

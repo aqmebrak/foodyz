@@ -30,7 +30,7 @@ export function Pagination({ page, totalPages, basePath }: PaginationProps) {
         href={makeHref(Math.max(1, page - 1))}
         aria-disabled={page === 1}
         className={cn(
-          "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors text-sm",
+          "cursor-pointer inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors text-sm",
           page === 1 && "pointer-events-none opacity-40"
         )}
         aria-label="Previous page"
@@ -40,7 +40,7 @@ export function Pagination({ page, totalPages, basePath }: PaginationProps) {
 
       {start > 1 && (
         <>
-          <Link href={makeHref(1)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors text-sm">
+          <Link href={makeHref(1)} className="cursor-pointer inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors text-sm">
             1
           </Link>
           {start > 2 && <span className="px-1 text-gray-400 text-sm">…</span>}
@@ -53,7 +53,7 @@ export function Pagination({ page, totalPages, basePath }: PaginationProps) {
           href={makeHref(p)}
           aria-current={p === page ? "page" : undefined}
           className={cn(
-            "inline-flex items-center justify-center w-9 h-9 rounded-lg border text-sm transition-colors",
+            "cursor-pointer inline-flex items-center justify-center w-9 h-9 rounded-lg border text-sm transition-colors",
             p === page
               ? "border-emerald-600 bg-emerald-600 text-white font-semibold"
               : "border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700"
@@ -66,7 +66,7 @@ export function Pagination({ page, totalPages, basePath }: PaginationProps) {
       {end < totalPages && (
         <>
           {end < totalPages - 1 && <span className="px-1 text-gray-400 text-sm">…</span>}
-          <Link href={makeHref(totalPages)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors text-sm">
+          <Link href={makeHref(totalPages)} className="cursor-pointer inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors text-sm">
             {totalPages}
           </Link>
         </>
@@ -76,7 +76,7 @@ export function Pagination({ page, totalPages, basePath }: PaginationProps) {
         href={makeHref(Math.min(totalPages, page + 1))}
         aria-disabled={page === totalPages}
         className={cn(
-          "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors text-sm",
+          "cursor-pointer inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors text-sm",
           page === totalPages && "pointer-events-none opacity-40"
         )}
         aria-label="Next page"

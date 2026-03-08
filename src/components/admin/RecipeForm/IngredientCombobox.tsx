@@ -94,7 +94,7 @@ export function IngredientCombobox({
           setCreating(false);
         }}
         className={cn(
-          "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring",
+          "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring",
           !selected && "text-muted-foreground"
         )}
       >
@@ -134,7 +134,7 @@ export function IngredientCombobox({
                 key={ing.id}
                 type="button"
                 onClick={() => handleSelect(ing.id)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left cursor-pointer hover:bg-gray-50 transition-colors"
               >
                 <Check
                   className={cn(
@@ -151,7 +151,7 @@ export function IngredientCombobox({
               <button
                 type="button"
                 onClick={() => startCreating(query)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 transition-colors border-t border-gray-100"
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 cursor-pointer hover:bg-emerald-50 transition-colors border-t border-gray-100"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 Add &ldquo;{query}&rdquo;
@@ -161,7 +161,7 @@ export function IngredientCombobox({
               <button
                 type="button"
                 onClick={() => startCreating()}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 transition-colors border-t border-gray-100"
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 cursor-pointer hover:bg-emerald-50 transition-colors border-t border-gray-100"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 New ingredient

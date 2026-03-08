@@ -181,6 +181,21 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 - [] **13.1** Like for the ingredients, add a tick step action to the recipe steps, so that when you are cooking you can tick off each step as you go. This state should be kept in local storage so that it persists across page reloads but is not shared between users (not stored in the database).
 - [] **13.2** add a mechanism that allow the user to divide or muliply the ingredient quantities based on the number of servings they want to make. This could be a Plus and Minus button next to the servings field in the recipe details page. When the user clicks on the Plus button, it multiplies the ingredient quantities by +1 one serving and updates the displayed quantities accordingly. When they click on the Minus button, it reduces the quantities by -1 serving and updates the displayed quantities accordingly. The original quantities should be stored as a reference so that the user can always go back to the default values.
 
+## Phase 14
+- [] **14.1** Add a button linking to the public recipe page from the admin recipe edit page
+- [] **14.2** If we are connected as admin and we visit a public recipe page, show an "Edit Recipe" button that links to the admin edit page for that recipe
+- [] **14.3** Under ingredients admin page: show the list of recipes that use each ingredient, with links to edit those recipes. This will help admins understand the impact of editing or deleting an ingredient.
+- [] **14.4** Admin edit recipe: when we create a new ingredient, the first click in the quantity input must clear the default value of 0
+- [] **14.5** Admin edit recipe: when we add a new ingredient to a recipe, the ingredient select input should be focused automatically to speed up data entry.
+- [] **14.6** Admin edit recipe: sort ingredient select list alphabetically and show the most used ingredients at the top of the list for easier access.
+- [] **14.6** Admin: avoid capitalizin the ingredient name when creating a new ingredient (for example "olive oil" instead of "Olive Oil") to avoid duplicates like "Olive Oil" and "olive oil" which are the same ingredient but will be treated as different ones by the system.
+
+
+## Phase 15 - 
+- [] **15.1** Admin reciped edit: add ingredients reordering functionality. This can be implemented using drag-and-drop or up/down buttons to allow admins to change the order of ingredients in a recipe. The new order should be saved in the database and reflected on the public recipe page.
+- [] **15.2** If we entered a quantity of 0 for an ingredient in the recipe form, we should hide the quantity on the public recipe page to avoid confusion (for example "Olive Oil" instead of "0 Olive Oil") since some ingredients may not require a specific quantity.
+
+
 ---
 
 ## Quick Reference
