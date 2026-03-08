@@ -93,7 +93,9 @@ export async function getAllCategories() {
 }
 
 export async function getAllIngredients() {
-  return db.ingredient.findMany({ orderBy: { name: "asc" } });
+  return db.ingredient.findMany({
+    orderBy: [{ recipes: { _count: "desc" } }, { name: "asc" }],
+  });
 }
 
 export async function getAllUnits() {

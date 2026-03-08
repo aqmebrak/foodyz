@@ -1,12 +1,13 @@
 "use client";
 
-import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Plus, Trash2, X } from "lucide-react";
+import Link from "next/link";
 import { Fragment, useState, useTransition } from "react";
 import type { Resolver } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
-import { createIngredient, deleteIngredient,updateIngredient } from "@/actions/ingredient";
+import { createIngredient, deleteIngredient, updateIngredient } from "@/actions/ingredient";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,12 +28,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { slugify } from "@/lib/utils";
-import { type IngredientFormValues,ingredientSchema } from "@/lib/validations/category";
+import { type IngredientFormValues, ingredientSchema } from "@/lib/validations/category";
+
+interface RecipeRef {
+  id: string;
+  title: string;
+}
 
 interface Ingredient {
   id: string;
   name: string;
   slug: string;
+  recipes: { recipe: RecipeRef }[];
 }
 
 interface IngredientsClientProps {
@@ -92,7 +99,9 @@ function IngredientForm({
                   <Input
                     {...field}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    placeholder="Olive oil"
+                    placeholder="olive oil"
+                    autoCapitalize="none"
+                    autoCorrect="off"
                   />
                 </FormControl>
                 <FormMessage />
@@ -130,6 +139,7 @@ function IngredientForm({
 
 export function IngredientsClient({ ingredients }: IngredientsClientProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
   async function handleCreate(data: IngredientFormValues) {
@@ -178,6 +188,7 @@ export function IngredientsClient({ ingredients }: IngredientsClientProps) {
               <TableRow className="bg-gray-50">
                 <TableHead>Name</TableHead>
                 <TableHead className="hidden sm:table-cell">Slug</TableHead>
+                <TableHead className="text-center w-24">Used in</TableHead>
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -188,6 +199,26 @@ export function IngredientsClient({ ingredients }: IngredientsClientProps) {
                     <TableCell className="font-medium">{ingredient.name}</TableCell>
                     <TableCell className="hidden sm:table-cell text-gray-500 text-sm font-mono">
                       {ingredient.slug}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {ingredient.recipes.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedId(expandedId === ingredient.id ? null : ingredient.id)
+                          }
+                          className="inline-flex items-center gap-1 text-sm text-emerald-700 hover:text-emerald-800 cursor-pointer"
+                        >
+                          {ingredient.recipes.length}
+                          {expandedId === ingredient.id ? (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          ) : (
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      ) : (
+                        <span className="text-sm text-gray-400">0</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -221,9 +252,32 @@ export function IngredientsClient({ ingredients }: IngredientsClientProps) {
                       </div>
                     </TableCell>
                   </TableRow>
+
+                  {/* Recipe usage list */}
+                  {expandedId === ingredient.id && ingredient.recipes.length > 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="bg-emerald-50/50 py-2 px-4">
+                        <p className="text-xs font-medium text-gray-500 mb-1.5">Used in:</p>
+                        <ul className="space-y-1">
+                          {ingredient.recipes.map(({ recipe }) => (
+                            <li key={recipe.id}>
+                              <Link
+                                href={`/admin/recipes/${recipe.id}`}
+                                className="text-sm text-emerald-700 hover:text-emerald-900 hover:underline"
+                              >
+                                {recipe.title}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </TableCell>
+                    </TableRow>
+                  )}
+
+                  {/* Edit form */}
                   {editingId === ingredient.id && (
                     <TableRow key={`${ingredient.id}-edit`}>
-                      <TableCell colSpan={3} className="bg-gray-50 p-4">
+                      <TableCell colSpan={4} className="bg-gray-50 p-4">
                         <IngredientForm
                           defaultValues={{
                             name: ingredient.name,

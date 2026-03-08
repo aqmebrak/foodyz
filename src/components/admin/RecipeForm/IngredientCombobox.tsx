@@ -14,6 +14,8 @@ interface IngredientComboboxProps {
   onChange: (id: string) => void;
   ingredients: Ingredient[];
   onIngredientCreated: (ingredient: Ingredient) => void;
+  autoOpen?: boolean;
+  onOpen?: () => void;
 }
 
 export function IngredientCombobox({
@@ -21,6 +23,8 @@ export function IngredientCombobox({
   onChange,
   ingredients,
   onIngredientCreated,
+  autoOpen,
+  onOpen,
 }: IngredientComboboxProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -43,6 +47,14 @@ export function IngredientCombobox({
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  useEffect(() => {
+    if (autoOpen) {
+      setOpen(true);
+      onOpen?.();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpen]);
 
   const filtered = query
     ? ingredients.filter((i) => normalizeStr(i.name).includes(normalizeStr(query)))
@@ -178,6 +190,8 @@ export function IngredientCombobox({
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                 placeholder="Ingredient name"
+                autoCapitalize="none"
+                autoCorrect="off"
                 className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-emerald-500"
               />
               {createError && <p className="text-xs text-red-500">{createError}</p>}

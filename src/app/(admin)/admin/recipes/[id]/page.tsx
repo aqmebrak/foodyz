@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -56,12 +56,22 @@ export default async function EditRecipePage({ params }: Props) {
   return (
     <div className="p-6 sm:p-8 max-w-3xl">
       <div className="mb-6">
-        <Button variant="ghost" size="sm" asChild className="-ml-2 mb-3">
-          <Link href="/admin/recipes">
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Recipes
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2 mb-3">
+          <Button variant="ghost" size="sm" asChild className="-ml-2">
+            <Link href="/admin/recipes">
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Recipes
+            </Link>
+          </Button>
+          {recipe.published && (
+            <Button variant="ghost" size="sm" asChild className="text-emerald-600 hover:text-emerald-700">
+              <Link href={`/recipes/${recipe.slug}`} target="_blank">
+                <ExternalLink className="w-4 h-4 mr-1" />
+                View on site
+              </Link>
+            </Button>
+          )}
+        </div>
         <h1 className="text-2xl font-bold text-gray-900">Edit recipe</h1>
         <p className="text-sm text-gray-500 mt-0.5">{recipe.title}</p>
       </div>

@@ -6,7 +6,14 @@ import { db } from "@/lib/db";
 import { type IngredientFormValues,ingredientSchema } from "@/lib/validations/category";
 
 export async function getIngredients() {
-  return db.ingredient.findMany({ orderBy: { name: "asc" } });
+  return db.ingredient.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      recipes: {
+        include: { recipe: { select: { id: true, title: true } } },
+      },
+    },
+  });
 }
 
 export async function createIngredient(data: IngredientFormValues) {

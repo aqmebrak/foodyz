@@ -1,4 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import type { Control, UseFieldArrayReturn } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,13 @@ export function IngredientsSection({
   units,
   onIngredientCreated,
 }: IngredientsSectionProps) {
+  const [autoOpenIndex, setAutoOpenIndex] = useState<number | null>(null);
+
+  function handleAppend() {
+    append({ ingredientId: "", quantity: 0, unitId: "", notes: "" });
+    setAutoOpenIndex(fields.length);
+  }
+
   return (
     <section className="space-y-4">
       <h2 className="text-base font-semibold text-gray-900 border-b pb-2">
@@ -71,6 +79,8 @@ export function IngredientsSection({
                         onChange={field.onChange}
                         ingredients={ingredients}
                         onIngredientCreated={onIngredientCreated}
+                        autoOpen={autoOpenIndex === index}
+                        onOpen={() => setAutoOpenIndex(null)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -92,6 +102,9 @@ export function IngredientsSection({
                         step="0.01"
                         placeholder="Qty"
                         {...field}
+                        onFocus={(e) => {
+                          if (Number(e.target.value) === 0) e.target.select();
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -173,9 +186,7 @@ export function IngredientsSection({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() =>
-          append({ ingredientId: "", quantity: 0, unitId: "", notes: "" })
-        }
+        onClick={handleAppend}
       >
         <Plus className="w-4 h-4 mr-1.5" />
         Add ingredient

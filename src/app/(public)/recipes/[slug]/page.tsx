@@ -1,4 +1,4 @@
-import { BookOpen, ChefHat, Clock, ShoppingBasket, Timer, Users } from "lucide-react";
+import { BookOpen, ChefHat, Clock, Pencil, ShoppingBasket, Timer, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import type { Difficulty } from "@prisma/client";
 import { getRecipeBySlug } from "@/actions/recipe";
 import { RecipeClientContent } from "@/components/recipes/RecipeClientContent";
 import { Breadcrumbs } from "@/components/shared/Breadcrumbs";
+import { auth } from "@/lib/auth";
 import { formatDuration } from "@/lib/utils";
 
 interface Props {
@@ -40,9 +41,11 @@ const difficultyLabels: Record<Difficulty, string> = {
 
 export default async function RecipeDetailPage({ params }: Props) {
   const { slug } = await params;
-  const recipe = await getRecipeBySlug(slug);
+  const [recipe, session] = await Promise.all([getRecipeBySlug(slug), auth()]);
 
   if (!recipe) notFound();
+
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const steps = recipe.instructions
     .split(/\n\n+/)
@@ -173,6 +176,17 @@ export default async function RecipeDetailPage({ params }: Props) {
           </a>
         </div>
       </div>
+
+      {/* Admin edit shortcut */}
+      {isAdmin && (
+        <Link
+          href={`/admin/recipes/${recipe.id}`}
+          className="fixed top-20 right-4 z-50 flex items-center gap-1.5 bg-gray-900/80 hover:bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
+        >
+          <Pencil className="w-3 h-3" />
+          Edit recipe
+        </Link>
+      )}
     </>
   );
 }
