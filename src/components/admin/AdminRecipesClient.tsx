@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ExternalLink, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -26,6 +26,7 @@ import type { Category, Ingredient, Unit } from "./RecipeForm/types";
 interface Recipe {
   id: string;
   title: string;
+  slug: string;
   published: boolean;
   difficulty: string;
   prepTime: number;
@@ -242,7 +243,7 @@ export function AdminRecipesClient({
                     Difficulty
                   </TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="w-20 text-right">Actions</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -289,11 +290,6 @@ export function AdminRecipesClient({
                         className="flex items-center justify-end gap-1"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/admin/recipes/${recipe.id}`}>
-                            <Pencil className="w-4 h-4" />
-                          </Link>
-                        </Button>
                         <ConfirmDialog
                           title="Delete recipe?"
                           description={`"${recipe.title}" will be permanently deleted.`}
@@ -328,9 +324,19 @@ export function AdminRecipesClient({
                 <p className="text-sm text-gray-500 mt-0.5">{selectedRecipe.title}</p>
               )}
             </div>
-            <Button variant="ghost" size="icon" onClick={closePanel}>
-              <X className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              {selectedRecipe?.published && (
+                <Button variant="ghost" size="sm" asChild className="text-emerald-600 hover:text-emerald-700">
+                  <Link href={`/recipes/${selectedRecipe.slug}`} target="_blank">
+                    <ExternalLink className="w-4 h-4 mr-1" />
+                    View on site
+                  </Link>
+                </Button>
+              )}
+              <Button variant="ghost" size="icon" onClick={closePanel}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           {loadingPanel ? (
