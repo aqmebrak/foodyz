@@ -5,6 +5,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/recipes", label: "Recipes" },
   { href: "/categories", label: "Categories" },
+  { href: "/flan", label: "🍮" },
 ];
 
 export function Header() {

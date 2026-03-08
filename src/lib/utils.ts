@@ -33,3 +33,21 @@ export function formatDuration(minutes: number): string {
   const m = minutes % 60;
   return m === 0 ? `${h}h` : `${h}h ${m}min`;
 }
+
+/**
+ * Extracts [lat, lng] from a full Google Maps URL.
+ * Supports: /@lat,lng,zoom  |  ?q=lat,lng  |  /place/name/lat,lng
+ * Returns null if coordinates cannot be extracted.
+ */
+export function parseGoogleMapsUrl(url: string): [number, number] | null {
+  const atMatch = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (atMatch) return [parseFloat(atMatch[1]), parseFloat(atMatch[2])];
+
+  const qMatch = url.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (qMatch) return [parseFloat(qMatch[1]), parseFloat(qMatch[2])];
+
+  const placeMatch = url.match(/\/place\/[^/]+\/(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (placeMatch) return [parseFloat(placeMatch[1]), parseFloat(placeMatch[2])];
+
+  return null;
+}

@@ -27,4 +27,7 @@ This wil be stricly for my personal use.
 ## Phase 2 - Advanced view
 - [] **2.1** On the "/flan" page, add a filter to only show flans with a rating above a certain threshold.
 - [] **2.2** On the "/flan" page, add a search bar to search for flans by name or location
-- [] **2.3** On the backoffice, add a filter to only show flans that have been tried.
+- [] **2.3** On the "/flan" page, add a filter to only show flans that have been tried.
+- [] **2.4** Display different markers colors depending on if tried or not
+
+

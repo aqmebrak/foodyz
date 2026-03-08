@@ -144,3 +144,26 @@ model RecipeImage {
   recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 }
+
+model PastryLocation {
+  id        String   @id @default(cuid())
+  name      String
+  mapsUrl   String   // full Google Maps URL
+  flans     Flan[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Flan {
+  id         String          @id @default(cuid())
+  name       String
+  locationId String
+  location   PastryLocation  @relation(fields: [locationId], references: [id])
+  photoUrl   String?         // Vercel Blob URL
+  rating     Float           @default(0)
+  tried      Boolean         @default(false)
+  triedAt    DateTime?
+  comment    String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}

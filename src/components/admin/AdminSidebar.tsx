@@ -2,6 +2,7 @@
 
 import {
   BookOpen,
+  Cake,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin/categories", label: "Categories", icon: Tag, exact: false },
   { href: "/admin/ingredients", label: "Ingredients", icon: Package, exact: false },
   { href: "/admin/units", label: "Units", icon: Scale, exact: false },
+  { href: "/admin/flans", label: "Flans 🍮", icon: Cake, exact: false },
 ];
 
 function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
