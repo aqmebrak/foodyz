@@ -196,6 +196,14 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 - [] **15.2** If we entered a quantity of 0 for an ingredient in the recipe form, we should hide the quantity on the public recipe page to avoid confusion (for example "Olive Oil" instead of "0 Olive Oil") since some ingredients may not require a specific quantity.
 
 
+## Phase 16 - Categorization with tags
+- [] **16.0** Remove the category field, we will only add tags to recipes it is easier to maintain, no need for a separate entity.
+- [] **16.1** Add a new field "tags" to the recipe model, which will be an array of strings. This will allow us to add multiple tags to each recipe for better categorization and filtering.
+- [] **16.2** Update the recipe form in the admin panel to include a multi-select input for tags, allowing admins to add or remove tags for each recipe. The multi-select should allow for both selecting from existing tags and creating new tags on the fly.
+- [] **16.3** On the public recipes page, add a filter component that allows users to filter recipes by tags. This will help users find recipes that match their interests or dietary preferences (e.g., "vegan", "gluten-free", "quick meals").
+- [] **16.4** Update the recipe detail page to display the tags associated with each recipe, allowing users to see at a glance the key attributes of the recipe and click on tags to view other recipes with the same tag.
+
+
 ---
 
 ## Quick Reference

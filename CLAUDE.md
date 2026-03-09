@@ -1,4 +1,5 @@
 - In all interactions, be extremely concise and sacrifice grammar for the sake of concision.
+- if available use Serena MCP as your semantic code retrieval and editing tools. 
 
 
 ## Project Overview
@@ -9,14 +10,15 @@ Foodyz is a recipe website with a public-facing browsing experience and a protec
 
 ## Tech Stack
 
-- **Next.js 15** — App Router
+- **Next.js 16** — App Router, Turbopack in dev
 - **React 19**
 - **TypeScript** — strict mode enabled
 - **shadcn/ui** — component library (primitives owned by the project)
 - **TailwindCSS v4**
-- **Prisma ORM** — database access layer
-- **PostgreSQL** — primary database
-- **Auth.js v5** — admin route protection
+- **Prisma 6** — database access layer
+- **PostgreSQL** — primary database (Vercel Postgres via Prisma Accelerate)
+- **Auth.js v5** (next-auth beta) — admin route protection
+- **Vercel Blob** — photo/image storage
 - **pnpm** — package manager (always use pnpm, never npm or yarn)
 - **Vercel** — deployment target
 
@@ -42,53 +44,68 @@ foodyz/
 │       ├── recipes/
 │       └── categories/
 └── src/
-├───| middleware.ts                 # protects /admin/* routes via Auth.js
+    ├── proxy.ts                  # Next.js 16 proxy (replaces middleware.ts) — protects /admin/*
     ├── app/
     │   ├── layout.tsx            # Root layout (html, body, fonts)
-    │   ├── page.tsx              # Homepage
     │   ├── globals.css
+    │   ├── login/page.tsx
+    │   ├── robots.ts
+    │   ├── sitemap.ts
+    │   ├── api/auth/[...nextauth]/route.ts
     │   ├── (public)/             # Public-facing route group
+    │   │   ├── page.tsx          # Homepage
+    │   │   ├── layout.tsx
     │   │   ├── recipes/
     │   │   │   ├── page.tsx      # /recipes — browse all
     │   │   │   └── [slug]/
-    │   │   │       └── page.tsx  # /recipes/pasta-carbonara
-    │   │   └── categories/
-    │   │       └── [slug]/
-    │   │           └── page.tsx
+    │   │   │       └── page.tsx  # /recipes/[slug]
+    │   │   ├── categories/
+    │   │   │   └── [slug]/
+    │   │   │       └── page.tsx
+    │   │   └── flan/
+    │   │       └── page.tsx      # /flan — personal flan tasting map
     │   └── (admin)/              # Backoffice route group
-    │       ├── layout.tsx        # Admin shell layout (sidebar, nav)
+    │       ├── layout.tsx        # Admin shell layout (sidebar)
     │       └── admin/
     │           ├── page.tsx      # Dashboard
     │           ├── recipes/
-    │           │   ├── page.tsx           # List recipes
-    │           │   ├── new/page.tsx       # Create recipe
-    │           │   └── [id]/
-    │           │       └── page.tsx       # Edit recipe
-    │           ├── categories/
-    │           │   └── page.tsx
-    │           └── ingredients/
-    │               └── page.tsx
+    │           │   ├── page.tsx
+    │           │   ├── new/page.tsx
+    │           │   └── [id]/page.tsx
+    │           ├── categories/page.tsx
+    │           ├── ingredients/page.tsx
+    │           ├── units/page.tsx
+    │           └── flans/page.tsx
     ├── components/
     │   ├── ui/                   # shadcn/ui primitives — do not edit directly
-    │   ├── layout/               # Header, Footer, Sidebar, Nav
-    │   ├── recipes/              # RecipeCard, RecipeGrid, RecipeForm, etc.
-    │   ├── admin/                # DataTable, ConfirmDialog, AdminNav
+    │   ├── layout/               # Header, Footer
+    │   ├── recipes/              # RecipeCard, RecipeGrid, RecipeClientContent, IngredientChecklist
+    │   ├── admin/                # AdminSidebar, FlansClient, CategoriesClient, IngredientsClient,
+    │   │                         # UnitsClient, AdminRecipesClient, ConfirmDialog
+    │   │                         # RecipeForm/ (sub-components + IngredientCombobox)
+    │   ├── flan/                 # FlanMap, FlanPageClient, FlanMapWrapper, LocationCombobox
     │   └── shared/               # Breadcrumbs, Pagination, SearchBar
     ├── lib/
     │   ├── db.ts                 # Prisma singleton — only DB entry point
-    │   ├── auth.ts               # Auth.js v5 config
-    │   ├── utils.ts              # cn(), slugify(), formatDuration()
+    │   ├── auth.ts               # Full Auth.js config (Node.js, Credentials + Prisma)
+    │   ├── auth.config.ts        # Edge-safe auth config (no DB) — used by proxy.ts
+    │   ├── rate-limit.ts
+    │   ├── utils.ts              # cn(), slugify(), formatDuration(), parseGoogleMapsUrl()
     │   └── validations/
-    │       ├── recipe.ts         # Zod schemas for recipes
+    │       ├── recipe.ts
     │       └── category.ts
     ├── actions/                  # Server Actions (all mutations live here)
-    │   ├── recipe.ts             # createRecipe, updateRecipe, deleteRecipe
+    │   ├── recipe.ts
     │   ├── category.ts
-    │   └── ingredient.ts
-    ├── hooks/                    # Client-side custom hooks
-    │   └── use-debounce.ts
+    │   ├── ingredient.ts
+    │   ├── unit.ts
+    │   ├── flan.ts               # Flan + PastryLocation CRUD, photo upload via Vercel Blob
+    │   └── auth.ts
+    ├── hooks/
+    │   ├── use-debounce.ts
+    │   └── use-wake-lock.ts      # Screen Wake Lock API for recipe pages
     └── types/
-        └── index.ts              # Shared TypeScript types
+        └── index.ts
 ```
 
 ---
@@ -124,6 +141,8 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - **`Unit`** → standard units for ingredient quantities, with conversion factors for scaling recipes
 - **`Tag`** → linked via `RecipeTag` junction (many-to-many)
 - **`User`** with `Role` enum (`USER` / `ADMIN`) for Auth.js
+- **`PastryLocation`** → pastry shop with `name` + `mapsUrl` (full Google Maps URL); has many `Flan`
+- **`Flan`** → belongs to `PastryLocation`; has `name`, `rating`, `tried`, `triedAt`, `photoUrl` (Vercel Blob), `comment`
 
 ### Key Fields
 
@@ -143,7 +162,8 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - **Validate with Zod first.** Every Server Action must validate its inputs with a Zod schema before calling Prisma.
 - **Revalidate after mutations.** Call `revalidatePath()` or `revalidateTag()` after every create/update/delete.
 - **Form state with hooks.** Use `useFormState` + `useFormStatus` for loading and error states in Client Components.
-- **Auth at the middleware level.** `middleware.ts` protects all `/admin/*` routes. Never put auth checks inside individual admin pages.
+- **Auth at the proxy level.** `src/proxy.ts` (Next.js 16 rename of `middleware.ts`) protects all `/admin/*` routes. Auth config is split: `auth.config.ts` (Edge-safe, no DB) used by proxy; `auth.ts` (Node.js, Credentials + Prisma) used by server components. Never put auth checks inside individual admin pages.
+- **Leaflet maps in client components only.** Use `next/dynamic(..., { ssr: false })` inside a `"use client"` file — not in Server Components.
 
 ---
 
@@ -184,6 +204,9 @@ DATABASE_URL=      # PostgreSQL connection string (pooled — used at runtime)
 DIRECT_URL=        # Direct (non-pooled) connection string (used by Prisma migrations)
 NEXTAUTH_SECRET=   # Random secret for Auth.js session signing
 NEXTAUTH_URL=      # Full base URL — http://localhost:3000 locally
+ADMIN_EMAIL=       # Seeded admin account email
+ADMIN_PASSWORD=    # Seeded admin account password
+BLOB_READ_WRITE_TOKEN=  # Vercel Blob token for photo uploads
 ```
 
 ---

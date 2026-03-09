@@ -62,10 +62,10 @@ test.describe("Recipe creation form", () => {
       .getByPlaceholder(/Describe each step/)
       .fill("Step 1: Boil water.\n\nStep 2: Add pasta.\n\nStep 3: Serve.");
 
-    // Add one ingredient — after clicking, row has select at index 2 (0=category,1=difficulty,2=ingredient)
+    // Add one ingredient — combobox auto-opens after clicking "Add ingredient"
     await page.getByRole("button", { name: "Add ingredient" }).click();
-    await page.getByRole("combobox").filter({ hasText: "Ingredient" }).click();
-    await page.getByRole("option").first().click();
+    // Ingredient options are <button> elements containing a check icon (lucide-check)
+    await page.locator("button:has(svg.lucide-check)").first().click();
     await page.getByPlaceholder("Qty").fill("100");
 
     await page.getByRole("button", { name: "Create recipe" }).first().click();
@@ -76,15 +76,20 @@ test.describe("Recipe creation form", () => {
 
   test("add and remove ingredient row", async ({ page }) => {
     await page.getByRole("button", { name: "Add ingredient" }).click();
+    // The combobox auto-opens and its z-50 dropdown extends over the button —
+    // dismiss it by clicking the page heading before the second click
+    await page.getByRole("heading", { name: "New recipe" }).click();
     await page.getByRole("button", { name: "Add ingredient" }).click();
+    await page.getByRole("heading", { name: "New recipe" }).click();
 
-    expect(await page.getByPlaceholder("Qty").count()).toBe(2);
+    // Use retrying assertion — React re-render may not be done instantly
+    await expect(page.getByPlaceholder("Qty")).toHaveCount(2);
 
     // Remove first row via its aria-labelled button
     await page
       .getByRole("button", { name: "Remove ingredient" })
       .first()
       .click();
-    expect(await page.getByPlaceholder("Qty").count()).toBe(1);
+    await expect(page.getByPlaceholder("Qty")).toHaveCount(1);
   });
 });
