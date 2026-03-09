@@ -13,7 +13,7 @@ interface RecipeGridProps {
     cookTime: number;
     servings: number;
     difficulty: Difficulty;
-    category: { name: string; slug: string };
+    tags: Array<{ tag: { name: string; slug: string } }>;
   }>;
   emptyMessage?: string;
 }

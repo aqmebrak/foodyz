@@ -86,22 +86,19 @@ export default async function RecipeDetailPage({ params }: Props) {
 
         {/* Header */}
         <header className="mb-6">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <Link
-              href={`/categories/${recipe.category.slug}`}
-              className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
-            >
-              {recipe.category.name}
-            </Link>
-            {recipe.tags.map(({ tag }) => (
-              <span
-                key={tag.slug}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-              >
-                {tag.name}
-              </span>
-            ))}
-          </div>
+          {recipe.tags.length > 0 && (
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              {recipe.tags.map(({ tag }) => (
+                <Link
+                  key={tag.slug}
+                  href={`/recipes?tag=${encodeURIComponent(tag.name)}`}
+                  className="text-xs bg-gray-100 hover:bg-emerald-100 text-gray-600 hover:text-emerald-700 px-2 py-0.5 rounded-full transition-colors"
+                >
+                  {tag.name}
+                </Link>
+              ))}
+            </div>
+          )}
 
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">
             {recipe.title}

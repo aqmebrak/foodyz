@@ -9,7 +9,6 @@ export const DEFAULT_FORM_VALUES = {
   slug: "",
   description: "",
   featuredImage: "",
-  categoryId: "",
   difficulty: "EASY" as const,
   prepTime: 15,
   cookTime: 30,
@@ -17,4 +16,5 @@ export const DEFAULT_FORM_VALUES = {
   published: false,
   instructions: "",
   ingredients: [],
+  tags: [],
 };

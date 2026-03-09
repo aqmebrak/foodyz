@@ -1,8 +1,9 @@
 import type { RecipeFormValues } from "@/lib/validations/recipe";
 
-export interface Category {
+export interface Tag {
   id: string;
   name: string;
+  slug: string;
 }
 
 export interface Ingredient {
@@ -17,7 +18,7 @@ export interface Unit {
 }
 
 export interface RecipeFormProps {
-  categories: Category[];
+  tags: Tag[];
   ingredients: Ingredient[];
   units: Unit[];
   defaultValues?: Partial<RecipeFormValues>;

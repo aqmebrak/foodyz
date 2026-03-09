@@ -2,15 +2,15 @@ import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { getAllCategories, getAllIngredients, getAllUnits } from "@/actions/recipe";
+import { getAllIngredients, getAllTags, getAllUnits } from "@/actions/recipe";
 import { RecipeForm } from "@/components/admin/RecipeForm";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "New Recipe — Admin" };
 
 export default async function NewRecipePage() {
-  const [categories, ingredients, units] = await Promise.all([
-    getAllCategories(),
+  const [tags, ingredients, units] = await Promise.all([
+    getAllTags(),
     getAllIngredients(),
     getAllUnits(),
   ]);
@@ -28,7 +28,7 @@ export default async function NewRecipePage() {
       </div>
 
       <RecipeForm
-        categories={categories}
+        tags={tags}
         ingredients={ingredients}
         units={units}
       />

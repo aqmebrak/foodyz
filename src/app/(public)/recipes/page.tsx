@@ -8,7 +8,12 @@ export const metadata: Metadata = {
   description: "Browse all published recipes.",
 };
 
-export default async function RecipesPage() {
+interface Props {
+  searchParams: Promise<{ tag?: string }>;
+}
+
+export default async function RecipesPage({ searchParams }: Props) {
+  const { tag } = await searchParams;
   const allRecipes = await getPublishedRecipes();
 
   return (
@@ -20,7 +25,7 @@ export default async function RecipesPage() {
         </p>
       </div>
 
-      <RecipesClient allRecipes={allRecipes} />
+      <RecipesClient allRecipes={allRecipes} initialTag={tag} />
     </div>
   );
 }

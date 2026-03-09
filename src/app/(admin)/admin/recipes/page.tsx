@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 
-import { getAllCategories, getAllIngredients, getAllRecipesAdmin, getAllUnits } from "@/actions/recipe";
+import { getAllIngredients, getAllRecipesAdmin, getAllTags, getAllUnits } from "@/actions/recipe";
 import { AdminRecipesClient } from "@/components/admin/AdminRecipesClient";
 
 export const metadata: Metadata = { title: "Recipes — Admin" };
 
 export default async function AdminRecipesPage() {
-  const [recipes, categories, ingredients, units] = await Promise.all([
+  const [recipes, tags, ingredients, units] = await Promise.all([
     getAllRecipesAdmin(),
-    getAllCategories(),
+    getAllTags(),
     getAllIngredients(),
     getAllUnits(),
   ]);
@@ -16,7 +16,7 @@ export default async function AdminRecipesPage() {
   return (
     <AdminRecipesClient
       recipes={recipes}
-      categories={categories}
+      tags={tags}
       ingredients={ingredients}
       units={units}
     />

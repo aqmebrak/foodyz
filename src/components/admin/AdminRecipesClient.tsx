@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ExternalLink, Loader2, Plus, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -21,7 +21,7 @@ import {
 import { cn, normalizeStr } from "@/lib/utils";
 import type { RecipeFormValues } from "@/lib/validations/recipe";
 
-import type { Category, Ingredient, Unit } from "./RecipeForm/types";
+import type { Ingredient, Tag, Unit } from "./RecipeForm/types";
 
 interface Recipe {
   id: string;
@@ -32,7 +32,7 @@ interface Recipe {
   prepTime: number;
   cookTime: number;
   servings: number;
-  category: { name: string };
+  tags: Array<{ tag: { name: string; slug: string } }>;
 }
 
 type SelectedRecipe = NonNullable<Awaited<ReturnType<typeof getRecipeForAdmin>>>;
@@ -52,7 +52,6 @@ function buildDefaultValues(recipe: SelectedRecipe): Partial<RecipeFormValues> {
     slug: recipe.slug,
     description: recipe.description ?? "",
     featuredImage: recipe.featuredImage ?? "",
-    categoryId: recipe.categoryId,
     difficulty: recipe.difficulty,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
@@ -65,24 +64,25 @@ function buildDefaultValues(recipe: SelectedRecipe): Partial<RecipeFormValues> {
       quantity: ri.quantity,
       notes: ri.notes ?? "",
     })),
+    tags: recipe.tags.map((rt) => rt.tag.name),
   };
 }
 
 interface AdminRecipesClientProps {
   recipes: Recipe[];
-  categories: Category[];
+  tags: Tag[];
   ingredients: Ingredient[];
   units: Unit[];
 }
 
 export function AdminRecipesClient({
   recipes,
-  categories,
+  tags,
   ingredients,
   units,
 }: AdminRecipesClientProps) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
+  const [selectedTag, setSelectedTag] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [status, setStatus] = useState("");
   const [maxPrepTime, setMaxPrepTime] = useState("");
@@ -93,13 +93,13 @@ export function AdminRecipesClient({
   const [selectedRecipe, setSelectedRecipe] = useState<SelectedRecipe | null>(null);
   const [loadingPanel, setLoadingPanel] = useState(false);
 
-  const uniqueCategories = [
-    ...new Map(recipes.map((r) => [r.category.name, r.category.name])).values(),
+  const uniqueTags = [
+    ...new Set(recipes.flatMap((r) => r.tags.map((rt) => rt.tag.name))),
   ].sort();
 
   const filtered = recipes.filter((r) => {
     if (query.trim() && !normalizeStr(r.title).includes(normalizeStr(query))) return false;
-    if (category && r.category.name !== category) return false;
+    if (selectedTag && !r.tags.some((rt) => rt.tag.name === selectedTag)) return false;
     if (difficulty && r.difficulty !== difficulty) return false;
     if (status === "published" && !r.published) return false;
     if (status === "draft" && r.published) return false;
@@ -110,7 +110,7 @@ export function AdminRecipesClient({
   });
 
   const hasFilters =
-    query || category || difficulty || status || maxPrepTime || maxCookTime || maxServings;
+    query || selectedTag || difficulty || status || maxPrepTime || maxCookTime || maxServings;
 
   async function handleRowClick(id: string) {
     if (selectedId === id) {
@@ -156,13 +156,13 @@ export function AdminRecipesClient({
           <SearchBar placeholder="Filter by title…" onSearch={setQuery} className="max-w-xs" />
           <select
             className={selectClass}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={selectedTag}
+            onChange={(e) => setSelectedTag(e.target.value)}
           >
-            <option value="">All categories</option>
-            {uniqueCategories.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            <option value="">All tags</option>
+            {uniqueTags.map((t) => (
+              <option key={t} value={t}>
+                {t}
               </option>
             ))}
           </select>
@@ -237,7 +237,7 @@ export function AdminRecipesClient({
                 <TableRow className="bg-gray-50">
                   <TableHead>Title</TableHead>
                   <TableHead className={cn("hidden", !selectedId && "sm:table-cell")}>
-                    Category
+                    Tags
                   </TableHead>
                   <TableHead className={cn("hidden", !selectedId && "md:table-cell")}>
                     Difficulty
@@ -263,7 +263,19 @@ export function AdminRecipesClient({
                         !selectedId && "sm:table-cell"
                       )}
                     >
-                      {recipe.category.name}
+                      <div className="flex flex-wrap gap-1">
+                        {recipe.tags.slice(0, 3).map(({ tag }) => (
+                          <span
+                            key={tag.slug}
+                            className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full"
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                        {recipe.tags.length > 3 && (
+                          <span className="text-xs text-gray-400">+{recipe.tags.length - 3}</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className={cn("hidden", !selectedId && "md:table-cell")}>
                       <span
@@ -346,7 +358,7 @@ export function AdminRecipesClient({
           ) : selectedRecipe ? (
             <RecipeForm
               key={selectedId}
-              categories={categories}
+              tags={tags}
               ingredients={ingredients}
               units={units}
               defaultValues={buildDefaultValues(selectedRecipe)}

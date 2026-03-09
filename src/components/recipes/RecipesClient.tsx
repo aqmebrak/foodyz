@@ -18,30 +18,48 @@ type Recipe = {
   cookTime: number;
   servings: number;
   difficulty: Difficulty;
-  category: { name: string; slug: string };
+  tags: Array<{ tag: { name: string; slug: string } }>;
 };
 
 const PER_PAGE = 24;
 
-export function RecipesClient({ allRecipes }: { allRecipes: Recipe[] }) {
+interface RecipesClientProps {
+  allRecipes: Recipe[];
+  initialTag?: string;
+}
+
+export function RecipesClient({ allRecipes, initialTag = "" }: RecipesClientProps) {
   const [query, setQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState(initialTag);
   const [page, setPage] = useState(1);
 
-  const filtered = query.trim()
-    ? allRecipes.filter(
-        (r) =>
-          normalizeStr(r.title).includes(normalizeStr(query)) ||
-          normalizeStr(r.description ?? "").includes(normalizeStr(query))
-      )
-    : allRecipes;
+  const uniqueTags = [
+    ...new Set(allRecipes.flatMap((r) => r.tags.map((rt) => rt.tag.name))),
+  ].sort();
+
+  const filtered = allRecipes.filter((r) => {
+    if (
+      query.trim() &&
+      !normalizeStr(r.title).includes(normalizeStr(query)) &&
+      !normalizeStr(r.description ?? "").includes(normalizeStr(query))
+    )
+      return false;
+    if (selectedTag && !r.tags.some((rt) => rt.tag.name === selectedTag)) return false;
+    return true;
+  });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const safePage = Math.min(page, totalPages);
   const paged = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
+  function handleTagChange(tag: string) {
+    setSelectedTag(tag);
+    setPage(1);
+  }
+
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-6 flex flex-wrap gap-3 items-center">
         <SearchBar
           placeholder="Search recipes…"
           onSearch={(q) => {
@@ -50,12 +68,44 @@ export function RecipesClient({ allRecipes }: { allRecipes: Recipe[] }) {
           }}
           className="max-w-sm"
         />
+
+        {uniqueTags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleTagChange("")}
+              className={cn(
+                "text-sm px-3 py-1 rounded-full border transition-colors",
+                selectedTag === ""
+                  ? "bg-emerald-600 text-white border-emerald-600"
+                  : "border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700"
+              )}
+            >
+              All
+            </button>
+            {uniqueTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => handleTagChange(tag === selectedTag ? "" : tag)}
+                className={cn(
+                  "text-sm px-3 py-1 rounded-full border transition-colors",
+                  selectedTag === tag
+                    ? "bg-emerald-600 text-white border-emerald-600"
+                    : "border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700"
+                )}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <RecipeGrid
         recipes={paged}
         emptyMessage={
-          query ? `No recipes match "${query}".` : "No recipes published yet."
+          query || selectedTag
+            ? `No recipes match${selectedTag ? ` the tag "${selectedTag}"` : ""}${query ? ` "${query}"` : ""}.`
+            : "No recipes published yet."
         }
       />
 

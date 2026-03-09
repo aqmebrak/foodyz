@@ -459,10 +459,6 @@ async function main() {
   // -------------------------------------------------------------------------
   // Legacy placeholder recipes (kept for DB compatibility)
   // -------------------------------------------------------------------------
-  const desserts = categoryMap["desserts"];
-  const salades = categoryMap["salades"];
-  const plats = categoryMap["plats"];
-
   const gateau = await db.recipe.upsert({
     where: { slug: "gateau-au-chocolat" },
     update: {},
@@ -485,7 +481,6 @@ async function main() {
       servings: 8,
       difficulty: Difficulty.MEDIUM,
       published: true,
-      categoryId: desserts.id,
     },
   });
   await db.recipeIngredient.createMany({
@@ -526,7 +521,6 @@ async function main() {
       servings: 4,
       difficulty: Difficulty.EASY,
       published: true,
-      categoryId: salades.id,
     },
   });
   await db.recipeIngredient.createMany({
@@ -570,7 +564,6 @@ async function main() {
       servings: 4,
       difficulty: Difficulty.MEDIUM,
       published: true,
-      categoryId: plats.id,
     },
   });
   await db.recipeIngredient.createMany({
@@ -600,8 +593,6 @@ async function main() {
 
   for (let i = 0; i < rawData.length; i++) {
     const r = rawData[i];
-    const categorySlug = getCategorySlug(i);
-    const category = categoryMap[categorySlug];
     const slug = slugify(r.name);
 
     const recipe = await db.recipe.upsert({
@@ -617,7 +608,6 @@ async function main() {
         servings: r.servings,
         difficulty: getDifficulty(r.prepTime, r.cookTime),
         published: true,
-        categoryId: category.id,
       },
     });
 

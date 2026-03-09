@@ -19,15 +19,13 @@ import {
 import { Switch } from "@/components/ui/switch";
 import type { RecipeFormValues } from "@/lib/validations/recipe";
 
-import type { Category } from "./types";
 import { difficultyOptions } from "./utils";
 
 interface DetailsSectionProps {
   control: Control<RecipeFormValues>;
-  categories: Category[];
 }
 
-export function DetailsSection({ control, categories }: DetailsSectionProps) {
+export function DetailsSection({ control }: DetailsSectionProps) {
   return (
     <section className="space-y-5">
       <h2 className="text-base font-semibold text-gray-900 border-b pb-2">
@@ -35,31 +33,6 @@ export function DetailsSection({ control, categories }: DetailsSectionProps) {
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <FormField
-          control={control}
-          name="categoryId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={control}
           name="difficulty"

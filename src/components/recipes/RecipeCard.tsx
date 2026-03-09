@@ -27,12 +27,13 @@ interface RecipeCardProps {
     cookTime: number;
     servings: number;
     difficulty: Difficulty;
-    category: { name: string; slug: string };
+    tags: Array<{ tag: { name: string; slug: string } }>;
   };
 }
 
 export function RecipeCard({ recipe }: RecipeCardProps) {
   const totalTime = recipe.prepTime + recipe.cookTime;
+  const firstTags = recipe.tags.slice(0, 2);
 
   return (
     <Link
@@ -61,9 +62,18 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       </div>
 
       <div className="flex flex-col gap-2 p-4 flex-1">
-        <span className="text-xs font-medium text-emerald-600 uppercase tracking-wide">
-          {recipe.category.name}
-        </span>
+        {firstTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {firstTags.map(({ tag }) => (
+              <span
+                key={tag.slug}
+                className="text-xs font-medium text-emerald-600 uppercase tracking-wide"
+              >
+                {tag.name}
+              </span>
+            ))}
+          </div>
+        )}
         <h3 className="font-semibold text-gray-900 text-base leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">
           {recipe.title}
         </h3>

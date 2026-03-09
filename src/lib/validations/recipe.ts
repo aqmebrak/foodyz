@@ -19,7 +19,6 @@ export const recipeSchema = z.object({
     ),
   description: z.string().max(1000).optional(),
   featuredImage: z.string().optional(),
-  categoryId: z.string().min(1, "Category is required"),
   difficulty: z.enum(["EASY", "MEDIUM", "HARD"] as const),
   prepTime: z.coerce.number().int().min(1, "Required"),
   cookTime: z.coerce.number().int().min(0),
@@ -27,6 +26,7 @@ export const recipeSchema = z.object({
   published: z.boolean().default(false),
   instructions: z.string().min(1, "Instructions are required"),
   ingredients: z.array(ingredientRowSchema).default([]),
+  tags: z.array(z.string()).default([]),
 });
 
 export type RecipeFormValues = z.infer<typeof recipeSchema>;

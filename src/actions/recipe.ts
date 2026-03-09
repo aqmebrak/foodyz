@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { put } from "@vercel/blob";
 
 import { db } from "@/lib/db";
+import { slugify } from "@/lib/utils";
 import { type RecipeFormValues,recipeSchema } from "@/lib/validations/recipe";
 
 // ---------------------------------------------------------------------------
@@ -15,7 +16,6 @@ export async function getPublishedRecipes() {
   return db.recipe.findMany({
     where: { published: true },
     include: {
-      category: true,
       tags: { include: { tag: true } },
     },
     orderBy: { createdAt: "desc" },
@@ -26,7 +26,6 @@ export async function getRecipeBySlug(slug: string) {
   return db.recipe.findUnique({
     where: { slug, published: true },
     include: {
-      category: true,
       ingredients: {
         include: { ingredient: true, unit: true },
         orderBy: { order: "asc" },
@@ -37,19 +36,15 @@ export async function getRecipeBySlug(slug: string) {
   });
 }
 
-export async function getRecipesByCategory(categorySlug: string) {
+export async function getRecipesByTag(tagSlug: string) {
   return db.recipe.findMany({
-    where: { published: true, category: { slug: categorySlug } },
-    include: {
-      category: true,
-      tags: { include: { tag: true } },
+    where: {
+      published: true,
+      tags: { some: { tag: { slug: tagSlug } } },
     },
+    include: { tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
   });
-}
-
-export async function getCategoryBySlug(slug: string) {
-  return db.category.findUnique({ where: { slug } });
 }
 
 export async function getAllPublishedSlugs() {
@@ -59,17 +54,13 @@ export async function getAllPublishedSlugs() {
   });
 }
 
-export async function getAllCategorySlugs() {
-  return db.category.findMany({ select: { slug: true } });
-}
-
 // ---------------------------------------------------------------------------
 // Admin reads
 // ---------------------------------------------------------------------------
 
 export async function getAllRecipesAdmin() {
   return db.recipe.findMany({
-    include: { category: true },
+    include: { tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -78,7 +69,6 @@ export async function getRecipeForAdmin(id: string) {
   return db.recipe.findUnique({
     where: { id },
     include: {
-      category: true,
       ingredients: {
         include: { ingredient: true, unit: true },
         orderBy: { order: "asc" },
@@ -102,6 +92,10 @@ export async function getAllUnits() {
   return db.unit.findMany({ orderBy: { name: "asc" } });
 }
 
+export async function getAllTags() {
+  return db.tag.findMany({ orderBy: { name: "asc" } });
+}
+
 // ---------------------------------------------------------------------------
 // Mutations
 // ---------------------------------------------------------------------------
@@ -112,10 +106,10 @@ export async function createRecipe(data: RecipeFormValues) {
     return { error: "Invalid form data. Please check all fields." };
   }
 
-  const { ingredients, description, featuredImage, ...rest } = parsed.data;
+  const { ingredients, tags, description, featuredImage, ...rest } = parsed.data;
 
   try {
-    await db.recipe.create({
+    const recipe = await db.recipe.create({
       data: {
         ...rest,
         description: description || null,
@@ -131,6 +125,19 @@ export async function createRecipe(data: RecipeFormValues) {
         },
       },
     });
+
+    // Upsert and connect tags
+    for (const tagName of tags) {
+      const tagSlug = slugify(tagName);
+      const tag = await db.tag.upsert({
+        where: { slug: tagSlug },
+        create: { name: tagName, slug: tagSlug },
+        update: {},
+      });
+      await db.recipeTag.create({
+        data: { recipeId: recipe.id, tagId: tag.id },
+      });
+    }
   } catch (e) {
     console.error(e);
     return { error: "Failed to create recipe. The slug may already exist." };
@@ -148,7 +155,7 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
     return { error: "Invalid form data. Please check all fields." };
   }
 
-  const { ingredients, description, featuredImage, ...rest } = parsed.data;
+  const { ingredients, tags, description, featuredImage, ...rest } = parsed.data;
 
   try {
     await db.recipe.update({
@@ -169,6 +176,20 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
         },
       },
     });
+
+    // Replace tags: delete all, re-create
+    await db.recipeTag.deleteMany({ where: { recipeId: id } });
+    for (const tagName of tags) {
+      const tagSlug = slugify(tagName);
+      const tag = await db.tag.upsert({
+        where: { slug: tagSlug },
+        create: { name: tagName, slug: tagSlug },
+        update: {},
+      });
+      await db.recipeTag.create({
+        data: { recipeId: id, tagId: tag.id },
+      });
+    }
   } catch (e) {
     console.error(e);
     return { error: "Failed to update recipe. The slug may already be taken." };

@@ -56,8 +56,8 @@ export default async function OgImage({
           </div>
         </div>
 
-        {/* Category / meta bar */}
-        {recipe?.category && (
+        {/* Tags bar */}
+        {recipe?.tags && recipe.tags.length > 0 && (
           <div
             style={{
               display: "flex",
@@ -69,7 +69,7 @@ export default async function OgImage({
               fontWeight: 600,
             }}
           >
-            {recipe.category.name}
+            {recipe.tags[0].tag.name}
           </div>
         )}
 

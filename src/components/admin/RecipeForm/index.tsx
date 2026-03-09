@@ -15,11 +15,12 @@ import { DetailsSection } from "./DetailsSection";
 import { IngredientsSection } from "./IngredientsSection";
 import { InstructionsSection } from "./InstructionsSection";
 import { SaveBar } from "./SaveBar";
+import { TagsSection } from "./TagsSection";
 import type { RecipeFormProps } from "./types";
 import { DEFAULT_FORM_VALUES } from "./utils";
 
 export function RecipeForm({
-  categories,
+  tags,
   ingredients: initialIngredients,
   units,
   defaultValues,
@@ -88,7 +89,9 @@ export function RecipeForm({
           onImageUpload={handleImageUpload}
         />
 
-        <DetailsSection control={form.control} categories={categories} />
+        <DetailsSection control={form.control} />
+
+        <TagsSection control={form.control} availableTags={tags} />
 
         <InstructionsSection control={form.control} />
 

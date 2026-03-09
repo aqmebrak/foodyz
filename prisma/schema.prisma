@@ -43,7 +43,6 @@ model Category {
   slug        String   @unique
   description String?
   image       String?
-  recipes     Recipe[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -60,8 +59,6 @@ model Recipe {
   difficulty    Difficulty         @default(EASY)
   published     Boolean            @default(false)
   featuredImage String?            // Vercel blob url
-  categoryId    String
-  category      Category           @relation(fields: [categoryId], references: [id])
   ingredients   RecipeIngredient[]
   tags          RecipeTag[]
   images        RecipeImage[]
