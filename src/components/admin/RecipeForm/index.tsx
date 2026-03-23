@@ -1,5 +1,6 @@
 "use client";
 
+import imageCompression from "browser-image-compression";
 import { useEffect, useState, useTransition } from "react";
 import type { Resolver } from "react-hook-form";
 import { useFieldArray,useForm } from "react-hook-form";
@@ -64,8 +65,13 @@ export function RecipeForm({
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const compressed = await imageCompression(file, {
+      maxSizeMB: 1.5,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    });
     const fd = new FormData();
-    fd.append("file", file);
+    fd.append("file", new File([compressed], file.name, { type: compressed.type }));
     const result = await uploadRecipeImage(fd);
     if (result.path) form.setValue("featuredImage", result.path);
   }

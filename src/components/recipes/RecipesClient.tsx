@@ -52,6 +52,11 @@ export function RecipesClient({ allRecipes, initialTag = "" }: RecipesClientProp
   const safePage = Math.min(page, totalPages);
   const paged = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
+  function changePage(p: number) {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function handleTagChange(tag: string) {
     setSelectedTag(tag);
     setPage(1);
@@ -115,7 +120,7 @@ export function RecipesClient({ allRecipes, initialTag = "" }: RecipesClientProp
           className="flex items-center justify-center gap-2 mt-10"
         >
           <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            onClick={() => changePage(Math.max(1, safePage - 1))}
             disabled={safePage === 1}
             className={cn(
               "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors",
@@ -129,7 +134,7 @@ export function RecipesClient({ allRecipes, initialTag = "" }: RecipesClientProp
             {safePage} / {totalPages}
           </span>
           <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => changePage(Math.min(totalPages, safePage + 1))}
             disabled={safePage === totalPages}
             className={cn(
               "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors",

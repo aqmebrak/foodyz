@@ -204,6 +204,12 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 - [] **16.4** Update the recipe detail page to display the tags associated with each recipe, allowing users to see at a glance the key attributes of the recipe and click on tags to view other recipes with the same tag.
 
 
+## Phase 17 - Polish mobile UX
+- [] **17.1** On mobile admin page, make the recipe edit content appear in a modal because the split view is unusable
+- [] **17.2** Increase the image upload body limit from 1mb to 5mb to allow for higher quality images to be uploaded from mobile devices.
+- [] **17.3** Add client-side image compression before uploading to reduce file size and improve upload times on mobile networks. This can be implemented using a library like `browser-image-compression` to compress images in the browser before they are sent to the server.
+- [] **17.4** On the public recipe list, when using pagination make scroll to top
+
 ---
 
 ## Quick Reference
