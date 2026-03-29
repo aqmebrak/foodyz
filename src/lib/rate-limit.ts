@@ -3,7 +3,7 @@
 // memory, so this only guards within a single instance. For multi-instance
 // production use, replace the Map with an Upstash Redis store.
 
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 10;
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
 interface Entry {

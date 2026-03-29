@@ -262,7 +262,7 @@ export function IngredientsClient({ ingredients }: IngredientsClientProps) {
                           {ingredient.recipes.map(({ recipe }) => (
                             <li key={recipe.id}>
                               <Link
-                                href={`/admin/recipes/${recipe.id}`}
+                                href={`/recipes/${recipe.id}`}
                                 className="text-sm text-emerald-700 hover:text-emerald-900 hover:underline"
                               >
                                 {recipe.title}

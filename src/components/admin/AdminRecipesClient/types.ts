@@ -10,6 +10,7 @@ export interface Recipe {
   prepTime: number;
   cookTime: number;
   servings: number;
+  featuredImage: string | null;
   tags: Array<{ tag: { name: string; slug: string } }>;
 }
 

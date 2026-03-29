@@ -1,4 +1,5 @@
 import { Trash2 } from "lucide-react";
+import Image from "next/image";
 
 import { deleteRecipe } from "@/actions/recipe";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -49,6 +50,7 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50">
+            <TableHead className="w-14"></TableHead>
             <TableHead>Title</TableHead>
             <TableHead className={cn("hidden", !selectedId && "sm:table-cell")}>Tags</TableHead>
             <TableHead className={cn("hidden", !selectedId && "md:table-cell")}>Difficulty</TableHead>
@@ -63,6 +65,23 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
               onClick={() => onRowClick(recipe.id)}
               className={cn("cursor-pointer", selectedId === recipe.id && "bg-emerald-50 hover:bg-emerald-50")}
             >
+              <TableCell className="p-2 pl-3">
+                {recipe.featuredImage ? (
+                  <div className="relative w-14 h-14 flex-none rounded-md overflow-hidden bg-gray-100">
+                    <Image
+                      src={recipe.featuredImage}
+                      alt=""
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-14 h-14 rounded-md bg-gray-100 flex items-center justify-center text-xl">
+                    🍽️
+                  </div>
+                )}
+              </TableCell>
               <TableCell className="font-medium">{recipe.title}</TableCell>
               <TableCell className={cn("text-gray-500 text-sm hidden", !selectedId && "sm:table-cell")}>
                 <div className="flex flex-wrap gap-1">

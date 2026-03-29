@@ -3,8 +3,8 @@
 import {
   BookOpen,
   Cake,
-  LayoutDashboard,
   LogOut,
+  MapPin,
   Menu,
   Package,
   Scale,
@@ -20,12 +20,12 @@ import { logoutAction } from "@/actions/auth";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/recipes", label: "Recipes", icon: BookOpen, exact: false },
-  { href: "/admin/categories", label: "Categories", icon: Tag, exact: false },
-  { href: "/admin/ingredients", label: "Ingredients", icon: Package, exact: false },
-  { href: "/admin/units", label: "Units", icon: Scale, exact: false },
-  { href: "/admin/flans", label: "Flans 🍮", icon: Cake, exact: false },
+  { href: "/recipes", label: "Recipes", icon: BookOpen, exact: false },
+  { href: "/categories", label: "Categories", icon: Tag, exact: false },
+  { href: "/ingredients", label: "Ingredients", icon: Package, exact: false },
+  { href: "/units", label: "Units", icon: Scale, exact: false },
+  { href: "/flans", label: "Flans 🍮", icon: Cake, exact: false },
+  { href: "/flan", label: "Flan Map", icon: MapPin, exact: true },
 ];
 
 function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
@@ -34,12 +34,9 @@ function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
   return (
     <>
       <div className="px-5 py-5 border-b border-emerald-800/60">
-        <Link href="/admin" className="flex items-center gap-2.5" onClick={onNavClick}>
+        <Link href="/recipes" className="flex items-center gap-2.5" onClick={onNavClick}>
           <UtensilsCrossed className="w-5 h-5 text-emerald-400" />
           <span className="font-bold text-white text-base tracking-tight">Foodyz</span>
-          <span className="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest mt-0.5">
-            admin
-          </span>
         </Link>
       </div>
 
@@ -97,12 +94,9 @@ export function AdminSidebar() {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <Link href="/admin" className="flex items-center gap-2">
+        <Link href="/recipes" className="flex items-center gap-2">
           <UtensilsCrossed className="w-4 h-4 text-emerald-400" />
           <span className="font-bold text-white text-sm tracking-tight">Foodyz</span>
-          <span className="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest">
-            admin
-          </span>
         </Link>
       </div>
 

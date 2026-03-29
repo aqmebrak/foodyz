@@ -145,8 +145,8 @@ export async function createRecipe(data: RecipeFormValues) {
 
   revalidatePath("/");
   revalidatePath("/recipes");
-  revalidatePath("/admin/recipes");
-  redirect("/admin/recipes");
+  revalidatePath("/recipes");
+  redirect("/recipes");
 }
 
 export async function updateRecipe(id: string, data: RecipeFormValues) {
@@ -198,8 +198,8 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
   revalidatePath("/");
   revalidatePath("/recipes");
   revalidatePath(`/recipes/${parsed.data.slug}`);
-  revalidatePath("/admin/recipes");
-  redirect("/admin/recipes");
+  revalidatePath("/recipes");
+  redirect("/recipes");
 }
 
 export async function deleteRecipe(id: string) {
@@ -212,7 +212,7 @@ export async function deleteRecipe(id: string) {
 
   revalidatePath("/");
   revalidatePath("/recipes");
-  revalidatePath("/admin/recipes");
+  revalidatePath("/recipes");
 }
 
 export async function uploadRecipeImage(formData: FormData) {
