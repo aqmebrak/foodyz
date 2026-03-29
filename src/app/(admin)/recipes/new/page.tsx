@@ -19,7 +19,7 @@ export default async function NewRecipePage() {
     <div className="p-6 sm:p-8 max-w-3xl">
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild className="-ml-2 mb-3">
-          <Link href="/admin/recipes">
+          <Link href="/recipes">
             <ChevronLeft className="w-4 h-4 mr-1" />
             Recipes
           </Link>

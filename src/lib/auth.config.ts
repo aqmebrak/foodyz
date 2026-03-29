@@ -13,10 +13,8 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isAdminRoute = nextUrl.pathname.startsWith("/admin");
-
-      if (isAdminRoute && !isLoggedIn) return false;
-
+      if (nextUrl.pathname === "/login") return true;
+      if (!isLoggedIn) return false;
       return true;
     },
 

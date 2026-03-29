@@ -12,8 +12,8 @@ import {
   uploadFlanPhoto,
 } from "@/actions/flan";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { LocationCombobox } from "@/components/flan/LocationCombobox";
 import type { PastryLocation } from "@/components/flan/LocationCombobox";
+import { LocationCombobox } from "@/components/flan/LocationCombobox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

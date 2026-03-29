@@ -2,7 +2,7 @@ import { expect,test } from "@playwright/test";
 
 test.describe("Recipe edit form", () => {
   async function openFirstRecipePanel(
-    page: Parameters<Parameters<typeof test>[1]>[0]
+    page: import("@playwright/test").Page
   ) {
     await page.goto("/admin/recipes");
     // Click the first data row to open the inline side panel
@@ -101,7 +101,7 @@ test.describe("Recipe edit form", () => {
     await page.getByPlaceholder("Qty").last().fill("2");
 
     // The ingredient combobox should now show a name (not the placeholder "Ingredient")
-    const comboboxes = page.locator("button").filter({ hasNotText: "Ingredient" });
+    await page.locator("button").filter({ hasNotText: "Ingredient" });
     // Just verify no error appeared and qty was filled
     await expect(page.getByPlaceholder("Qty").last()).toHaveValue("2");
   });

@@ -382,6 +382,7 @@ async function main() {
   );
   const categoryMap = Object.fromEntries(categories.map((c) => [c.slug, c]));
   console.log("  \u2713 Categories");
+  console.log("  \u2713 ", categoryMap);
 
   // -------------------------------------------------------------------------
   // Ingredients

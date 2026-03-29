@@ -1,12 +1,13 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import Image from "next/image";
 
 import { cn, parseGoogleMapsUrl } from "@/lib/utils";
+
+import "leaflet/dist/leaflet.css";
 
 // Colored div icons: amber for tried, gray for not tried
 function makeIcon(tried: boolean) {
