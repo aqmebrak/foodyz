@@ -231,7 +231,7 @@ export function FlansClient({ flans, locations: initialLocations }: FlansClientP
     <div className="p-6 sm:p-8 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Flans 🍮</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-foreground">Flans 🍮</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {flans.length} total · {locationsList.length} location{locationsList.length !== 1 ? "s" : ""}
           </p>

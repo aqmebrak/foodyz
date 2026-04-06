@@ -141,7 +141,7 @@ function RecipeDetailView({
 }) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
+      <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">
         Loading…
       </div>
     );
@@ -158,7 +158,7 @@ function RecipeDetailView({
     <article className="max-w-2xl mx-auto px-4 py-5 pb-10">
       {/* Featured image */}
       {recipe.featuredImage && (
-        <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 mb-5">
+        <div className="relative aspect-video rounded-xl overflow-hidden bg-muted mb-5">
           <Image
             src={recipe.featuredImage}
             alt={recipe.title}
@@ -174,7 +174,7 @@ function RecipeDetailView({
         {recipe.tags.map(({ tag }) => (
           <span
             key={tag.slug}
-            className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+            className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full"
           >
             {tag.name}
           </span>
@@ -194,11 +194,11 @@ function RecipeDetailView({
 
       {/* Description */}
       {recipe.description && (
-        <p className="text-gray-600 text-sm mb-5">{recipe.description}</p>
+        <p className="text-muted-foreground text-sm mb-5">{recipe.description}</p>
       )}
 
       {/* Stats */}
-      <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-6">
+      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
         {recipe.prepTime > 0 && (
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4" />
@@ -220,17 +220,17 @@ function RecipeDetailView({
       {/* Ingredients */}
       {recipe.ingredients.length > 0 && (
         <section className="mb-6">
-          <h2 className="font-semibold text-gray-900 mb-3">Ingredients</h2>
+          <h2 className="font-semibold text-foreground mb-3">Ingredients</h2>
           <ul className="space-y-1.5">
             {recipe.ingredients.map((ri) => (
-              <li key={ri.ingredientId} className="text-sm text-gray-700 flex gap-2">
-                <span className="font-medium text-gray-900 shrink-0">
+              <li key={ri.ingredientId} className="text-sm text-foreground flex gap-2">
+                <span className="font-medium text-foreground shrink-0">
                   {ri.quantity}
                   {ri.unit ? ` ${ri.unit.abbreviation}` : ""}
                 </span>
                 <span>
                   {ri.ingredient.name}
-                  {ri.notes ? <span className="text-gray-400"> — {ri.notes}</span> : null}
+                  {ri.notes ? <span className="text-muted-foreground"> — {ri.notes}</span> : null}
                 </span>
               </li>
             ))}
@@ -241,10 +241,10 @@ function RecipeDetailView({
       {/* Instructions */}
       {steps.length > 0 && (
         <section>
-          <h2 className="font-semibold text-gray-900 mb-3">Instructions</h2>
+          <h2 className="font-semibold text-foreground mb-3">Instructions</h2>
           <ol className="space-y-4">
             {steps.map((step, i) => (
-              <li key={i} className="flex gap-3 text-sm text-gray-700">
+              <li key={i} className="flex gap-3 text-sm text-foreground">
                 <span className="flex-none font-semibold text-emerald-600 w-5 text-right">
                   {i + 1}.
                 </span>

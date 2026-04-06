@@ -115,9 +115,9 @@ export function IngredientCombobox({
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg overflow-hidden">
           {/* Search input */}
-          <div className="p-2 border-b border-gray-100">
+          <div className="p-2 border-b border-border">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
               <input
@@ -136,17 +136,17 @@ export function IngredientCombobox({
           {/* List */}
           <div className="max-h-48 overflow-y-auto">
             {filtered.length === 0 && !query && (
-              <p className="px-3 py-2 text-sm text-gray-400">No ingredients.</p>
+              <p className="px-3 py-2 text-sm text-muted-foreground">No ingredients.</p>
             )}
             {filtered.length === 0 && query && !creating && (
-              <p className="px-3 py-2 text-sm text-gray-400">No results for &ldquo;{query}&rdquo;.</p>
+              <p className="px-3 py-2 text-sm text-muted-foreground">No results for &ldquo;{query}&rdquo;.</p>
             )}
             {filtered.map((ing) => (
               <button
                 key={ing.id}
                 type="button"
                 onClick={() => handleSelect(ing.id)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left cursor-pointer hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left cursor-pointer hover:bg-muted transition-colors"
               >
                 <Check
                   className={cn(
@@ -163,7 +163,7 @@ export function IngredientCombobox({
               <button
                 type="button"
                 onClick={() => startCreating(query)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 cursor-pointer hover:bg-emerald-50 transition-colors border-t border-gray-100"
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 cursor-pointer hover:bg-emerald-50 transition-colors border-t border-border"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 Add &ldquo;{query}&rdquo;
@@ -173,7 +173,7 @@ export function IngredientCombobox({
               <button
                 type="button"
                 onClick={() => startCreating()}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 cursor-pointer hover:bg-emerald-50 transition-colors border-t border-gray-100"
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 cursor-pointer hover:bg-emerald-50 transition-colors border-t border-border"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 New ingredient
@@ -192,7 +192,7 @@ export function IngredientCombobox({
                 placeholder="Ingredient name"
                 autoCapitalize="none"
                 autoCorrect="off"
-                className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full px-2 py-1.5 text-sm border border-input bg-background rounded focus:outline-none focus:ring-1 focus:ring-ring"
               />
               {createError && <p className="text-xs text-red-500">{createError}</p>}
               <div className="flex gap-2">

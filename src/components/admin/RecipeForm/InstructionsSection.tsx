@@ -17,7 +17,7 @@ interface InstructionsSectionProps {
 export function InstructionsSection({ control }: InstructionsSectionProps) {
   return (
     <section className="space-y-5">
-      <h2 className="text-base font-semibold text-gray-900 border-b pb-2">
+      <h2 className="text-base font-semibold text-foreground border-b pb-2">
         Instructions
       </h2>
       <FormField

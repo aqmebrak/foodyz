@@ -26,7 +26,7 @@ export function BasicInfoSection({
 }: BasicInfoSectionProps) {
   return (
     <section className="space-y-5">
-      <h2 className="text-base font-semibold text-gray-900 border-b pb-2">
+      <h2 className="text-base font-semibold text-foreground border-b pb-2">
         Basic info
       </h2>
 
@@ -85,7 +85,7 @@ export function BasicInfoSection({
             <FormLabel>Featured image</FormLabel>
             <div className="space-y-3">
               {featuredImage && (
-                <div className="relative w-full aspect-video max-w-xs rounded-lg overflow-hidden bg-gray-100">
+                <div className="relative w-full aspect-video max-w-xs rounded-lg overflow-hidden bg-muted">
                   <Image
                     src={featuredImage}
                     alt="Featured"
@@ -104,7 +104,7 @@ export function BasicInfoSection({
                 placeholder="/images/recipes/my-photo.jpg"
                 {...field}
                 value={field.value ?? ""}
-                className="max-w-xs text-xs text-gray-400"
+                className="max-w-xs text-xs text-muted-foreground"
               />
             </div>
             <FormMessage />

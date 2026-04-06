@@ -24,7 +24,7 @@ export default async function NewRecipePage() {
             Recipes
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold text-gray-900">New recipe</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-foreground">New recipe</h1>
       </div>
 
       <RecipeForm

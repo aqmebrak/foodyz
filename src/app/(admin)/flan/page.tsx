@@ -11,11 +11,11 @@ export default async function FlanPage() {
   const triedCount = flans.filter((f) => f.tried).length;
 
   return (
-    <div className="min-h-screen bg-amber-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="px-6 py-8 max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900">🍮 Flan Tour — Lyon</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="text-3xl font-bold text-foreground">🍮 Flan Tour — Lyon</h1>
+        <p className="text-muted-foreground mt-1">
           {triedCount} tried · {flans.length - triedCount} on the list
         </p>
       </div>

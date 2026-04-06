@@ -28,7 +28,7 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
 
   return (
     <section className="space-y-5">
-      <h2 className="text-base font-semibold text-gray-900 border-b pb-2">
+      <h2 className="text-base font-semibold text-foreground border-b pb-2">
         Tags
       </h2>
 
@@ -113,7 +113,7 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
                     />
 
                     {open && (filteredTags.length > 0 || canCreate) && (
-                      <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-md max-h-48 overflow-y-auto">
+                      <div className="absolute z-50 mt-1 w-full bg-card border border-border rounded-md shadow-md max-h-48 overflow-y-auto">
                         {filteredTags.map((t) => (
                           <button
                             key={t.id}
@@ -134,7 +134,7 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
                               e.preventDefault();
                               addTag(inputValue.trim());
                             }}
-                            className="w-full text-left px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 border-t border-gray-100"
+                            className="w-full text-left px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 border-t border-border"
                           >
                             + Create &quot;{inputValue.trim()}&quot;
                           </button>

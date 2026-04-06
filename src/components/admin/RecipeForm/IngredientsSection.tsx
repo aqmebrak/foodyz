@@ -54,19 +54,19 @@ export function IngredientsSection({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-base font-semibold text-gray-900 border-b pb-2">
+      <h2 className="text-base font-semibold text-foreground border-b pb-2">
         Ingredients
       </h2>
 
       {fields.length === 0 && (
-        <p className="text-sm text-gray-400 py-2">No ingredients added.</p>
+        <p className="text-sm text-muted-foreground py-2">No ingredients added.</p>
       )}
 
       <div className="space-y-3">
         {fields.map((field, index) => (
           <div
             key={field.id}
-            className="grid grid-cols-12 gap-2 items-start p-3 bg-gray-50 rounded-lg"
+            className="grid grid-cols-12 gap-2 items-start p-3 bg-muted/50 rounded-lg"
           >
             {/* Ingredient — col 1-4 (sm) */}
             <div className="col-span-12 sm:col-span-4">
@@ -177,7 +177,7 @@ export function IngredientsSection({
                   aria-label="Move up"
                   disabled={index === 0}
                   onClick={() => move(index, index - 1)}
-                  className="h-5 w-7 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                  className="h-5 w-7 text-muted-foreground hover:text-foreground disabled:opacity-30"
                 >
                   <ArrowUp className="w-3 h-3" />
                 </Button>
@@ -188,7 +188,7 @@ export function IngredientsSection({
                   aria-label="Move down"
                   disabled={index === fields.length - 1}
                   onClick={() => move(index, index + 1)}
-                  className="h-5 w-7 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                  className="h-5 w-7 text-muted-foreground hover:text-foreground disabled:opacity-30"
                 >
                   <ArrowDown className="w-3 h-3" />
                 </Button>
@@ -199,7 +199,7 @@ export function IngredientsSection({
                 size="icon"
                 aria-label="Remove ingredient"
                 onClick={() => remove(index)}
-                className="h-9 w-9 text-gray-400 hover:text-red-500"
+                className="h-9 w-9 text-muted-foreground hover:text-red-500"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>

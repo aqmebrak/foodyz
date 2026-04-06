@@ -55,7 +55,7 @@ function FlanModal({ flan, onClose }: { flan: Flan; onClose: () => void }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+      <div className="bg-card rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
         {/* Photo */}
         {flan.photoUrl ? (
           <div className="relative w-full aspect-[4/3] bg-amber-50">
@@ -71,12 +71,12 @@ function FlanModal({ flan, onClose }: { flan: Flan; onClose: () => void }) {
         <div className="p-5">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">{flan.name}</h2>
-              <p className="text-sm text-gray-500 mt-0.5">{flan.location.name}</p>
+              <h2 className="text-lg font-semibold text-foreground">{flan.name}</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">{flan.location.name}</p>
             </div>
             <button
               onClick={onClose}
-              className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               aria-label="Close"
             >
               <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
@@ -90,19 +90,19 @@ function FlanModal({ flan, onClose }: { flan: Flan; onClose: () => void }) {
             {[1, 2, 3, 4, 5].map((s) => (
               <span key={s} className={`text-xl ${s <= flan.rating ? "text-amber-400" : "text-gray-200"}`}>★</span>
             ))}
-            <span className="ml-1 text-sm text-gray-500 self-center">{flan.rating}/5</span>
+            <span className="ml-1 text-sm text-muted-foreground self-center">{flan.rating}/5</span>
           </div>
 
           {/* Date */}
           {flan.triedAt && (
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Tried on {new Date(flan.triedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
             </p>
           )}
 
           {/* Comment */}
           {flan.comment && (
-            <p className="text-sm text-gray-700 mt-3 leading-relaxed border-t border-gray-100 pt-3">
+            <p className="text-sm text-foreground mt-3 leading-relaxed border-t border-border pt-3">
               {flan.comment}
             </p>
           )}
@@ -161,7 +161,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name or location…"
-              className="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-amber-200 bg-white focus:outline-none focus:ring-1 focus:ring-amber-400 w-56"
+              className="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-amber-200 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-amber-400 w-56"
             />
           </div>
 
@@ -174,7 +174,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
                 className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer ${
                   minRating === opt.value
                     ? "bg-amber-400 border-amber-400 text-white"
-                    : "bg-white border-amber-200 text-gray-600 hover:border-amber-400"
+                    : "bg-background border-amber-200 text-foreground hover:border-amber-400"
                 }`}
               >
                 {opt.label}
@@ -188,7 +188,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
             className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer ${
               triedOnly
                 ? "bg-emerald-500 border-emerald-500 text-white"
-                : "bg-white border-amber-200 text-gray-600 hover:border-amber-400"
+                : "bg-background border-amber-200 text-foreground hover:border-amber-400"
             }`}
           >
             ✓ Tried only
@@ -196,7 +196,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
 
           {/* Result count */}
           {(query || minRating > 0 || triedOnly) && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground">
               {filtered.length} result{filtered.length !== 1 ? "s" : ""}
             </span>
           )}
@@ -212,11 +212,11 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
         <div className="flex items-center gap-4 mt-2 px-1">
           <div className="flex items-center gap-1.5">
             <span className="inline-block w-3.5 h-3.5 rounded-full bg-amber-400 border-2 border-amber-500" />
-            <span className="text-xs text-gray-500">Tried</span>
+            <span className="text-xs text-muted-foreground">Tried</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="inline-block w-3.5 h-3.5 rounded-full bg-gray-400 border-2 border-gray-500" />
-            <span className="text-xs text-gray-500">Not tried</span>
+            <span className="text-xs text-muted-foreground">Not tried</span>
           </div>
         </div>
       </div>
@@ -224,7 +224,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
       {/* List (tried only) */}
       {filtered.some((f) => f.tried) && (
         <div className="px-6 py-8 max-w-5xl mx-auto">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          <h2 className="text-lg font-semibold text-foreground mb-4">
             Tried{triedOnly ? "" : ` (${triedCount})`}
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
@@ -234,7 +234,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
                 <button
                   key={flan.id}
                   onClick={() => setSelectedFlan(flan)}
-                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-amber-100 hover:border-amber-300 transition-colors cursor-pointer text-left w-full"
+                  className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border hover:border-amber-300 transition-colors cursor-pointer text-left w-full"
                 >
                   {flan.photoUrl ? (
                     <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-amber-50">
@@ -244,8 +244,8 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
                     <span className="text-2xl shrink-0">🍮</span>
                   )}
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900 text-sm truncate">{flan.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{flan.location.name}</p>
+                    <p className="font-medium text-foreground text-sm truncate">{flan.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{flan.location.name}</p>
                     <div className="flex gap-0.5 mt-0.5">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <span key={s} className={s <= flan.rating ? "text-amber-400 text-xs" : "text-gray-200 text-xs"}>
@@ -263,7 +263,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
       {/* Not tried list */}
       {!triedOnly && filtered.some((f) => !f.tried) && (
         <div className="px-6 pb-8 max-w-5xl mx-auto">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          <h2 className="text-lg font-semibold text-foreground mb-4">
             On the list ({filtered.filter((f) => !f.tried).length})
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
@@ -275,7 +275,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
                   href={flan.location.mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-gray-300 transition-colors cursor-pointer opacity-70"
+                  className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border hover:border-muted-foreground transition-colors cursor-pointer opacity-70"
                 >
                   {flan.photoUrl ? (
                     <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-gray-100 grayscale opacity-60">
@@ -285,8 +285,8 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
                     <span className="text-2xl shrink-0 grayscale">🍮</span>
                   )}
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-700 text-sm truncate">{flan.name}</p>
-                    <p className="text-xs text-gray-400 truncate">{flan.location.name}</p>
+                    <p className="font-medium text-foreground text-sm truncate">{flan.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{flan.location.name}</p>
                   </div>
                 </a>
               ))}
@@ -295,7 +295,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
       )}
 
       {filtered.length === 0 && (
-        <div className="px-6 py-16 text-center text-gray-400">
+        <div className="px-6 py-16 text-center text-muted-foreground">
           <p className="text-4xl mb-3">🍮</p>
           <p className="text-base font-medium">No flans match your filters.</p>
         </div>

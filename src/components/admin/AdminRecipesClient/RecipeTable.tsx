@@ -28,7 +28,7 @@ interface RecipeTableProps {
 export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowClick }: RecipeTableProps) {
   if (allCount === 0) {
     return (
-      <div className="text-center py-20 text-gray-400">
+      <div className="text-center py-20 text-muted-foreground">
         <p className="text-lg">No recipes yet.</p>
         <p className="text-sm mt-1">Create your first recipe to get started.</p>
       </div>
@@ -37,7 +37,7 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
 
   if (filtered.length === 0) {
     return (
-      <div className="text-center py-16 text-gray-400">
+      <div className="text-center py-16 text-muted-foreground">
         <p className="text-base">
           No recipes match {hasFilters ? "the active filters" : "your search"}.
         </p>
@@ -46,10 +46,10 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
   }
 
   return (
-    <div className="rounded-lg border border-gray-100 overflow-hidden">
+    <div className="rounded-lg border border-border overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="bg-gray-50">
+          <TableRow className="bg-muted/50">
             <TableHead className="w-14"></TableHead>
             <TableHead>Title</TableHead>
             <TableHead className={cn("hidden", !selectedId && "sm:table-cell")}>Tags</TableHead>
@@ -67,7 +67,7 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
             >
               <TableCell className="p-2 pl-3">
                 {recipe.featuredImage ? (
-                  <div className="relative w-10 h-10 sm:w-36 sm:h-36 flex-none rounded-md overflow-hidden bg-gray-100">
+                  <div className="relative w-10 h-10 sm:w-36 sm:h-36 flex-none rounded-md overflow-hidden bg-muted">
                     <Image
                       src={recipe.featuredImage}
                       alt=""
@@ -76,7 +76,7 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
                     />
                   </div>
                 ) : (
-                  <div className="w-10 h-10 sm:w-36 sm:h-36 rounded-md bg-gray-100 flex items-center justify-center text-xl">
+                  <div className="w-10 h-10 sm:w-36 sm:h-36 rounded-md bg-muted flex items-center justify-center text-xl">
                     🍽️
                   </div>
                 )}
@@ -94,15 +94,15 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
                   </span>
                 </div>
               </TableCell>
-              <TableCell className={cn("text-gray-500 text-sm hidden", !selectedId && "sm:table-cell")}>
+              <TableCell className={cn("text-muted-foreground text-sm hidden", !selectedId && "sm:table-cell")}>
                 <div className="flex flex-wrap gap-1">
                   {recipe.tags.slice(0, 3).map(({ tag }) => (
-                    <span key={tag.slug} className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
+                    <span key={tag.slug} className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
                       {tag.name}
                     </span>
                   ))}
                   {recipe.tags.length > 3 && (
-                    <span className="text-xs text-gray-400">+{recipe.tags.length - 3}</span>
+                    <span className="text-xs text-muted-foreground">+{recipe.tags.length - 3}</span>
                   )}
                 </div>
               </TableCell>
@@ -126,7 +126,7 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
                     description={`"${recipe.title}" will be permanently deleted.`}
                     action={deleteRecipe.bind(null, recipe.id)}
                     trigger={
-                      <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500">
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     }
