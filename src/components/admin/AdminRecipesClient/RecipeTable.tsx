@@ -54,7 +54,7 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
             <TableHead>Title</TableHead>
             <TableHead className={cn("hidden", !selectedId && "sm:table-cell")}>Tags</TableHead>
             <TableHead className={cn("hidden", !selectedId && "md:table-cell")}>Difficulty</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead className="hidden sm:table-cell">Status</TableHead>
             <TableHead className="w-16 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -63,26 +63,37 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
             <TableRow
               key={recipe.id}
               onClick={() => onRowClick(recipe.id)}
-              className={cn("cursor-pointer", selectedId === recipe.id && "bg-emerald-50 hover:bg-emerald-50")}
+              className={cn("cursor-pointer sm:h-36", selectedId === recipe.id && "bg-emerald-50 hover:bg-emerald-50")}
             >
               <TableCell className="p-2 pl-3">
                 {recipe.featuredImage ? (
-                  <div className="relative w-14 h-14 flex-none rounded-md overflow-hidden bg-gray-100">
+                  <div className="relative w-10 h-10 sm:w-36 sm:h-36 flex-none rounded-md overflow-hidden bg-gray-100">
                     <Image
                       src={recipe.featuredImage}
                       alt=""
                       fill
-                      sizes="56px"
                       className="object-cover"
                     />
                   </div>
                 ) : (
-                  <div className="w-14 h-14 rounded-md bg-gray-100 flex items-center justify-center text-xl">
+                  <div className="w-10 h-10 sm:w-36 sm:h-36 rounded-md bg-gray-100 flex items-center justify-center text-xl">
                     🍽️
                   </div>
                 )}
               </TableCell>
-              <TableCell className="font-medium">{recipe.title}</TableCell>
+              <TableCell className="font-medium">
+                <div className="flex flex-col gap-1">
+                  <span>{recipe.title}</span>
+                  <span className="sm:hidden">
+                    <Badge
+                      variant={recipe.published ? "default" : "secondary"}
+                      className={recipe.published ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100" : ""}
+                    >
+                      {recipe.published ? "Published" : "Draft"}
+                    </Badge>
+                  </span>
+                </div>
+              </TableCell>
               <TableCell className={cn("text-gray-500 text-sm hidden", !selectedId && "sm:table-cell")}>
                 <div className="flex flex-wrap gap-1">
                   {recipe.tags.slice(0, 3).map(({ tag }) => (
@@ -100,7 +111,7 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
                   {recipe.difficulty.charAt(0) + recipe.difficulty.slice(1).toLowerCase()}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden sm:table-cell">
                 <Badge
                   variant={recipe.published ? "default" : "secondary"}
                   className={recipe.published ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100" : ""}

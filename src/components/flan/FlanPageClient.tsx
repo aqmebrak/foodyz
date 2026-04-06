@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 import { normalizeStr } from "@/lib/utils";
 
@@ -39,10 +40,96 @@ const RATING_OPTIONS = [
   { label: "★ 5", value: 5 },
 ];
 
+function FlanModal({ flan, onClose }: { flan: Flan; onClose: () => void }) {
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      onClick={(e) => e.target === overlayRef.current && onClose()}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        {/* Photo */}
+        {flan.photoUrl ? (
+          <div className="relative w-full aspect-[4/3] bg-amber-50">
+            <Image src={flan.photoUrl} alt={flan.name} fill className="object-cover" sizes="448px" />
+          </div>
+        ) : (
+          <div className="w-full aspect-[4/3] bg-amber-50 flex items-center justify-center">
+            <span className="text-7xl">🍮</span>
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="p-5">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">{flan.name}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">{flan.location.name}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Stars */}
+          <div className="flex gap-1 mt-3">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <span key={s} className={`text-xl ${s <= flan.rating ? "text-amber-400" : "text-gray-200"}`}>★</span>
+            ))}
+            <span className="ml-1 text-sm text-gray-500 self-center">{flan.rating}/5</span>
+          </div>
+
+          {/* Date */}
+          {flan.triedAt && (
+            <p className="text-xs text-gray-400 mt-2">
+              Tried on {new Date(flan.triedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+            </p>
+          )}
+
+          {/* Comment */}
+          {flan.comment && (
+            <p className="text-sm text-gray-700 mt-3 leading-relaxed border-t border-gray-100 pt-3">
+              {flan.comment}
+            </p>
+          )}
+
+          {/* Maps link */}
+          <a
+            href={flan.location.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 flex items-center gap-2 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 15.01 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 6.01 3.354 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+            </svg>
+            View on Google Maps
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FlanPageClient({ flans }: FlanPageClientProps) {
   const [query, setQuery] = useState("");
   const [minRating, setMinRating] = useState(0);
   const [triedOnly, setTriedOnly] = useState(false);
+  const [selectedFlan, setSelectedFlan] = useState<Flan | null>(null);
 
   const filtered = flans.filter((f) => {
     if (triedOnly && !f.tried) return false;
@@ -60,6 +147,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
 
   return (
     <>
+      {selectedFlan && <FlanModal flan={selectedFlan} onClose={() => setSelectedFlan(null)} />}
       {/* Filters */}
       <div className="px-6 pb-4 max-w-5xl mx-auto">
         <div className="flex flex-wrap gap-2 items-center">
@@ -143,14 +231,18 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
             {filtered
               .filter((f) => f.tried)
               .map((flan) => (
-                <a
+                <button
                   key={flan.id}
-                  href={flan.location.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-amber-100 hover:border-amber-300 transition-colors cursor-pointer"
+                  onClick={() => setSelectedFlan(flan)}
+                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-amber-100 hover:border-amber-300 transition-colors cursor-pointer text-left w-full"
                 >
-                  <span className="text-2xl shrink-0">🍮</span>
+                  {flan.photoUrl ? (
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-amber-50">
+                      <Image src={flan.photoUrl} alt={flan.name} fill className="object-cover" sizes="48px" />
+                    </div>
+                  ) : (
+                    <span className="text-2xl shrink-0">🍮</span>
+                  )}
                   <div className="min-w-0">
                     <p className="font-medium text-gray-900 text-sm truncate">{flan.name}</p>
                     <p className="text-xs text-gray-500 truncate">{flan.location.name}</p>
@@ -162,7 +254,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
                       ))}
                     </div>
                   </div>
-                </a>
+                </button>
               ))}
           </div>
         </div>
@@ -185,7 +277,13 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-gray-300 transition-colors cursor-pointer opacity-70"
                 >
-                  <span className="text-2xl shrink-0 grayscale">🍮</span>
+                  {flan.photoUrl ? (
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-gray-100 grayscale opacity-60">
+                      <Image src={flan.photoUrl} alt={flan.name} fill className="object-cover" sizes="48px" />
+                    </div>
+                  ) : (
+                    <span className="text-2xl shrink-0 grayscale">🍮</span>
+                  )}
                   <div className="min-w-0">
                     <p className="font-medium text-gray-700 text-sm truncate">{flan.name}</p>
                     <p className="text-xs text-gray-400 truncate">{flan.location.name}</p>

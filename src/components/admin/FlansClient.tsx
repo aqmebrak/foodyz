@@ -156,8 +156,10 @@ function FlanForm({
           <label className="text-xs font-medium text-gray-600">Photo</label>
           <Input type="file" accept="image/*" onChange={handlePhoto} disabled={uploading} />
           {uploading && <p className="text-xs text-gray-400">Uploading…</p>}
-          {form.photoUrl && (
-            <p className="text-xs text-emerald-600 truncate">{form.photoUrl}</p>
+          {form.photoUrl && !uploading && (
+            <div className="relative w-full h-24 rounded-md overflow-hidden bg-gray-100 mt-1">
+              <Image src={form.photoUrl} alt="Preview" fill className="object-cover" />
+            </div>
           )}
         </div>
       </div>

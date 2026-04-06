@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Pencil, Timer, Users, X } from "lucide-react";
+import { Check, Clock, Link2, Pencil, Timer, Users, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Difficulty } from "@prisma/client";
@@ -47,6 +47,14 @@ export function RecipeViewDrawer({
   onClose,
 }: RecipeViewDrawerProps) {
   const [mode, setMode] = useState<"view" | "edit">("view");
+  const [copied, setCopied] = useState(false);
+
+  function copyShareLink() {
+    if (!recipe) return;
+    navigator.clipboard.writeText(`${window.location.origin}/recipes/${recipe.slug}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   // Reset to view mode when a different recipe is selected
   useEffect(() => {
@@ -62,6 +70,20 @@ export function RecipeViewDrawer({
             {recipe?.title ?? "Recipe"}
           </DrawerTitle>
           <div className="flex items-center gap-2 shrink-0">
+            {recipe?.published && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={copyShareLink}
+              >
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
+                ) : (
+                  <Link2 className="w-3.5 h-3.5 mr-1.5" />
+                )}
+                {copied ? "Copied!" : "Share"}
+              </Button>
+            )}
             {mode === "view" ? (
               <Button
                 size="sm"

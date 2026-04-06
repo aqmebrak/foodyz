@@ -71,7 +71,7 @@ export async function createFlan(data: FlanFormValues) {
     },
   });
 
-  revalidatePath("/admin/flans");
+  revalidatePath("/flans");
   revalidatePath("/flan");
 }
 
@@ -92,13 +92,13 @@ export async function updateFlan(id: string, data: FlanFormValues) {
     },
   });
 
-  revalidatePath("/admin/flans");
+  revalidatePath("/flans");
   revalidatePath("/flan");
 }
 
 export async function deleteFlan(id: string) {
   await db.flan.delete({ where: { id } });
-  revalidatePath("/admin/flans");
+  revalidatePath("/flans");
   revalidatePath("/flan");
 }
 
@@ -117,13 +117,13 @@ export async function createPastryLocation(data: PastryLocationFormValues) {
     },
   });
 
-  revalidatePath("/admin/flans");
+  revalidatePath("/flans");
   return { location };
 }
 
 export async function deletePastryLocation(id: string) {
   await db.pastryLocation.delete({ where: { id } });
-  revalidatePath("/admin/flans");
+  revalidatePath("/flans");
 }
 
 // ---------------------------------------------------------------------------
