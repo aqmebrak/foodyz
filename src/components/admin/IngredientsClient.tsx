@@ -82,7 +82,7 @@ function IngredientForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-3">
         {serverError && (
           <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
             {serverError}
@@ -258,7 +258,7 @@ export function IngredientsClient({ ingredients }: IngredientsClientProps) {
                     <TableRow>
                       <TableCell colSpan={4} className="bg-emerald-50/50 py-2 px-4">
                         <p className="text-xs font-medium text-gray-500 mb-1.5">Used in:</p>
-                        <ul className="space-y-1">
+                        <ul className="flex flex-col gap-1">
                           {ingredient.recipes.map(({ recipe }) => (
                             <li key={recipe.id}>
                               <Link

@@ -25,7 +25,7 @@ export function BasicInfoSection({
   onImageUpload,
 }: BasicInfoSectionProps) {
   return (
-    <section className="space-y-5">
+    <section className="flex flex-col gap-5">
       <h2 className="text-base font-semibold text-foreground border-b pb-2">
         Basic info
       </h2>
@@ -83,7 +83,7 @@ export function BasicInfoSection({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Featured image</FormLabel>
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               {featuredImage && (
                 <div className="relative w-full aspect-video max-w-xs rounded-lg overflow-hidden bg-muted">
                   <Image

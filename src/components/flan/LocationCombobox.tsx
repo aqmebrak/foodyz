@@ -191,7 +191,7 @@ export function LocationCombobox({
 
           {/* Inline create form */}
           {creating && (
-            <div className="p-2 border-t border-gray-100 space-y-2">
+            <div className="p-2 border-t border-gray-100 flex flex-col gap-2">
               <input
                 autoFocus
                 value={newName}

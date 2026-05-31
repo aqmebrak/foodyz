@@ -88,7 +88,7 @@ export function FlanMap({ flans }: FlanMapProps) {
       {markers.map(({ flan, coords }) => (
         <Marker key={flan.id} position={coords} icon={makeIcon(flan.tried)}>
           <Popup maxWidth={240} minWidth={180}>
-            <div className="space-y-2 py-1">
+            <div className="flex flex-col gap-2 py-1">
               {flan.photoUrl && (
                 <div className="relative w-full h-32 rounded-md overflow-hidden">
                   <Image

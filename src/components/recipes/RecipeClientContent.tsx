@@ -121,7 +121,7 @@ export function RecipeClientContent({
             </span>
           )}
         </h2>
-        <ol className="space-y-3">
+        <ol className="flex flex-col gap-3">
           {steps.map((step, i) => {
             const isDone = mounted && checkedSteps.has(i);
             return (

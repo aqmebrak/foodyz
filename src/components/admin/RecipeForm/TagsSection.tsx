@@ -27,7 +27,7 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <section className="space-y-5">
+    <section className="flex flex-col gap-5">
       <h2 className="text-base font-semibold text-foreground border-b pb-2">
         Tags
       </h2>
@@ -68,7 +68,7 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
             <FormItem>
               <FormLabel className="sr-only">Tags</FormLabel>
               <FormControl>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   {selectedTags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {selectedTags.map((name) => (

@@ -53,7 +53,7 @@ export function IngredientsSection({
   }
 
   return (
-    <section className="space-y-4">
+    <section className="flex flex-col gap-4">
       <h2 className="text-base font-semibold text-foreground border-b pb-2">
         Ingredients
       </h2>
@@ -62,7 +62,7 @@ export function IngredientsSection({
         <p className="text-sm text-muted-foreground py-2">No ingredients added.</p>
       )}
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         {fields.map((field, index) => (
           <div
             key={field.id}

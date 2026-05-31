@@ -129,10 +129,12 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
   const [query, setQuery] = useState("");
   const [minRating, setMinRating] = useState(0);
   const [triedOnly, setTriedOnly] = useState(false);
+  const [toTryOnly, setToTryOnly] = useState(false);
   const [selectedFlan, setSelectedFlan] = useState<Flan | null>(null);
 
   const filtered = flans.filter((f) => {
     if (triedOnly && !f.tried) return false;
+    if (toTryOnly && f.tried) return false;
     if (minRating > 0 && f.rating < minRating) return false;
     if (query.trim()) {
       const q = normalizeStr(query);
@@ -194,8 +196,19 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
             ✓ Tried only
           </button>
 
+          <button
+            onClick={() => setToTryOnly((v) => !v)}
+            className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer ${
+              toTryOnly
+                ? "bg-emerald-500 border-emerald-500 text-white"
+                : "bg-background border-amber-200 text-foreground hover:border-amber-400"
+            }`}
+          >
+            ? To try
+          </button>
+
           {/* Result count */}
-          {(query || minRating > 0 || triedOnly) && (
+          {(query || minRating > 0 || triedOnly || toTryOnly) && (
             <span className="text-xs text-muted-foreground">
               {filtered.length} result{filtered.length !== 1 ? "s" : ""}
             </span>

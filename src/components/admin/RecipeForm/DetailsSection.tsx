@@ -27,7 +27,7 @@ interface DetailsSectionProps {
 
 export function DetailsSection({ control }: DetailsSectionProps) {
   return (
-    <section className="space-y-5">
+    <section className="flex flex-col gap-5">
       <h2 className="text-base font-semibold text-foreground border-b pb-2">
         Details
       </h2>

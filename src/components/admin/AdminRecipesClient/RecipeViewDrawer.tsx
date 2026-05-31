@@ -221,7 +221,7 @@ function RecipeDetailView({
       {recipe.ingredients.length > 0 && (
         <section className="mb-6">
           <h2 className="font-semibold text-foreground mb-3">Ingredients</h2>
-          <ul className="space-y-1.5">
+          <ul className="flex flex-col gap-1.5">
             {recipe.ingredients.map((ri) => (
               <li key={ri.ingredientId} className="text-sm text-foreground flex gap-2">
                 <span className="font-medium text-foreground shrink-0">
@@ -242,7 +242,7 @@ function RecipeDetailView({
       {steps.length > 0 && (
         <section>
           <h2 className="font-semibold text-foreground mb-3">Instructions</h2>
-          <ol className="space-y-4">
+          <ol className="flex flex-col gap-4">
             {steps.map((step, i) => (
               <li key={i} className="flex gap-3 text-sm text-foreground">
                 <span className="flex-none font-semibold text-emerald-600 w-5 text-right">

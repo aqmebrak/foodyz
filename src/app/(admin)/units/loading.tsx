@@ -4,7 +4,7 @@ export default function UnitsLoading() {
   return (
     <div className="p-6 sm:p-8 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <Skeleton className="h-7 w-20" />
           <Skeleton className="h-4 w-16" />
         </div>

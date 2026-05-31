@@ -40,7 +40,7 @@ function SidebarNav({ onNavClick }: { onNavClick?: () => void }) {
         </Link>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
+      <nav className="flex-1 flex flex-col px-3 py-4 gap-0.5">
         {navItems.map(({ href, label, icon: Icon, exact }) => {
           const isActive = exact
             ? pathname === href

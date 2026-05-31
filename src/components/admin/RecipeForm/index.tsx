@@ -80,7 +80,7 @@ export function RecipeForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="p-8 flex flex-col gap-8">
         {serverError && (
           <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">
             {serverError}

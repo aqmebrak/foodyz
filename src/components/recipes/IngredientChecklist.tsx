@@ -37,7 +37,7 @@ export function IngredientChecklist({ ingredients, formatQty }: IngredientCheckl
           {checkedCount} of {ingredients.length} checked
         </p>
       )}
-      <ul className="space-y-2">
+      <ul className="flex flex-col gap-2">
         {ingredients.map((item) => {
           const isChecked = checked.has(item.id);
           const quantity = formatQty

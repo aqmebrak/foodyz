@@ -116,7 +116,7 @@ function FlanForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
           {error}
@@ -124,7 +124,7 @@ function FlanForm({
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-gray-600">Flan name *</label>
           <Input
             value={form.name}
@@ -133,7 +133,7 @@ function FlanForm({
             required
           />
         </div>
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-gray-600">Location *</label>
           <LocationCombobox
             value={form.locationId}
@@ -148,11 +148,11 @@ function FlanForm({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-gray-600">Rating</label>
           <StarRating value={form.rating} onChange={(v) => set("rating", v)} />
         </div>
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-gray-600">Photo</label>
           <Input type="file" accept="image/*" onChange={handlePhoto} disabled={uploading} />
           {uploading && <p className="text-xs text-gray-400">Uploading…</p>}
@@ -175,7 +175,7 @@ function FlanForm({
           <span className="text-sm font-medium text-gray-700">Tried</span>
         </label>
         {form.tried && (
-          <div className="space-y-1 flex-1">
+          <div className="flex flex-col gap-1 flex-1">
             <label className="text-xs font-medium text-gray-600">Date tried</label>
             <Input
               type="date"
@@ -186,7 +186,7 @@ function FlanForm({
         )}
       </div>
 
-      <div className="space-y-1">
+      <div className="flex flex-col gap-1">
         <label className="text-xs font-medium text-gray-600">Comment</label>
         <Textarea
           value={form.comment ?? ""}
@@ -255,7 +255,7 @@ export function FlansClient({ flans, locations: initialLocations }: FlansClientP
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         {flans.length === 0 && !showNew && (
           <p className="text-sm text-gray-400 py-8 text-center">
             No flans yet. Add your first one!
