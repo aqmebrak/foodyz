@@ -12,6 +12,6 @@ setup("authenticate as admin", async ({ page }) => {
   await page.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
   await page.getByRole("button", { name: "Sign in" }).click();
 
-  await page.waitForURL(/\/admin/);
+  await page.waitForURL(/\/recipes/);
   await page.context().storageState({ path: authFile });
 });

@@ -1,40 +1,36 @@
-import { expect,test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+// The (public) route group's grid/browse page was removed in the
+// private-app-unified-recipes pivot — /recipes now serves the admin CRUD
+// table (client-side row clicks, no <a href> per row). The only surviving
+// (public)-layout page is the recipe detail view, reached by a known slug
+// (e.g. shared via the admin "View on site" link) rather than by browsing.
+const KNOWN_SLUG = "gateau-au-chocolat";
 
 test.describe("Public recipe browsing", () => {
-  test("recipes page loads with published recipes", async ({ page }) => {
+  test("admin recipes page loads with recipe rows", async ({ page }) => {
     await page.goto("/recipes");
     await expect(page.getByRole("heading", { name: "Recipes" })).toBeVisible();
-    // At least one recipe link should be visible
-    await expect(
-      page.locator("a[href^='/recipes/']").first()
-    ).toBeVisible();
+    // Header row + at least one data row
+    await expect(page.getByRole("row").nth(1)).toBeVisible();
   });
 
-  test("can open a recipe detail page from the list", async ({ page }) => {
-    await page.goto("/recipes");
-    // Click the first recipe card link
-    await page.locator("a[href^='/recipes/']").first().click();
-    await page.waitForURL(/\/recipes\/.+/);
-    // Recipe title h1 should be visible
+  test("recipe detail page renders", async ({ page }) => {
+    await page.goto(`/recipes/${KNOWN_SLUG}`);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
   test("recipe detail page shows metadata stats", async ({ page }) => {
-    await page.goto("/recipes");
-    await page.locator("a[href^='/recipes/']").first().click();
-    await page.waitForURL(/\/recipes\/.+/);
+    await page.goto(`/recipes/${KNOWN_SLUG}`);
 
-    // Stat labels from the metadata grid
-    await expect(page.getByText("Prep")).toBeVisible();
-    await expect(page.getByText("Cook")).toBeVisible();
-    await expect(page.getByText("Serves")).toBeVisible();
-    await expect(page.getByText("Level")).toBeVisible();
+    // Stats grid always shows servings and a difficulty badge; Prep/Cook are
+    // conditionally rendered only when the recipe has a nonzero time.
+    await expect(page.getByText(/servings$/).first()).toBeVisible();
+    await expect(page.getByText(/^(Easy|Medium|Hard)$/)).toBeVisible();
   });
 
   test("recipe detail page shows ingredients and steps", async ({ page }) => {
-    await page.goto("/recipes");
-    await page.locator("a[href^='/recipes/']").first().click();
-    await page.waitForURL(/\/recipes\/.+/);
+    await page.goto(`/recipes/${KNOWN_SLUG}`);
 
     // RecipeClientContent renders these sections
     await expect(
@@ -49,16 +45,12 @@ test.describe("Public recipe browsing", () => {
     page,
   }) => {
     await page.goto("/recipes/this-recipe-does-not-exist-xyz-999");
-    // Next.js not-found pages typically contain "not found" text
     await expect(
       page.getByText(/not found/i)
     ).toBeVisible({ timeout: 10_000 });
   });
 
   test("homepage loads", async ({ page }) => {
-    await page.goto("/");
-    await expect(page).toHaveTitle(/.+/);
-    // No uncaught errors — page should respond with 200
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
   });

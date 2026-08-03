@@ -129,8 +129,8 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 
 ### Models & Relationships
 
-- **`Recipe`** → belongs to `Category`, has many `RecipeIngredient`, `RecipeTag`, `RecipeImage`
-- **`Category`** → has many `Recipe`
+- **`Recipe`** → has many `RecipeIngredient`, `RecipeTag`, `RecipeImage` (organized by tags, not categories)
+- **`Category`** → standalone entity with its own CRUD at `/categories`; not linked to `Recipe` (relation removed in migration `20260309000000_remove_category_from_recipe`)
 - **`Ingredient`** → linked via `RecipeIngredient` junction (stores `quantity`, `unit`, `notes`, `order`); unit linked to `Unit` table via `IngredientUnit` junction
 - **`Unit`** → standard units for ingredient quantities, with conversion factors for scaling recipes
 - **`Tag`** → linked via `RecipeTag` junction (many-to-many)
