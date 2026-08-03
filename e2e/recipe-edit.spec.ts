@@ -4,14 +4,14 @@ test.describe("Recipe edit form", () => {
   async function openFirstRecipePanel(
     page: import("@playwright/test").Page
   ) {
-    await page.goto("/admin/recipes");
-    // Click the first data row to open the inline side panel
+    await page.goto("/recipes");
+    // Click the first data row to open the view drawer
     await page.getByRole("row").nth(1).click();
-    // Wait for the edit panel heading (appears immediately on row click)
-    await expect(
-      page.getByRole("heading", { name: "Edit recipe" })
-    ).toBeVisible({ timeout: 10_000 });
-    // Wait for the async recipe fetch to complete (RecipeForm renders its SaveBar)
+    // Wait for the async recipe fetch to complete, enabling the Edit button
+    const editButton = page.getByRole("button", { name: "Edit" });
+    await expect(editButton).toBeEnabled({ timeout: 15_000 });
+    await editButton.click();
+    // Wait for RecipeForm to mount in edit mode (renders its SaveBar)
     await expect(
       page.getByRole("button", { name: "Save changes" }).first()
     ).toBeVisible({ timeout: 15_000 });
@@ -69,7 +69,7 @@ test.describe("Recipe edit form", () => {
       timeout: 5_000,
     });
     // After save, server action redirects back to the recipe list
-    await expect(page).toHaveURL(/\/admin\/recipes/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/recipes/, { timeout: 10_000 });
   });
 
   test("shows ingredient rows pre-populated", async ({ page }) => {

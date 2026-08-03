@@ -2,7 +2,7 @@ import { expect,test } from "@playwright/test";
 
 test.describe("Recipe creation form", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/admin/recipes/new");
+    await page.goto("/recipes/new");
   });
 
   test("auto-generates slug from title", async ({ page }) => {
@@ -21,23 +21,10 @@ test.describe("Recipe creation form", () => {
     await expect(slug).toHaveValue("second-title-here");
   });
 
-  test("shows validation error when category is not selected", async ({
-    page,
-  }) => {
-    await page.getByLabel("Title").fill("Incomplete Recipe");
-    // Instructions textarea has no FormLabel — use placeholder
-    await page.getByPlaceholder(/Describe each step/).fill("Some instructions.");
-    await page.getByRole("button", { name: "Create recipe" }).first().click();
-    await expect(page.getByText(/required/i)).toBeVisible();
-  });
-
   test("shows validation error when instructions are empty", async ({
     page,
   }) => {
     await page.getByLabel("Title").fill("No Instructions Recipe");
-    // Category select: FormLabel "Category" is associated via htmlFor/id
-    await page.getByLabel("Category").click();
-    await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create recipe" }).first().click();
     await expect(page.getByText("Instructions are required")).toBeVisible();
   });
@@ -49,10 +36,6 @@ test.describe("Recipe creation form", () => {
 
     await page.getByLabel("Title").fill(uniqueTitle);
     await page.getByLabel("Description").fill("Created by Playwright E2E test.");
-
-    // Category (index 0 among [data-slot="select-trigger"])
-    await page.getByLabel("Category").click();
-    await page.getByRole("option").first().click();
 
     await page.getByLabel("Prep time (min)").fill("10");
     await page.getByLabel("Cook time (min)").fill("20");
@@ -70,7 +53,7 @@ test.describe("Recipe creation form", () => {
 
     await page.getByRole("button", { name: "Create recipe" }).first().click();
 
-    await page.waitForURL(/\/admin\/recipes$/);
+    await page.waitForURL(/\/recipes$/);
     await expect(page.getByText(uniqueTitle)).toBeVisible();
   });
 

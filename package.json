@@ -40,16 +40,6 @@
     "vaul": "^1.1.2",
     "zod": "^4.4.3"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@prisma/client",
-      "@prisma/engines",
-      "esbuild",
-      "prisma",
-      "sharp",
-      "unrs-resolver"
-    ]
-  },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
