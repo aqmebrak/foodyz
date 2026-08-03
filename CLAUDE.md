@@ -4,7 +4,11 @@
 
 ## Project Overview
 
-Foodyz is a recipe website with a public-facing browsing experience and a protected `/admin` backoffice for full CRUD management of recipes, categories, and ingredients.
+Foodyz is a personal recipe manager. The entire app sits behind login (Auth.js) — there is no anonymous public browsing. Two route groups exist for layout purposes only, not for access control:
+- `(public)` — marketing-style layout (`Header`/`Footer`), currently just the recipe detail page (`/recipes/[slug]`)
+- `(admin)` — sidebar-shell layout, hosting CRUD screens for recipes, categories, ingredients, units, and flans, plus the personal `/flan` tasting-map page
+
+Also includes `/flan`, a personal flan (custard tart) tasting map around Lyon with rated locations on a Leaflet map.
 
 ---
 
@@ -17,7 +21,7 @@ Foodyz is a recipe website with a public-facing browsing experience and a protec
 - **TailwindCSS v4**
 - **Prisma 6** — database access layer
 - **PostgreSQL** — primary database (Vercel Postgres via Prisma Accelerate)
-- **Auth.js v5** (next-auth beta) — admin route protection
+- **Auth.js v5** (next-auth beta) — protects the whole app; only `/login` and `/api/auth/*` are unauthenticated
 - **Vercel Blob** — photo/image storage
 - **pnpm** — package manager (always use pnpm, never npm or yarn)
 - **Vercel** — deployment target
@@ -33,55 +37,45 @@ foodyz/
 ├── .env                         # gitignored — never commit
 ├── .env.example                 # committed env template
 ├── next.config.ts
-├── tailwind.config.ts
 ├── tsconfig.json
 ├── prisma/
 │   ├── schema.prisma
 │   ├── seed.ts
 │   └── migrations/              # never edit manually
+├── e2e/                         # Playwright specs (auth.setup.ts writes e2e/.auth/user.json)
 ├── public/
 │   └── images/                  # recipe and category images stored in repo
 │       ├── recipes/
 │       └── categories/
 └── src/
-    ├── proxy.ts                  # Next.js 16 proxy (replaces middleware.ts) — protects /admin/*
+    ├── proxy.ts                  # Next.js 16 proxy (replaces middleware.ts) — requires auth on every route except /login and /api/auth/*
     ├── app/
     │   ├── layout.tsx            # Root layout (html, body, fonts)
     │   ├── globals.css
+    │   ├── page.tsx               # "/" — redirects to /recipes
     │   ├── login/page.tsx
     │   ├── robots.ts
     │   ├── sitemap.ts
     │   ├── api/auth/[...nextauth]/route.ts
-    │   ├── (public)/             # Public-facing route group
-    │   │   ├── page.tsx          # Homepage
+    │   ├── (public)/             # Header/Footer layout group (still auth-gated by proxy)
     │   │   ├── layout.tsx
-    │   │   ├── recipes/
-    │   │   │   ├── page.tsx      # /recipes — browse all
-    │   │   │   └── [slug]/
-    │   │   │       └── page.tsx  # /recipes/[slug]
-    │   │   ├── categories/
-    │   │   │   └── [slug]/
-    │   │   │       └── page.tsx
-    │   │   └── flan/
-    │   │       └── page.tsx      # /flan — personal flan tasting map
-    │   └── (admin)/              # Backoffice route group
-    │       ├── layout.tsx        # Admin shell layout (sidebar)
-    │       └── admin/
-    │           ├── page.tsx      # Dashboard
-    │           ├── recipes/
-    │           │   ├── page.tsx
-    │           │   ├── new/page.tsx
-    │           │   └── [id]/page.tsx
-    │           ├── categories/page.tsx
-    │           ├── ingredients/page.tsx
-    │           ├── units/page.tsx
-    │           └── flans/page.tsx
+    │   │   └── recipes/[slug]/page.tsx   # recipe detail view
+    │   └── (admin)/              # Sidebar-shell layout group — CRUD screens
+    │       ├── layout.tsx
+    │       ├── recipes/
+    │       │   ├── page.tsx      # /recipes — admin CRUD table
+    │       │   └── new/page.tsx
+    │       ├── categories/page.tsx
+    │       ├── ingredients/page.tsx
+    │       ├── units/page.tsx
+    │       ├── flans/page.tsx    # /flans — admin CRUD for flans + pastry locations
+    │       └── flan/page.tsx     # /flan — personal flan tasting map (admin layout, non-CRUD content)
     ├── components/
     │   ├── ui/                   # shadcn/ui primitives — do not edit directly
     │   ├── layout/               # Header, Footer
     │   ├── recipes/              # RecipeCard, RecipeGrid, RecipeClientContent, IngredientChecklist
     │   ├── admin/                # AdminSidebar, FlansClient, CategoriesClient, IngredientsClient,
-    │   │                         # UnitsClient, AdminRecipesClient, ConfirmDialog
+    │   │                         # UnitsClient, AdminRecipesClient/, ConfirmDialog
     │   │                         # RecipeForm/ (sub-components + IngredientCombobox)
     │   ├── flan/                 # FlanMap, FlanPageClient, FlanMapWrapper, LocationCombobox
     │   └── shared/               # Breadcrumbs, Pagination, SearchBar
@@ -102,8 +96,8 @@ foodyz/
     │   ├── flan.ts               # Flan + PastryLocation CRUD, photo upload via Vercel Blob
     │   └── auth.ts
     ├── hooks/
-    │   ├── use-debounce.ts
-    │   └── use-wake-lock.ts      # Screen Wake Lock API for recipe pages
+    │   └── use-debounce.ts
+    ├── __tests__/                # Vitest unit tests (actions/*.test.ts, setup.ts)
     └── types/
         └── index.ts
 ```
@@ -162,7 +156,7 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - **Validate with Zod first.** Every Server Action must validate its inputs with a Zod schema before calling Prisma.
 - **Revalidate after mutations.** Call `revalidatePath()` or `revalidateTag()` after every create/update/delete.
 - **Form state with hooks.** Use `useFormState` + `useFormStatus` for loading and error states in Client Components.
-- **Auth at the proxy level.** `src/proxy.ts` (Next.js 16 rename of `middleware.ts`) protects all `/admin/*` routes. Auth config is split: `auth.config.ts` (Edge-safe, no DB) used by proxy; `auth.ts` (Node.js, Credentials + Prisma) used by server components. Never put auth checks inside individual admin pages.
+- **Auth at the proxy level.** `src/proxy.ts` (Next.js 16 rename of `middleware.ts`) requires a session on every route except `/login` and `/api/auth/*` — the whole app is private, not just `/admin`. Auth config is split: `auth.config.ts` (Edge-safe, no DB) used by proxy; `auth.ts` (Node.js, Credentials + Prisma) used by server components. Never put auth checks inside individual pages.
 - **Leaflet maps in client components only.** Use `next/dynamic(..., { ssr: false })` inside a `"use client"` file — not in Server Components.
 
 ---
@@ -202,8 +196,8 @@ Document all of these in `.env.example`:
 ```bash
 DATABASE_URL=      # PostgreSQL connection string (pooled — used at runtime)
 DIRECT_URL=        # Direct (non-pooled) connection string (used by Prisma migrations)
-NEXTAUTH_SECRET=   # Random secret for Auth.js session signing
-NEXTAUTH_URL=      # Full base URL — http://localhost:3000 locally
+AUTH_SECRET=       # Random secret for Auth.js session signing — generate with `openssl rand -base64 32`
+AUTH_URL=          # Full base URL — http://localhost:3000 locally
 ADMIN_EMAIL=       # Seeded admin account email
 ADMIN_PASSWORD=    # Seeded admin account password
 BLOB_READ_WRITE_TOKEN=  # Vercel Blob token for photo uploads
