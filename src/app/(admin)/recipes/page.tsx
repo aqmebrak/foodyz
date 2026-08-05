@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { getAllIngredients, getAllRecipesAdmin, getAllTags, getAllUnits } from "@/actions/recipe";
 import { AdminRecipesClient } from "@/components/admin/AdminRecipesClient";
@@ -14,11 +15,13 @@ export default async function AdminRecipesPage() {
   ]);
 
   return (
-    <AdminRecipesClient
-      recipes={recipes}
-      tags={tags}
-      ingredients={ingredients}
-      units={units}
-    />
+    <Suspense>
+      <AdminRecipesClient
+        recipes={recipes}
+        tags={tags}
+        ingredients={ingredients}
+        units={units}
+      />
+    </Suspense>
   );
 }

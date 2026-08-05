@@ -81,7 +81,7 @@ export function RecipeTable({ allCount, filtered, selectedId, hasFilters, onRowC
                   </div>
                 )}
               </TableCell>
-              <TableCell className="font-medium">
+              <TableCell className="font-medium whitespace-normal wrap-break-word">
                 <div className="flex flex-col gap-1">
                   <span>{recipe.title}</span>
                   <span className="sm:hidden">

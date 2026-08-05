@@ -210,19 +210,7 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 - [] **17.3** Add client-side image compression before uploading to reduce file size and improve upload times on mobile networks. This can be implemented using a library like `browser-image-compression` to compress images in the browser before they are sent to the server.
 - [] **17.4** On the public recipe list, when using pagination make scroll to top
 
----
-
-## Quick Reference
-
-| Phase | Focus | Key files touched |
-|---|---|---|
-| 1 | Scaffolding | `package.json`, `tsconfig.json`, `next.config.ts`, `lib/utils.ts` |
-| 2 | Database | `prisma/schema.prisma`, `lib/db.ts`, `prisma/seed.ts` |
-| 3 | Auth | `lib/auth.ts`, `middleware.ts`, `app/login/page.tsx` |
-| 4 | Layouts | `app/layout.tsx`, `(admin)/layout.tsx`, layout components |
-| 5 | Public site | `(public)/` pages, `RecipeCard`, `RecipeGrid` |
-| 6 | Admin recipes | `actions/recipe.ts`, `RecipeForm`, admin recipe pages |
-| 7 | Admin lookups | `actions/category.ts`, `actions/ingredient.ts`, admin pages |
-| 8 | UX polish | `loading.tsx`, `error.tsx`, `Pagination`, `SearchBar` |
-| 9 | Deployment | Vercel project, env vars, production DB migration |
-| 10 | Hardening | sitemap, OG images, rate limiting, tests |
+## Phase 18 - 
+- [x] **18.1** When opening a recipe I want the URL to be updated with the recipe slug so that I can share the link to a specific recipe.
+- [x] **18.2** on mobile remove scroll on the recipe table, we should be able to see everything without having to scroll
+- [x] **18.3** Verify dark mode is working correctly: for a text it has to be white, I see the Recipes title does not work even with dark:text-white

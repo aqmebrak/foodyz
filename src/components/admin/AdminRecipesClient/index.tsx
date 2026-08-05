@@ -2,7 +2,8 @@
 
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { getRecipeForAdmin } from "@/actions/recipe";
 import type { Ingredient, Tag, Unit } from "@/components/admin/RecipeForm/types";
@@ -22,6 +23,10 @@ interface AdminRecipesClientProps {
 }
 
 export function AdminRecipesClient({ recipes, tags, ingredients, units }: AdminRecipesClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [query, setQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
   const [difficulty, setDifficulty] = useState("");
@@ -50,12 +55,7 @@ export function AdminRecipesClient({ recipes, tags, ingredients, units }: AdminR
 
   const hasFilters = !!(query || selectedTag || difficulty || status || maxPrepTime || maxCookTime || maxServings);
 
-  async function handleRowClick(id: string) {
-    if (selectedId === id) {
-      setSelectedId(null);
-      setSelectedRecipe(null);
-      return;
-    }
+  async function openRecipe(id: string) {
     setSelectedId(id);
     setLoadingDrawer(true);
     const recipe = await getRecipeForAdmin(id);
@@ -63,9 +63,29 @@ export function AdminRecipesClient({ recipes, tags, ingredients, units }: AdminR
     setLoadingDrawer(false);
   }
 
+  // Open the recipe named in the URL (?recipe=<slug>) on load, so drawer links are shareable
+  useEffect(() => {
+    const slug = searchParams.get("recipe");
+    if (!slug) return;
+    const match = recipes.find((r) => r.slug === slug);
+    if (match) openRecipe(match.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleRowClick(id: string) {
+    if (selectedId === id) {
+      closeDrawer();
+      return;
+    }
+    const slug = recipes.find((r) => r.id === id)?.slug;
+    router.replace(slug ? `${pathname}?recipe=${slug}` : pathname, { scroll: false });
+    await openRecipe(id);
+  }
+
   function closeDrawer() {
     setSelectedId(null);
     setSelectedRecipe(null);
+    router.replace(pathname, { scroll: false });
   }
 
   return (
