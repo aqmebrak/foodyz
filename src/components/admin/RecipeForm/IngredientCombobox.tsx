@@ -182,7 +182,7 @@ export const IngredientCombobox = forwardRef<
             placeholder="Search ingredients"
             aria-label="Search ingredients"
             autoComplete="off"
-            className="h-11 w-full rounded-lg border border-steam bg-white pl-9 pr-3 text-base text-ink outline-none focus-visible:ring-2 focus-visible:ring-basil"
+            className="h-11 w-full rounded-lg border border-steam bg-card pl-9 pr-3 text-base text-ink outline-none focus-visible:ring-2 focus-visible:ring-basil"
           />
         </div>
       </div>
@@ -255,7 +255,7 @@ export const IngredientCombobox = forwardRef<
             aria-label="New ingredient name"
             autoCapitalize="none"
             autoCorrect="off"
-            className="h-11 w-full rounded-lg border border-steam bg-white px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-basil"
+            className="h-11 w-full rounded-lg border border-steam bg-card px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-basil"
           />
           {createError && <p className="text-sm text-paprika">{createError}</p>}
           <div className="flex gap-2">
@@ -297,7 +297,7 @@ export const IngredientCombobox = forwardRef<
           setCreating(false);
         }}
         className={cn(
-          "flex h-11 w-full cursor-pointer items-center justify-between rounded-lg border border-steam bg-white px-3 text-base text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil data-[invalid]:border-paprika",
+          "flex h-11 w-full cursor-pointer items-center justify-between rounded-lg border border-steam bg-card px-3 text-base text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil data-[invalid]:border-paprika",
           !selected && "text-ink/50",
         )}
       >
@@ -327,7 +327,7 @@ export const IngredientCombobox = forwardRef<
         </Drawer>
       ) : (
         open && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-steam bg-white shadow-lg">
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-steam bg-card shadow-lg">
             {panel}
           </div>
         )

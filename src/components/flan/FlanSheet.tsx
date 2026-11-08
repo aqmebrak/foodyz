@@ -83,7 +83,7 @@ export function FlanSheet({ metrics, snapIndex, onSnapIndexChange, header, child
           aria-describedby={undefined}
           style={{ height: metrics.vh }}
           className={cn(
-            "fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-2xl border-t border-steam bg-white shadow-[0_-4px_16px_rgba(28,36,32,0.12)] outline-none md:hidden",
+            "fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-2xl border-t border-steam bg-card shadow-[0_-4px_16px_rgba(28,36,32,0.12)] outline-none md:hidden",
             "motion-reduce:!transition-none",
           )}
         >

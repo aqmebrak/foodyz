@@ -123,7 +123,7 @@ export function LocationCombobox({
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-gray-200 rounded-md shadow-lg overflow-hidden">
           {/* Search */}
           <div className="p-2 border-b border-gray-100">
             <div className="relative">

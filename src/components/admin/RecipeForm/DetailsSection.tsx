@@ -49,8 +49,8 @@ export function DetailsSection({ control }: DetailsSectionProps) {
                     className={cn(
                       "h-11 rounded-lg border text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil",
                       active
-                        ? "border-basil bg-basil text-white"
-                        : "border-steam bg-white text-ink hover:bg-enamel",
+                        ? "border-basil bg-basil text-on-basil"
+                        : "border-steam bg-card text-ink hover:bg-enamel",
                     )}
                   >
                     {o.label}
@@ -129,7 +129,7 @@ export function DetailsSection({ control }: DetailsSectionProps) {
         control={control}
         name="published"
         render={({ field }) => (
-          <FormItem className="flex min-h-11 flex-row items-center justify-between gap-3 rounded-xl border border-steam bg-white px-4 py-2">
+          <FormItem className="flex min-h-11 flex-row items-center justify-between gap-3 rounded-xl border border-steam bg-card px-4 py-2">
             <div className="flex flex-col gap-0.5">
               <FormLabel className="text-base">Published</FormLabel>
               <FormDescription className="text-xs">
@@ -140,7 +140,7 @@ export function DetailsSection({ control }: DetailsSectionProps) {
               <Switch
                 checked={field.value}
                 onCheckedChange={field.onChange}
-                className="h-7 w-12 data-[state=checked]:bg-basil [&>span]:size-6"
+                className="relative data-[size=default]:h-7 data-[size=default]:w-12 data-[state=checked]:bg-basil before:absolute before:-inset-2 before:content-[''] [&>span]:size-6!"
               />
             </FormControl>
           </FormItem>

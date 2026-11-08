@@ -114,13 +114,13 @@ export function PasteIngredientsSheet({
             aria-label="Ingredient list"
             rows={5}
             autoCapitalize="none"
-            className="min-h-32 rounded-lg border-steam bg-white text-base text-ink"
+            className="min-h-32 rounded-lg border-steam bg-card text-base text-ink"
           />
 
           {parsed.length > 0 && (
             <ul
               aria-label="Preview"
-              className="divide-y divide-steam rounded-xl border border-steam bg-white"
+              className="divide-y divide-steam rounded-xl border border-steam bg-card"
             >
               {parsed.map((row, i) => {
                 const unit = units.find((u) => u.id === row.unitId);
@@ -163,7 +163,7 @@ export function PasteIngredientsSheet({
             type="button"
             onClick={handleAdd}
             disabled={count === 0 || isPending}
-            className="h-12 w-full bg-basil text-base text-white hover:bg-basil/90"
+            className="h-12 w-full bg-basil text-base text-on-basil hover:bg-basil/90"
           >
             {isPending && <Loader2 className="size-4 animate-spin" />}
             {count === 1 ? "Add 1 ingredient" : `Add ${count} ingredients`}

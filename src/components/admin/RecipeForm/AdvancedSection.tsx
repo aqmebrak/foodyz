@@ -17,7 +17,7 @@ interface AdvancedSectionProps {
 
 export function AdvancedSection({ control }: AdvancedSectionProps) {
   return (
-    <details className="group rounded-xl border border-steam bg-white">
+    <details className="group rounded-xl border border-steam bg-card">
       <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-4 text-base font-medium text-ink [&::-webkit-details-marker]:hidden">
         Advanced
         <span className="text-ink/50 transition-transform group-open:rotate-90" aria-hidden>

@@ -22,7 +22,7 @@ export function DraftBanner({ savedAt, onRestore, onDiscard }: DraftBannerProps)
         You have an unsaved draft from {formatRelativeTime(savedAt, now)}
       </p>
       <div className="flex gap-2">
-        <Button type="button" onClick={onRestore} className="h-11 bg-basil px-5 text-white hover:bg-basil/90">
+        <Button type="button" onClick={onRestore} className="h-11 bg-basil px-5 text-on-basil hover:bg-basil/90">
           Restore
         </Button>
         <Button type="button" variant="ghost" onClick={onDiscard} className="h-11 px-5">

@@ -44,7 +44,7 @@ export function TimerStack({ timers, onCancel }: { timers: CookTimer[]; onCancel
             role={v.done ? "alert" : undefined}
             className={cn(
               "flex h-12 shrink-0 items-center gap-1 rounded-full border pl-4 pr-0.5 text-base font-semibold tabular-nums",
-              v.done ? "border-yolk bg-yolk text-ink motion-safe:animate-pulse" : "border-steam bg-white",
+              v.done ? "border-yolk bg-yolk text-ink motion-safe:animate-pulse" : "border-steam bg-card",
             )}
           >
             <span>{v.done ? `${t.label} done` : formatCountdown(v.remainingSeconds)}</span>
@@ -85,8 +85,8 @@ export function StepTimerChip({
         v
           ? v.done
             ? "border-yolk bg-yolk text-ink motion-safe:animate-pulse"
-            : "border-basil bg-basil text-white"
-          : "border-basil bg-white text-basil",
+            : "border-basil bg-basil text-on-basil"
+          : "border-basil bg-card text-basil",
       )}
     >
       <span aria-hidden>⏲</span>
@@ -112,7 +112,7 @@ export function TimerBarChip({ timers, onOpen }: { timers: CookTimer[]; onOpen: 
         "flex h-14 shrink-0 items-center gap-2 rounded-xl border-2 px-4 text-lg font-bold tabular-nums",
         anyDone
           ? "border-yolk bg-yolk text-ink motion-safe:animate-pulse"
-          : "border-basil bg-white text-basil",
+          : "border-basil bg-card text-basil",
       )}
     >
       <span aria-hidden>⏲</span>

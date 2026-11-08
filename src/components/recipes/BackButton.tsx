@@ -30,7 +30,7 @@ export function BackButton({ className }: BackButtonProps) {
       onClick={goBack}
       aria-label="Back to recipes"
       className={cn(
-        "flex size-11 items-center justify-center rounded-full bg-white/85 text-ink shadow-sm backdrop-blur transition-colors hover:bg-white md:border md:border-steam",
+        "flex size-11 items-center justify-center rounded-full bg-card/85 text-ink shadow-sm backdrop-blur transition-colors hover:bg-card md:border md:border-steam",
         className,
       )}
     >

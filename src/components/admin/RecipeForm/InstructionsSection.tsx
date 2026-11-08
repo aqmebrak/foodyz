@@ -115,7 +115,7 @@ function StepsEditor({
         <li key={item.id} className="flex gap-3">
           <span
             aria-hidden
-            className="mt-2 flex size-8 shrink-0 items-center justify-center rounded-full bg-basil text-sm font-semibold tabular-nums text-white"
+            className="mt-2 flex size-8 shrink-0 items-center justify-center rounded-full bg-basil text-sm font-semibold tabular-nums text-on-basil"
           >
             {index + 1}
           </span>
@@ -132,7 +132,7 @@ function StepsEditor({
               value={item.text}
               rows={3}
               placeholder={index === 0 ? "Describe this step" : undefined}
-              className="min-h-[5.5rem] bg-white text-[17px] leading-relaxed md:text-[17px]"
+              className="min-h-[5.5rem] bg-card text-[17px] leading-relaxed md:text-[17px]"
               onChange={(e) => updateText(item.id, e.target.value)}
               onPaste={(e) => handlePaste(e, index)}
               onBlur={onBlur}

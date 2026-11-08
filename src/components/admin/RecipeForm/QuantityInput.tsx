@@ -68,7 +68,7 @@ export function QuantityInput({
         onChange(n);
       }}
       className={cn(
-        "h-11 w-full rounded-lg border border-steam bg-white px-3 text-base tabular-nums text-ink outline-none focus-visible:ring-2 focus-visible:ring-basil",
+        "h-11 w-full rounded-lg border border-steam bg-card px-3 text-base tabular-nums text-ink outline-none focus-visible:ring-2 focus-visible:ring-basil",
         "aria-invalid:border-paprika",
       )}
     />

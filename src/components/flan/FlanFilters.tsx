@@ -13,8 +13,8 @@ interface FlanFiltersProps {
 
 const chipClass =
   "inline-flex h-11 shrink-0 cursor-pointer items-center justify-center rounded-full border px-4 text-sm font-medium shadow-sm transition-colors";
-const chipOff = "border-steam bg-white text-ink hover:border-ink/30";
-const chipOn = "border-basil bg-basil text-white";
+const chipOff = "border-steam bg-card text-ink hover:border-ink/30";
+const chipOn = "border-basil bg-basil text-on-basil";
 
 export function FlanFilters({ value, onChange }: FlanFiltersProps) {
   const [expanded, setExpanded] = useState(false);
@@ -48,7 +48,7 @@ export function FlanFilters({ value, onChange }: FlanFiltersProps) {
           placeholder="Search by name or location…"
           aria-label="Search flans"
           autoFocus={expanded}
-          className="h-11 w-64 rounded-full border border-steam bg-white pl-10 pr-10 text-base text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-basil"
+          className="h-11 w-64 rounded-full border border-steam bg-card pl-10 pr-10 text-base text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-basil"
         />
         {showInput && (
           <button

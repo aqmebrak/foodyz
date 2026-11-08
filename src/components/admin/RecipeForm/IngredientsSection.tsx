@@ -62,7 +62,7 @@ function NotesField({
                 aria-label="Note"
                 {...field}
                 value={field.value ?? ""}
-                className="h-11 rounded-lg border-steam bg-white text-base"
+                className="h-11 rounded-lg border-steam bg-card text-base"
               />
             </FormControl>
           </FormItem>
@@ -112,7 +112,7 @@ export function IngredientsSection({
         {fields.map((field, index) => (
           <div
             key={field.id}
-            className="flex flex-col gap-2 rounded-xl border border-steam bg-white p-3"
+            className="flex flex-col gap-2 rounded-xl border border-steam bg-card p-3"
           >
             <FormField
               control={control}
@@ -172,7 +172,7 @@ export function IngredientsSection({
                         <FormControl>
                           <SelectTrigger
                             aria-label="Unit"
-                            className="w-full rounded-lg border-steam bg-white text-base data-[size=default]:h-11"
+                            className="w-full rounded-lg border-steam bg-card text-base data-[size=default]:h-11"
                           >
                             <SelectValue placeholder="Unit" />
                           </SelectTrigger>
@@ -240,7 +240,7 @@ export function IngredientsSection({
           type="button"
           variant="outline"
           onClick={handleAppend}
-          className="h-11 flex-1 rounded-lg border-steam bg-white text-base"
+          className="h-11 flex-1 rounded-lg border-steam bg-card text-base"
         >
           <Plus className="mr-1.5 size-4" />
           Add ingredient
@@ -249,7 +249,7 @@ export function IngredientsSection({
           type="button"
           variant="outline"
           onClick={() => setPasteOpen(true)}
-          className="h-11 flex-1 rounded-lg border-steam bg-white text-base"
+          className="h-11 flex-1 rounded-lg border-steam bg-card text-base"
         >
           <ClipboardList className="mr-1.5 size-4" />
           Paste a list

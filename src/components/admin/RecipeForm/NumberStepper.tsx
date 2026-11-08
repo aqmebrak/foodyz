@@ -20,7 +20,7 @@ interface NumberStepperProps {
 }
 
 const buttonClass =
-  "flex size-11 shrink-0 items-center justify-center rounded-lg border border-steam bg-white text-ink transition-colors hover:bg-enamel active:bg-steam disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil";
+  "flex size-11 shrink-0 items-center justify-center rounded-lg border border-steam bg-card text-ink transition-colors hover:bg-enamel active:bg-steam disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil";
 
 export function NumberStepper({
   id,
@@ -68,7 +68,7 @@ export function NumberStepper({
             onChange(digits === "" ? "" : Number(digits));
           }}
           className={cn(
-            "h-11 w-full rounded-lg border border-steam bg-white px-2 text-center text-base tabular-nums text-ink outline-none focus-visible:ring-2 focus-visible:ring-basil",
+            "h-11 w-full rounded-lg border border-steam bg-card px-2 text-center text-base tabular-nums text-ink outline-none focus-visible:ring-2 focus-visible:ring-basil",
             suffix && "pr-9",
             "aria-invalid:border-paprika",
           )}

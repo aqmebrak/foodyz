@@ -44,7 +44,7 @@ export function IngredientChecklist({
               <span
                 className={cn(
                   "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors",
-                  isChecked ? "border-basil bg-basil text-white" : "border-ink/30 bg-white",
+                  isChecked ? "border-basil bg-basil text-on-basil" : "border-ink/30 bg-card",
                 )}
               >
                 {isChecked && <Check className="size-4" strokeWidth={3} />}

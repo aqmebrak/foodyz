@@ -42,8 +42,8 @@ function Chip({ active, onClick, children, className }: ChipProps) {
         className={cn(
           "flex h-[38px] items-center rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors",
           active
-            ? "border-basil bg-basil text-white"
-            : "border-steam bg-white text-ink group-active:bg-steam/60",
+            ? "border-basil bg-basil text-on-basil"
+            : "border-steam bg-card text-ink group-active:bg-steam/60",
         )}
       >
         {children}
@@ -80,7 +80,7 @@ export function RecipeFilters({ filters, tags, resultCount, onChange, onClear }:
           onChange={(e) => onChange({ q: e.target.value })}
           placeholder="Search recipes or ingredients"
           aria-label="Search recipes or ingredients"
-          className="h-12 w-full rounded-full border border-steam bg-white pl-12 pr-12 text-base text-ink outline-none placeholder:text-ink/50 focus-visible:border-basil focus-visible:ring-[3px] focus-visible:ring-basil/30 [&::-webkit-search-cancel-button]:hidden"
+          className="h-12 w-full rounded-full border border-steam bg-card pl-12 pr-12 text-base text-ink outline-none placeholder:text-ink/50 focus-visible:border-basil focus-visible:ring-[3px] focus-visible:ring-basil/30 [&::-webkit-search-cancel-button]:hidden"
         />
         {filters.q && (
           <button
@@ -162,7 +162,7 @@ export function RecipeFilters({ filters, tags, resultCount, onChange, onClear }:
             </Button>
             <Button
               type="button"
-              className="h-12 flex-[2] rounded-full bg-basil text-base text-white hover:bg-basil/90"
+              className="h-12 flex-[2] rounded-full bg-basil text-base text-on-basil hover:bg-basil/90"
               onClick={() => setSheetOpen(false)}
             >
               {`Show ${resultCount} ${resultCount === 1 ? "recipe" : "recipes"}`}

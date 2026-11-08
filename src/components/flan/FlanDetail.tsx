@@ -80,7 +80,7 @@ export function FlanDetail({ flan, onBack }: FlanDetailProps) {
           href={flan.location.mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-basil px-4 text-base font-medium text-white transition-colors hover:bg-basil/90"
+          className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-basil px-4 text-base font-medium text-on-basil transition-colors hover:bg-basil/90"
         >
           <MapPin className="size-4" />
           Open in Google Maps

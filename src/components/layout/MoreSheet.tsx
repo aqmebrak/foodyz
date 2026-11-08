@@ -22,7 +22,7 @@ const links = [
 ];
 
 const rowClass =
-  "flex min-h-12 w-full items-center gap-3 rounded-md px-3 text-base text-ink hover:bg-enamel";
+  "flex min-h-12 w-full items-center gap-3 rounded-md px-3 text-base text-ink hover:bg-enamel focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-basil";
 
 interface MoreSheetProps {
   itemClass: string;

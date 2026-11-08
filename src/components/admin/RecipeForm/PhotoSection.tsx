@@ -54,7 +54,7 @@ export function PhotoSection({
               className="object-cover"
             />
             {uploading && (
-              <div className="absolute inset-0 flex items-center justify-center gap-2 bg-ink/50 text-white">
+              <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 text-white">
                 <Loader2 className="size-5 animate-spin" />
                 <span className="text-sm font-medium">Uploading…</span>
               </div>
@@ -85,7 +85,7 @@ export function PhotoSection({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-steam bg-white text-ink/60 transition-colors hover:bg-enamel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil"
+          className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-steam bg-card text-ink/60 transition-colors hover:bg-enamel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil"
         >
           <Camera className="size-8" />
           <span className="text-base font-medium">Add a photo</span>

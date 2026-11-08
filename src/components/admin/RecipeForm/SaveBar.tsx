@@ -33,7 +33,7 @@ export function SaveBar({ isPending, isEdit, disabled, error }: SaveBarProps) {
       <Button
         type="submit"
         disabled={isPending || disabled}
-        className="h-12 w-full bg-basil text-base font-semibold text-white hover:bg-basil/90"
+        className="h-12 w-full bg-basil text-base font-semibold text-on-basil hover:bg-basil/90"
       >
         {isPending ? (
           <>

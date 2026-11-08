@@ -49,7 +49,7 @@ function SidebarNav() {
                   className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-basil text-white"
+                  ? "bg-basil text-on-basil"
                   : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
             >
@@ -77,7 +77,7 @@ function SidebarNav() {
 
 export function AdminSidebar() {
   return (
-    <aside className="hidden md:flex w-56 min-h-screen bg-ink flex-col shrink-0">
+    <aside className="hidden md:flex w-56 min-h-screen bg-panel flex-col shrink-0">
       <SidebarNav />
     </aside>
   );

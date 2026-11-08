@@ -59,7 +59,7 @@ export function RecipeRow({ recipe, selected, onOpenDrawer }: RecipeRowProps) {
         }}
         className={cn(
           "flex min-h-[88px] items-center gap-3 rounded-2xl px-2 py-2 transition-colors active:bg-steam/60",
-          "md:border md:border-steam md:bg-white md:hover:border-basil/40",
+          "md:border md:border-steam md:bg-card md:hover:border-basil/40",
           selected && "md:border-basil md:bg-basil/5",
         )}
       >

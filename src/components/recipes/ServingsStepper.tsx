@@ -8,7 +8,7 @@ interface ServingsStepperProps {
 }
 
 const buttonClass =
-  "flex size-11 shrink-0 items-center justify-center rounded-full border border-steam bg-white text-ink transition-colors hover:bg-enamel active:bg-steam disabled:opacity-40";
+  "flex size-11 shrink-0 items-center justify-center rounded-full border border-steam bg-card text-ink transition-colors hover:bg-enamel active:bg-steam disabled:opacity-40";
 
 export function ServingsStepper({ value, onChange }: ServingsStepperProps) {
   return (

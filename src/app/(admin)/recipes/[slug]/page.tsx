@@ -99,7 +99,7 @@ export default async function RecipePage({
             <Link
               href={`/recipes/${recipe.slug}/edit`}
               aria-label="Edit recipe"
-              className="flex size-11 shrink-0 items-center justify-center rounded-full border border-steam bg-white text-ink transition-colors hover:bg-enamel"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full border border-steam bg-card text-ink transition-colors hover:bg-enamel"
             >
               <Pencil className="size-5" />
             </Link>

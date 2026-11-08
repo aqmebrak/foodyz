@@ -224,7 +224,7 @@ export function CookMode({ steps, ingredients, formatQty, progress, timers, onCl
             type="button"
             onClick={goPrev}
             disabled={current === 0}
-            className="flex h-14 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-steam bg-white text-lg font-semibold disabled:opacity-40"
+            className="flex h-14 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-steam bg-card text-lg font-semibold disabled:opacity-40"
           >
             <ArrowLeft className="size-5" />
             Previous
@@ -233,7 +233,7 @@ export function CookMode({ steps, ingredients, formatQty, progress, timers, onCl
             ref={nextRef}
             type="button"
             onClick={goNext}
-            className="flex h-14 flex-[1.6] items-center justify-center gap-2 rounded-xl bg-basil text-lg font-bold text-white active:bg-basil/80"
+            className="flex h-14 flex-[1.6] items-center justify-center gap-2 rounded-xl bg-basil text-lg font-bold text-on-basil active:bg-basil/80"
           >
             {current >= last ? (
               <>

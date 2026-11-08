@@ -99,7 +99,7 @@ export function FlanPageClient({ flans, locations }: FlanPageClientProps) {
 
       {/* Overlays: title card + filters */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col gap-2 pt-[calc(env(safe-area-inset-top)+12px)] md:right-[360px]">
-        <div className="pointer-events-auto mx-4 w-fit rounded-xl bg-white/95 px-3 py-2 shadow-md backdrop-blur">
+        <div className="pointer-events-auto mx-4 w-fit rounded-xl bg-card/95 px-3 py-2 shadow-md backdrop-blur">
           <h1 className="font-display text-base font-semibold leading-tight text-ink">
             🍮 Flan tour · Lyon
           </h1>
@@ -123,7 +123,7 @@ export function FlanPageClient({ flans, locations }: FlanPageClientProps) {
           type="button"
           onClick={() => setLogOpen(true)}
           aria-label="Log a flan"
-          className="pointer-events-auto flex size-14 cursor-pointer items-center justify-center rounded-full bg-basil text-white shadow-lg transition-colors hover:bg-basil/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil focus-visible:ring-offset-2 md:h-12 md:w-auto md:gap-2 md:px-5"
+          className="pointer-events-auto flex size-14 cursor-pointer items-center justify-center rounded-full bg-basil text-on-basil shadow-lg transition-colors hover:bg-basil/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil focus-visible:ring-offset-2 md:h-12 md:w-auto md:gap-2 md:px-5"
         >
           <Plus className="size-6 md:size-5" />
           <span className="hidden text-base font-medium md:inline">Log a flan</span>
@@ -133,7 +133,7 @@ export function FlanPageClient({ flans, locations }: FlanPageClientProps) {
       <QuickLogSheet open={logOpen} onOpenChange={setLogOpen} locations={locations} isMobile={isMobile} />
 
       {/* Desktop: side panel */}
-      <aside className="hidden w-[360px] shrink-0 flex-col border-l border-steam bg-white md:flex">
+      <aside className="hidden w-[360px] shrink-0 flex-col border-l border-steam bg-card md:flex">
         <div className="shrink-0 border-b border-steam px-4 py-3">
           <p className="text-sm font-medium text-ink">{summary}</p>
         </div>

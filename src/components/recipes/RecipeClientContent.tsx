@@ -85,7 +85,7 @@ export function RecipeClientContent({
             onClick={() => setPanel(tab.id)}
             className={cn(
               "h-11 flex-1 rounded-lg text-base font-semibold transition-colors",
-              panel === tab.id ? "bg-basil text-white" : "text-ink/70 hover:bg-steam",
+              panel === tab.id ? "bg-basil text-on-basil" : "text-ink/70 hover:bg-steam",
             )}
           >
             {tab.label} · {tab.count}
@@ -153,7 +153,7 @@ export function RecipeClientContent({
                   >
                     <span
                       className={cn(
-                        "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white",
+                        "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-on-basil",
                         isDone ? "bg-basil/40" : "bg-basil",
                       )}
                     >
@@ -201,7 +201,7 @@ export function RecipeClientContent({
           <button
             type="button"
             onClick={() => setCookModeOpen(true)}
-            className="flex h-14 min-w-0 flex-1 items-center justify-center rounded-xl bg-basil text-lg font-bold text-white transition-colors hover:bg-basil/90 active:bg-basil/80"
+            className="flex h-14 min-w-0 flex-1 items-center justify-center rounded-xl bg-basil text-lg font-bold text-on-basil transition-colors hover:bg-basil/90 active:bg-basil/80"
           >
             {checkedSteps.size > 0 && !allDone ? "Resume cooking" : "Start cooking"}
           </button>
