@@ -2,30 +2,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RecipesLoading() {
   return (
-    <div className="p-6 sm:p-8 max-w-6xl">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-7 w-28" />
-          <Skeleton className="h-4 w-16" />
+    <div className="w-full px-4 pb-6 md:p-8" aria-busy="true">
+      <span className="sr-only">Loading recipes</span>
+      <div className="flex items-end justify-between pt-5 md:mb-2 md:pt-0">
+        <div>
+          <Skeleton className="h-9 w-36" />
+          <Skeleton className="mt-2 h-4 w-20" />
         </div>
-        <Skeleton className="h-9 w-32" />
+        <Skeleton className="hidden h-10 w-32 md:block" />
       </div>
-      <div className="rounded-lg border border-gray-100 overflow-hidden">
-        <div className="bg-gray-50 px-4 py-3 flex gap-8">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-4 w-20 hidden sm:block" />
-          <Skeleton className="h-4 w-20 hidden md:block" />
-          <Skeleton className="h-4 w-16" />
-        </div>
+      <Skeleton className="mt-4 h-12 w-full rounded-full" />
+      <div className="mt-3 flex gap-2 overflow-hidden">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-11 w-24 shrink-0 rounded-full" />
+        ))}
+      </div>
+      <div className="-mx-2 mt-4 grid gap-y-0.5 md:mx-0 md:grid-cols-2 md:gap-3 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="px-4 py-4 flex items-center gap-8 border-t border-gray-50">
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-4 w-24 hidden sm:block" />
-            <Skeleton className="h-5 w-16 rounded-full hidden md:block" />
-            <Skeleton className="h-5 w-20 rounded-full" />
-            <div className="ml-auto flex gap-1">
-              <Skeleton className="h-8 w-8 rounded" />
-              <Skeleton className="h-8 w-8 rounded" />
+          <div key={i} className="flex min-h-[88px] items-center gap-3 px-2 py-2">
+            <Skeleton className="size-[72px] shrink-0 rounded-xl" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-5 w-4/5" />
+              <Skeleton className="h-4 w-1/2" />
             </div>
           </div>
         ))}
