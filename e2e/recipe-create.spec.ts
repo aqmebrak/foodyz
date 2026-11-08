@@ -7,11 +7,13 @@ test.describe("Recipe creation form", () => {
 
   test("auto-generates slug from title", async ({ page }) => {
     await page.getByLabel("Title").fill("My Awesome Recipe");
+    await page.getByText("Advanced", { exact: true }).click();
     await expect(page.getByLabel("Slug")).toHaveValue("my-awesome-recipe");
   });
 
   test("slug updates live as title changes", async ({ page }) => {
     const title = page.getByLabel("Title");
+    await page.getByText("Advanced", { exact: true }).click();
     const slug = page.getByLabel("Slug");
 
     await title.fill("First Title");
@@ -29,7 +31,7 @@ test.describe("Recipe creation form", () => {
     await expect(page.getByText("Instructions are required")).toBeVisible();
   });
 
-  test("creates a recipe successfully and redirects to list", async ({
+  test("creates a recipe successfully and redirects to its detail page", async ({
     page,
   }) => {
     const uniqueTitle = `E2E Recipe ${Date.now()}`;
@@ -37,9 +39,9 @@ test.describe("Recipe creation form", () => {
     await page.getByLabel("Title").fill(uniqueTitle);
     await page.getByLabel("Description").fill("Created by Playwright E2E test.");
 
-    await page.getByLabel("Prep time (min)").fill("10");
-    await page.getByLabel("Cook time (min)").fill("20");
-    await page.getByLabel("Servings").fill("2");
+    await page.getByLabel("Prep time", { exact: true }).fill("10");
+    await page.getByLabel("Cook time", { exact: true }).fill("20");
+    await page.getByLabel("Servings", { exact: true }).fill("2");
 
     await page
       .getByPlaceholder(/Describe each step/)
@@ -53,8 +55,8 @@ test.describe("Recipe creation form", () => {
 
     await page.getByRole("button", { name: "Create recipe" }).first().click();
 
-    await page.waitForURL(/\/recipes$/);
-    await expect(page.getByText(uniqueTitle)).toBeVisible();
+    await page.waitForURL(/\/recipes\/e2e-recipe-\d+$/);
+    await expect(page.getByRole("heading", { name: uniqueTitle })).toBeVisible();
   });
 
   test("add and remove ingredient row", async ({ page }) => {

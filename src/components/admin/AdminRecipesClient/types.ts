@@ -1,5 +1,4 @@
 import type { getRecipeForAdmin } from "@/actions/recipe";
-import type { RecipeFormValues } from "@/lib/validations/recipe";
 
 export interface Recipe {
   id: string;
@@ -24,25 +23,3 @@ export const difficultyBadge: Record<string, string> = {
 
 export const selectClass =
   "h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring text-foreground";
-
-export function buildDefaultValues(recipe: SelectedRecipe): Partial<RecipeFormValues> {
-  return {
-    title: recipe.title,
-    slug: recipe.slug,
-    description: recipe.description ?? "",
-    featuredImage: recipe.featuredImage ?? "",
-    difficulty: recipe.difficulty,
-    prepTime: recipe.prepTime,
-    cookTime: recipe.cookTime,
-    servings: recipe.servings,
-    published: recipe.published,
-    instructions: recipe.instructions,
-    ingredients: recipe.ingredients.map((ri) => ({
-      ingredientId: ri.ingredientId,
-      unitId: ri.unitId ?? "",
-      quantity: ri.quantity,
-      notes: ri.notes ?? "",
-    })),
-    tags: recipe.tags.map((rt) => rt.tag.name),
-  };
-}

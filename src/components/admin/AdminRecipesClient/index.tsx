@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { getRecipeForAdmin } from "@/actions/recipe";
-import type { Ingredient, Tag, Unit } from "@/components/admin/RecipeForm/types";
 import { Button } from "@/components/ui/button";
 import { normalizeStr } from "@/lib/utils";
 
@@ -17,12 +16,9 @@ import type { Recipe, SelectedRecipe } from "./types";
 
 interface AdminRecipesClientProps {
   recipes: Recipe[];
-  tags: Tag[];
-  ingredients: Ingredient[];
-  units: Unit[];
 }
 
-export function AdminRecipesClient({ recipes, tags, ingredients, units }: AdminRecipesClientProps) {
+export function AdminRecipesClient({ recipes }: AdminRecipesClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -132,11 +128,7 @@ export function AdminRecipesClient({ recipes, tags, ingredients, units }: AdminR
       <RecipeViewDrawer
         open={!!selectedId}
         recipe={selectedRecipe}
-        recipeId={selectedId}
         loading={loadingDrawer}
-        tags={tags}
-        ingredients={ingredients}
-        units={units}
         onClose={closeDrawer}
       />
     </div>

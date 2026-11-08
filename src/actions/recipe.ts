@@ -97,6 +97,19 @@ export async function getAllTags() {
 }
 
 // ---------------------------------------------------------------------------
+export async function getRecipeForAdminBySlug(slug: string) {
+  return db.recipe.findUnique({
+    where: { slug },
+    include: {
+      ingredients: {
+        include: { ingredient: true, unit: true },
+        orderBy: { order: "asc" },
+      },
+      tags: { include: { tag: true } },
+    },
+  });
+}
+
 // Mutations
 // ---------------------------------------------------------------------------
 
@@ -145,8 +158,8 @@ export async function createRecipe(data: RecipeFormValues) {
 
   revalidatePath("/");
   revalidatePath("/recipes");
-  revalidatePath("/recipes");
-  redirect("/recipes");
+  revalidatePath(`/recipes/${parsed.data.slug}`);
+  redirect(`/recipes/${parsed.data.slug}`);
 }
 
 export async function updateRecipe(id: string, data: RecipeFormValues) {
@@ -198,8 +211,7 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
   revalidatePath("/");
   revalidatePath("/recipes");
   revalidatePath(`/recipes/${parsed.data.slug}`);
-  revalidatePath("/recipes");
-  redirect("/recipes");
+  redirect(`/recipes/${parsed.data.slug}`);
 }
 
 export async function deleteRecipe(id: string) {
@@ -211,7 +223,6 @@ export async function deleteRecipe(id: string) {
   }
 
   revalidatePath("/");
-  revalidatePath("/recipes");
   revalidatePath("/recipes");
 }
 

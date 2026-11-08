@@ -10,6 +10,8 @@ vi.mock("@/lib/db", () => ({
       delete: vi.fn(),
       findMany: vi.fn(),
     },
+    recipeTag: { deleteMany: vi.fn(), create: vi.fn() },
+    tag: { upsert: vi.fn() },
   },
 }));
 
@@ -49,7 +51,7 @@ describe("createRecipe", () => {
     vi.mocked(db.recipe.create).mockResolvedValueOnce({} as never);
     await createRecipe(validRecipe);
     expect(db.recipe.create).toHaveBeenCalledOnce();
-    expect(redirect).toHaveBeenCalledWith("/recipes");
+    expect(redirect).toHaveBeenCalledWith("/recipes/pasta-carbonara");
   });
 
   it("returns error when db.recipe.create throws", async () => {
@@ -72,6 +74,7 @@ describe("updateRecipe", () => {
     expect(db.recipe.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "id-1" } })
     );
+    expect(redirect).toHaveBeenCalledWith("/recipes/pasta-carbonara");
   });
 
   it("returns error when db throws", async () => {

@@ -8,17 +8,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import type { RecipeFormValues } from "@/lib/validations/recipe";
 
+import { NumberStepper } from "./NumberStepper";
 import { difficultyOptions } from "./utils";
 
 interface DetailsSectionProps {
@@ -28,99 +22,130 @@ interface DetailsSectionProps {
 export function DetailsSection({ control }: DetailsSectionProps) {
   return (
     <section className="flex flex-col gap-5">
-      <h2 className="text-base font-semibold text-foreground border-b pb-2">
+      <h2 className="border-b pb-2 text-base font-semibold text-foreground">
         Details
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <FormField
-          control={control}
-          name="difficulty"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Difficulty</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {difficultyOptions.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <FormField
+        control={control}
+        name="difficulty"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel id="difficulty-label">Difficulty</FormLabel>
+            <div
+              role="radiogroup"
+              aria-labelledby="difficulty-label"
+              className="grid grid-cols-3 gap-2"
+            >
+              {difficultyOptions.map((o) => {
+                const active = field.value === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => field.onChange(o.value)}
+                    className={cn(
+                      "h-11 rounded-lg border text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil",
+                      active
+                        ? "border-basil bg-basil text-white"
+                        : "border-steam bg-white text-ink hover:bg-enamel",
+                    )}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={control}
-          name="prepTime"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Prep time (min)</FormLabel>
-              <FormControl>
-                <Input type="number" min={1} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <FormField
+        control={control}
+        name="prepTime"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Prep time</FormLabel>
+            <FormControl>
+              <NumberStepper
+                {...field}
+                value={field.value}
+                label="prep time"
+                min={1}
+                step={5}
+                suffix="min"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={control}
-          name="cookTime"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cook time (min)</FormLabel>
-              <FormControl>
-                <Input type="number" min={0} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <FormField
+        control={control}
+        name="cookTime"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cook time</FormLabel>
+            <FormControl>
+              <NumberStepper
+                {...field}
+                value={field.value}
+                label="cook time"
+                min={0}
+                step={5}
+                suffix="min"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={control}
-          name="servings"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Servings</FormLabel>
-              <FormControl>
-                <Input type="number" min={1} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <FormField
+        control={control}
+        name="servings"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Servings</FormLabel>
+            <FormControl>
+              <NumberStepper
+                {...field}
+                value={field.value}
+                label="servings"
+                min={1}
+                step={1}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={control}
-          name="published"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div>
-                <FormLabel>Published</FormLabel>
-                <FormDescription className="text-xs">
-                  Visible on the public site
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
+      <FormField
+        control={control}
+        name="published"
+        render={({ field }) => (
+          <FormItem className="flex min-h-11 flex-row items-center justify-between gap-3 rounded-xl border border-steam bg-white px-4 py-2">
+            <div className="flex flex-col gap-0.5">
+              <FormLabel className="text-base">Published</FormLabel>
+              <FormDescription className="text-xs">
+                Show in your recipe list
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                className="h-7 w-12 data-[state=checked]:bg-basil [&>span]:size-6"
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
     </section>
   );
 }

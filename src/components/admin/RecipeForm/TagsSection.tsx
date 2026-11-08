@@ -28,7 +28,7 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
 
   return (
     <section className="flex flex-col gap-5">
-      <h2 className="text-base font-semibold text-foreground border-b pb-2">
+      <h2 className="border-b pb-2 text-base font-semibold text-foreground">
         Tags
       </h2>
 
@@ -70,21 +70,21 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
               <FormControl>
                 <div className="flex flex-col gap-2">
                   {selectedTags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-2">
                       {selectedTags.map((name) => (
                         <Badge
                           key={name}
                           variant="secondary"
-                          className="flex items-center gap-1 pr-1"
+                          className="h-11 gap-1 pl-3 pr-0 text-sm"
                         >
                           {name}
                           <button
                             type="button"
                             onClick={() => removeTag(name)}
-                            className="ml-0.5 hover:text-red-600 transition-colors"
+                            className="flex size-11 items-center justify-center transition-colors hover:text-paprika"
                             aria-label={`Remove tag ${name}`}
                           >
-                            <X className="w-3 h-3" />
+                            <X className="size-4" />
                           </button>
                         </Badge>
                       ))}
@@ -109,7 +109,9 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
                         }
                       }}
                       placeholder="Add or create tags…"
-                      className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                      autoComplete="off"
+                      enterKeyHint="done"
+                      className="h-11 w-full rounded-lg border border-input bg-background px-3 py-1 text-base shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-basil md:text-sm"
                     />
 
                     {open && (filteredTags.length > 0 || canCreate) && (
@@ -122,7 +124,7 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
                               e.preventDefault();
                               addTag(t.name);
                             }}
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-emerald-50 hover:text-emerald-700"
+                            className="min-h-11 w-full px-3 py-2 text-left text-base hover:bg-basil/10 hover:text-basil md:text-sm"
                           >
                             {t.name}
                           </button>
@@ -134,7 +136,7 @@ export function TagsSection({ control, availableTags }: TagsSectionProps) {
                               e.preventDefault();
                               addTag(inputValue.trim());
                             }}
-                            className="w-full text-left px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 border-t border-border"
+                            className="min-h-11 w-full border-t border-border px-3 py-2 text-left text-base text-basil hover:bg-basil/10 md:text-sm"
                           >
                             + Create &quot;{inputValue.trim()}&quot;
                           </button>
