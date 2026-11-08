@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 
 import {
+  filterProgress,
   legacyKey,
   loadProgress,
+  migrateLegacy,
   progressKey,
   type RecipeProgress,
   serializeProgress,
@@ -58,16 +60,39 @@ function write(slug: string, next: RecipeProgress) {
   notify();
 }
 
-export function useRecipeProgress(slug: string, stepCount: number): UseRecipeProgress {
-  // The snapshot is a normalized string so useSyncExternalStore sees stable values.
-  const snapshot = useSyncExternalStore(
-    subscribe,
-    () => {
-      const p = read(slug);
-      return JSON.stringify([[...p.ingredients], [...p.steps].sort((a, b) => a - b)]);
-    },
-    () => "[[],[]]",
+export function useRecipeProgress(
+  slug: string,
+  stepCount: number,
+  ingredientIds?: string[],
+): UseRecipeProgress {
+  const idsKey = ingredientIds ? ingredientIds.join("\u0000") : null;
+  const idSet = useMemo(
+    () => (idsKey === null ? undefined : new Set(idsKey === "" ? [] : idsKey.split("\u0000"))),
+    [idsKey],
   );
+  const getSnapshot = useCallback(() => {
+    const p = filterProgress(read(slug), { stepCount, ingredientIds: idSet });
+    return JSON.stringify([[...p.ingredients], [...p.steps].sort((a, b) => a - b)]);
+  }, [slug, stepCount, idSet]);
+
+  // One-time: stamp legacy steps-only data so it starts expiring like everything else.
+  useEffect(() => {
+    try {
+      const moved = migrateLegacy(
+        (k) => localStorage.getItem(k),
+        (k, v) => localStorage.setItem(k, v),
+        (k) => localStorage.removeItem(k),
+        slug,
+        Date.now(),
+      );
+      if (moved) notify();
+    } catch {
+      // storage unavailable
+    }
+  }, [slug]);
+
+  // The snapshot is a normalized string so useSyncExternalStore sees stable values.
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot, () => "[[],[]]");
 
   const { checkedIngredients, checkedSteps } = useMemo(() => {
     const [ingredients, steps] = JSON.parse(snapshot) as [string[], number[]];

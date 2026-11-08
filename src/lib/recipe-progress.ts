@@ -1,5 +1,8 @@
 export const PROGRESS_TTL_MS = 12 * 60 * 60 * 1000;
 
+/** Max tolerated clock skew for an updatedAt in the future. */
+export const FUTURE_SKEW_MS = 5 * 60 * 1000;
+
 export interface RecipeProgress {
   ingredients: string[];
   steps: number[];
@@ -37,6 +40,7 @@ function parseCurrent(raw: string, now: number): RecipeProgress | null {
     if (!data || typeof data !== "object") return null;
     if (!isStringArray(data.ingredients) || !isNumberArray(data.steps)) return null;
     if (typeof data.updatedAt !== "number") return null;
+    if (data.updatedAt > now + FUTURE_SKEW_MS) return null; // clock skew: never expires otherwise
     if (now - data.updatedAt > PROGRESS_TTL_MS) return null;
     return { ingredients: data.ingredients, steps: data.steps };
   } catch {
@@ -69,4 +73,44 @@ export function loadProgress(
     // storage unavailable
   }
   return EMPTY;
+}
+
+/** Drops step indices >= stepCount and (when given) ingredient ids that no longer exist. */
+export function filterProgress(
+  progress: RecipeProgress,
+  bounds: { stepCount: number; ingredientIds?: Set<string> },
+): RecipeProgress {
+  const { stepCount, ingredientIds } = bounds;
+  return {
+    ingredients: ingredientIds
+      ? progress.ingredients.filter((id) => ingredientIds.has(id))
+      : progress.ingredients,
+    steps: progress.steps.filter((i) => i < stepCount),
+  };
+}
+
+/**
+ * Moves legacy steps-only data to the timestamped key, stamping it with `now`
+ * (legacy data has no timestamp, so this starts its 12h expiry clock).
+ * Returns true when a migration happened.
+ */
+export function migrateLegacy(
+  read: (key: string) => string | null,
+  write: (key: string, value: string) => void,
+  remove: (key: string) => void,
+  slug: string,
+  now: number,
+): boolean {
+  try {
+    if (read(progressKey(slug)) !== null) return false;
+    const raw = read(legacyKey(slug));
+    if (raw === null) return false;
+    const legacy = parseLegacy(raw);
+    if (!legacy) return false;
+    write(progressKey(slug), serializeProgress(legacy, now));
+    remove(legacyKey(slug));
+    return true;
+  } catch {
+    return false;
+  }
 }
