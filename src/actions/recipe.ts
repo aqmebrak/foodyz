@@ -60,7 +60,19 @@ export async function getAllPublishedSlugs() {
 
 export async function getAllRecipesAdmin() {
   return db.recipe.findMany({
-    include: { tags: { include: { tag: true } } },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      published: true,
+      difficulty: true,
+      prepTime: true,
+      cookTime: true,
+      servings: true,
+      featuredImage: true,
+      tags: { select: { tag: { select: { name: true, slug: true } } } },
+      ingredients: { select: { ingredient: { select: { name: true } } } },
+    },
     orderBy: { createdAt: "desc" },
   });
 }

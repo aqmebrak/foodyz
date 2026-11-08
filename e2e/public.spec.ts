@@ -1,16 +1,25 @@
 import { expect, test } from "@playwright/test";
 
-// /recipes serves the admin CRUD table (client-side row clicks, no <a href>
-// per row). The recipe detail view lives in the (admin) shell and is reached
-// by a known slug.
+// /recipes serves a searchable list of <a href="/recipes/[slug]"> rows. The
+// recipe detail view lives in the (admin) shell and is reached by a known slug.
 const KNOWN_SLUG = "gateau-au-chocolat";
 
 test.describe("Public recipe browsing", () => {
   test("admin recipes page loads with recipe rows", async ({ page }) => {
     await page.goto("/recipes");
     await expect(page.getByRole("heading", { name: "Recipes" })).toBeVisible();
-    // Header row + at least one data row
-    await expect(page.getByRole("row").nth(1)).toBeVisible();
+    await expect(page.locator('main a[href^="/recipes/"]:not([href$="/new"])').first()).toBeVisible();
+  });
+
+  test("search filters the list by title or ingredient", async ({ page }) => {
+    await page.goto("/recipes");
+    const rows = page.locator('main ul a[href^="/recipes/"]');
+    await expect(rows.first()).toBeVisible();
+    await page.getByRole("searchbox", { name: /search recipes/i }).fill("zzzxqj-no-match");
+    await expect(page.getByText(/No recipes match/)).toBeVisible();
+    await expect(rows).toHaveCount(0);
+    await page.getByRole("button", { name: "Clear filters" }).click();
+    await expect(rows.first()).toBeVisible();
   });
 
   test("recipe detail page renders", async ({ page }) => {

@@ -1,9 +1,10 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useCookTimers } from "@/hooks/use-cook-timers";
+import { recordRecentRecipe } from "@/hooks/use-recent-recipes";
 import { useRecipeProgress } from "@/hooks/use-recipe-progress";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,10 @@ export function RecipeClientContent({
   const [cookModeOpen, setCookModeOpen] = useState(false);
   const progress = useRecipeProgress(recipeSlug, steps.length, ingredientIds);
   const timers = useCookTimers();
+
+  useEffect(() => {
+    recordRecentRecipe(recipeSlug);
+  }, [recipeSlug]);
   const { checkedSteps, firstUncheckedStep } = progress;
 
   const ratio = currentServings / originalServings;

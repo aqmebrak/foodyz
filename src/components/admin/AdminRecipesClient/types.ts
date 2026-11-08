@@ -11,6 +11,7 @@ export interface Recipe {
   servings: number;
   featuredImage: string | null;
   tags: Array<{ tag: { name: string; slug: string } }>;
+  ingredients: Array<{ ingredient: { name: string } }>;
 }
 
 export type SelectedRecipe = NonNullable<Awaited<ReturnType<typeof getRecipeForAdmin>>>;
@@ -20,6 +21,3 @@ export const difficultyBadge: Record<string, string> = {
   MEDIUM: "bg-amber-100 text-amber-800",
   HARD: "bg-red-100 text-red-800",
 };
-
-export const selectClass =
-  "h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring text-foreground";
