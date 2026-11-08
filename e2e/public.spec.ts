@@ -1,10 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-// The (public) route group's grid/browse page was removed in the
-// private-app-unified-recipes pivot — /recipes now serves the admin CRUD
-// table (client-side row clicks, no <a href> per row). The only surviving
-// (public)-layout page is the recipe detail view, reached by a known slug
-// (e.g. shared via the admin "View on site" link) rather than by browsing.
+// /recipes serves the admin CRUD table (client-side row clicks, no <a href>
+// per row). The recipe detail view lives in the (admin) shell and is reached
+// by a known slug.
 const KNOWN_SLUG = "gateau-au-chocolat";
 
 test.describe("Public recipe browsing", () => {
@@ -46,7 +44,7 @@ test.describe("Public recipe browsing", () => {
   }) => {
     await page.goto("/recipes/this-recipe-does-not-exist-xyz-999");
     await expect(
-      page.getByText(/not found/i)
+      page.getByRole("heading", { name: /not found/i })
     ).toBeVisible({ timeout: 10_000 });
   });
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Difficulty } from "@prisma/client";
 
-import { getAllPublishedSlugs, getRecipeBySlug } from "@/actions/recipe";
+import { getRecipeBySlug } from "@/actions/recipe";
 import { RecipeClientContent } from "@/components/recipes/RecipeClientContent";
 import { auth } from "@/lib/auth";
 import { formatDuration } from "@/lib/utils";
@@ -21,11 +21,6 @@ const difficultyLabels: Record<Difficulty, string> = {
   MEDIUM: "Medium",
   HARD: "Hard",
 };
-
-export async function generateStaticParams() {
-  const slugs = await getAllPublishedSlugs();
-  return slugs.map(({ slug }) => ({ slug }));
-}
 
 export async function generateMetadata({
   params,

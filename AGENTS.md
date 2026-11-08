@@ -14,9 +14,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project Overview
 
-Foodyz is a personal recipe manager. The entire app sits behind login (Auth.js) — there is no anonymous public browsing. Two route groups exist for layout purposes only, not for access control:
-- `(public)` — marketing-style layout (`Header`/`Footer`), currently just the recipe detail page (`/recipes/[slug]`)
-- `(admin)` — sidebar-shell layout, hosting CRUD screens for recipes, categories, ingredients, units, and flans, plus the personal `/flan` tasting-map page
+Foodyz is a personal recipe manager. The entire app sits behind login (Auth.js) — there is no anonymous public browsing. One route group, `(admin)`, provides the app shell (not access control): desktop left sidebar + mobile bottom tab bar (Recipes, Flans, New, More sheet). It hosts the recipe detail page (`/recipes/[slug]`), CRUD screens for recipes, categories, ingredients, units, and flans, plus the personal `/flan` tasting-map page
 
 Also includes `/flan`, a personal flan (custard tart) tasting map around Lyon with rated locations on a Leaflet map.
 
@@ -70,13 +68,12 @@ foodyz/
     │   ├── robots.ts
     │   ├── sitemap.ts
     │   ├── api/auth/[...nextauth]/route.ts
-    │   ├── (public)/             # Header/Footer layout group (still auth-gated by proxy)
-    │   │   ├── layout.tsx
-    │   │   └── recipes/[slug]/page.tsx   # recipe detail view
-    │   └── (admin)/              # Sidebar-shell layout group — CRUD screens
+    │   └── (admin)/              # App shell (sidebar md+, bottom tab bar < md) — all screens
     │       ├── layout.tsx
+    │       ├── not-found.tsx
     │       ├── recipes/
     │       │   ├── page.tsx      # /recipes — admin CRUD table
+    │       │   ├── [slug]/page.tsx   # recipe detail view
     │       │   └── new/page.tsx
     │       ├── categories/page.tsx
     │       ├── ingredients/page.tsx
@@ -85,7 +82,7 @@ foodyz/
     │       └── flan/page.tsx     # /flan — personal flan tasting map (admin layout, non-CRUD content)
     ├── components/
     │   ├── ui/                   # shadcn/ui primitives — do not edit directly
-    │   ├── layout/               # Header, Footer
+    │   ├── layout/               # BottomTabBar, MoreSheet
     │   ├── recipes/              # RecipeClientContent, IngredientChecklist
     │   ├── admin/                # AdminSidebar, FlansClient, CategoriesClient, IngredientsClient,
     │   │                         # UnitsClient, AdminRecipesClient/, ConfirmDialog
@@ -174,7 +171,7 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - **Validate with Zod first.** Every Server Action must validate its inputs with a Zod schema before calling Prisma.
 - **Revalidate after mutations.** Call `revalidatePath()` or `revalidateTag()` after every create/update/delete — and make sure the path matches an actual route (there is no `/admin` prefix on any route; a past regression had `category`/`ingredient`/`unit` actions revalidating stale `/admin/*` paths that revalidated nothing).
 - **Form state with hooks.** Use `useFormState` + `useFormStatus` for loading and error states in Client Components.
-- **Auth at the proxy level.** `src/proxy.ts` (Next.js 16 rename of `middleware.ts`) requires a session on every route except `/login` and `/api/auth/*` — the whole app is private, not just `/admin`. Auth config is split: `auth.config.ts` (Edge-safe, no DB) used by proxy; `auth.ts` (Node.js, Credentials + Prisma) used by server components. Never put auth checks inside individual pages — the one exception is `(public)/recipes/[slug]/page.tsx`, which calls `auth()` itself to conditionally show an "Edit recipe" link to `ADMIN`-role sessions (this makes that route fully dynamic — no more static generation for recipe slugs, a deliberate trade-off).
+- **Auth at the proxy level.** `src/proxy.ts` (Next.js 16 rename of `middleware.ts`) requires a session on every route except `/login` and `/api/auth/*` — the whole app is private, not just `/admin`. Auth config is split: `auth.config.ts` (Edge-safe, no DB) used by proxy; `auth.ts` (Node.js, Credentials + Prisma) used by server components. Never put auth checks inside individual pages — the one exception is `(admin)/recipes/[slug]/page.tsx`, which calls `auth()` itself to conditionally show an "Edit recipe" link to `ADMIN`-role sessions (this makes that route fully dynamic — no more static generation for recipe slugs, a deliberate trade-off).
 - **Leaflet maps in client components only.** Use `next/dynamic(..., { ssr: false })` inside a `"use client"` file — not in Server Components.
 
 ---

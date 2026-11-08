@@ -63,6 +63,7 @@
 }
 
 :root {
+  --tabbar-h: calc(56px + env(safe-area-inset-bottom));
   --basil: #2f6b47;
   --yolk: #f2b630;
   --enamel: #f5f7f4;
