@@ -51,3 +51,9 @@ export function parseGoogleMapsUrl(url: string): [number, number] | null {
 
   return null;
 }
+
+/** Label for a quantity's unit; the "pièce" unit is stored with the placeholder abbreviation "(empty)", which renders as nothing. */
+export function unitLabel(unit: { abbreviation: string } | null): string {
+  if (!unit || unit.abbreviation === "(empty)") return "";
+  return unit.abbreviation;
+}

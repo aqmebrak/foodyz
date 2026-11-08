@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn, unitLabel } from "@/lib/utils";
 
 export interface ChecklistIngredient {
   id: string;
@@ -29,10 +29,9 @@ export function IngredientChecklist({
     <ul className="flex flex-col divide-y divide-steam">
       {ingredients.map((item) => {
         const isChecked = checked.has(item.id);
+        const unit = unitLabel(item.unit);
         const quantity =
-          item.quantity !== 0
-            ? `${formatQty(item.quantity)}${item.unit && item.unit.abbreviation !== "(empty)" ? ` ${item.unit.abbreviation}` : ""}`
-            : "";
+          item.quantity !== 0 ? `${formatQty(item.quantity)}${unit ? ` ${unit}` : ""}` : "";
         return (
           <li key={item.id}>
             <button
