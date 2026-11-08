@@ -39,10 +39,12 @@ test.describe("Public recipe browsing", () => {
   test("recipe detail page shows ingredients and steps", async ({ page }) => {
     await page.goto(`/recipes/${KNOWN_SLUG}`);
 
-    // RecipeClientContent renders these sections
+    // RecipeClientContent renders these sections. Below md only one panel shows at a time.
     await expect(
       page.getByRole("heading", { name: /ingredients/i })
     ).toBeVisible();
+    const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
+    if (isMobile) await page.getByRole("tab", { name: /steps/i }).click();
     await expect(
       page.getByRole("heading", { name: /steps/i })
     ).toBeVisible();
@@ -60,5 +62,16 @@ test.describe("Public recipe browsing", () => {
   test("homepage loads", async ({ page }) => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
+  });
+
+  test("flan page: Log a flan button is reachable on mobile", async ({ page }) => {
+    const width = page.viewportSize()?.width ?? 1280;
+    test.skip(width >= 768, "mobile-only regression guard (vaul aria-hidden patch)");
+    await page.goto("/flan");
+    const button = page.getByRole("button", { name: "Log a flan" });
+    await expect(button).toBeVisible();
+    await expect(button.locator("xpath=ancestor-or-self::*[@aria-hidden='true']")).toHaveCount(0);
+    await button.focus();
+    await expect(button).toBeFocused();
   });
 });
