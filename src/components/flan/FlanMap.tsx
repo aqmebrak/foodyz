@@ -1,133 +1,103 @@
 "use client";
 
 import L from "leaflet";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { useEffect, useMemo } from "react";
+import { MapContainer, Marker, TileLayer, useMap,ZoomControl } from "react-leaflet";
 
-import { cn, parseGoogleMapsUrl } from "@/lib/utils";
+import type { FlanItem } from "@/lib/flan-filters";
+import { parseGoogleMapsUrl } from "@/lib/utils";
 
 import "leaflet/dist/leaflet.css";
 
-// Colored div icons: amber for tried, gray for not tried
-function makeIcon(tried: boolean) {
-  const color = tried ? "#f59e0b" : "#9ca3af";
-  const border = tried ? "#d97706" : "#6b7280";
+// Lyon center
+const LYON: [number, number] = [45.764, 4.8357];
+const FOCUS_ZOOM = 16;
+
+// Tried = yolk fill; to-try = white fill with ink outline. Selected = larger, basil ring.
+function makeIcon(tried: boolean, selected: boolean) {
+  const size = selected ? 26 : 20;
+  const fill = tried ? "#F2B630" : "#FFFFFF";
+  const border = "#1C2420";
+  const ring = selected ? ",0 0 0 3px #2F6B47" : "";
   return L.divIcon({
     className: "",
-    html: `<div style="width:18px;height:18px;background:${color};border:2.5px solid ${border};border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>`,
-    iconSize: [18, 18],
-    iconAnchor: [9, 18],
-    popupAnchor: [0, -20],
+    html: `<div style="width:${size}px;height:${size}px;background:${fill};border:2.5px solid ${border};border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 1px 4px rgba(0,0,0,0.3)${ring}"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size],
   });
 }
 
-interface Flan {
-  id: string;
-  name: string;
-  location: { name: string; mapsUrl: string };
-  photoUrl: string | null;
-  rating: number;
-  tried: boolean;
-  triedAt: Date | null;
-  comment: string | null;
-}
-
 export interface FlanMapProps {
-  flans: Flan[];
+  flans: FlanItem[];
+  selectedId?: string | null;
+  onSelect?: (id: string) => void;
+  /** Pixels at the bottom of the map hidden by a sheet; focused markers are centred above it. */
+  bottomInset?: number;
 }
 
-// Lyon center
-const LYON: [number, number] = [45.7640, 4.8357];
-
-function StarRow({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <span key={s} className={cn("text-sm", s <= rating ? "text-amber-400" : "text-gray-300")}>
-          ★
-        </span>
-      ))}
-    </div>
-  );
-}
-
-export function FlanMap({ flans }: FlanMapProps) {
-  const [mounted, setMounted] = useState(false);
+function FocusController({
+  target,
+  bottomInset,
+}: {
+  target: [number, number] | null;
+  bottomInset: number;
+}) {
+  const map = useMap();
+  const lat = target?.[0];
+  const lng = target?.[1];
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (lat === undefined || lng === undefined) return;
+    const zoom = Math.max(map.getZoom(), FOCUS_ZOOM);
+    // Shift the centre down so the marker sits in the middle of the visible area.
+    const point = map.project([lat, lng], zoom);
+    point.y += bottomInset / 2;
+    const center = map.unproject(point, zoom);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) map.setView(center, zoom, { animate: false });
+    else map.flyTo(center, zoom, { duration: 0.8 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-focus only when the target changes
+  }, [lat, lng, map]);
 
-  const markers = flans
-    .map((flan) => {
-      const coords = parseGoogleMapsUrl(flan.location.mapsUrl);
-      return coords ? { flan, coords } : null;
-    })
-    .filter(Boolean) as { flan: Flan; coords: [number, number] }[];
+  return null;
+}
 
-  if (!mounted) {
-    return (
-      <div className="w-full h-full rounded-xl bg-gray-100 animate-pulse flex items-center justify-center">
-        <p className="text-gray-400 text-sm">Loading map…</p>
-      </div>
-    );
-  }
+export function FlanMap({ flans, selectedId = null, onSelect, bottomInset = 0 }: FlanMapProps) {
+  const markers = useMemo(
+    () =>
+      flans
+        .map((flan) => {
+          const coords = parseGoogleMapsUrl(flan.location.mapsUrl);
+          return coords ? { flan, coords } : null;
+        })
+        .filter((m): m is { flan: FlanItem; coords: [number, number] } => m !== null),
+    [flans],
+  );
+
+  const selected = markers.find((m) => m.flan.id === selectedId);
 
   return (
     <MapContainer
       center={LYON}
       zoom={13}
-      className="w-full h-full rounded-xl z-0"
+      className="h-full w-full max-md:[&_.leaflet-control-zoom]:hidden"
       scrollWheelZoom={true}
+      zoomControl={false}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <ZoomControl position="topright" />
+      <FocusController target={selected?.coords ?? null} bottomInset={bottomInset} />
       {markers.map(({ flan, coords }) => (
-        <Marker key={flan.id} position={coords} icon={makeIcon(flan.tried)}>
-          <Popup maxWidth={240} minWidth={180}>
-            <div className="flex flex-col gap-2 py-1">
-              {flan.photoUrl && (
-                <div className="relative w-full h-32 rounded-md overflow-hidden">
-                  <Image
-                    src={flan.photoUrl}
-                    alt={flan.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
-              <div>
-                <p className="font-semibold text-gray-900 text-sm leading-tight">{flan.name}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{flan.location.name}</p>
-                {!flan.tried && (
-                  <span className="inline-block mt-1 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                    Not tried yet
-                  </span>
-                )}
-              </div>
-              {flan.tried && <StarRow rating={flan.rating} />}
-              {flan.comment && (
-                <p className="text-xs text-gray-600 italic">{flan.comment}</p>
-              )}
-              {flan.triedAt && (
-                <p className="text-xs text-gray-400">
-                  Tried {new Date(flan.triedAt).toLocaleDateString("fr-FR")}
-                </p>
-              )}
-              <a
-                href={flan.location.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-emerald-600 hover:underline"
-              >
-                Open in Maps →
-              </a>
-            </div>
-          </Popup>
-        </Marker>
+        <Marker
+          key={`${flan.id}-${flan.id === selectedId}`}
+          position={coords}
+          icon={makeIcon(flan.tried, flan.id === selectedId)}
+          zIndexOffset={flan.id === selectedId ? 1000 : 0}
+          eventHandlers={{ click: () => onSelect?.(flan.id) }}
+        />
       ))}
     </MapContainer>
   );

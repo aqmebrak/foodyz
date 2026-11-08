@@ -8,27 +8,16 @@ export const metadata = {
 
 export default async function FlanPage() {
   const flans = await getFlans();
-  const triedCount = flans.filter((f) => f.tried).length;
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="px-6 py-8 max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-foreground">🍮 Flan Tour — Lyon</h1>
-        <p className="text-muted-foreground mt-1">
-          {triedCount} tried · {flans.length - triedCount} on the list
-        </p>
+  if (flans.length === 0) {
+    return (
+      <div className="flex min-h-[60dvh] flex-col items-center justify-center px-4 text-center text-ink/60">
+        <p className="mb-3 text-4xl">🍮</p>
+        <p className="text-base font-medium">No flans yet.</p>
+        <p className="mt-1 text-sm">Go eat some flan and come back!</p>
       </div>
+    );
+  }
 
-      {flans.length === 0 ? (
-        <div className="px-6 py-16 text-center text-gray-400">
-          <p className="text-4xl mb-3">🍮</p>
-          <p className="text-base font-medium">No flans yet.</p>
-          <p className="text-sm mt-1">Go eat some flan and come back!</p>
-        </div>
-      ) : (
-        <FlanPageClient flans={flans} />
-      )}
-    </div>
-  );
+  return <FlanPageClient flans={flans} />;
 }
