@@ -53,7 +53,7 @@ describe("createRecipe", () => {
     vi.mocked(db.recipe.create).mockResolvedValueOnce({} as never);
     await createRecipe(validRecipe);
     expect(db.recipe.create).toHaveBeenCalledOnce();
-    expect(redirect).toHaveBeenCalledWith("/recipes/pasta-carbonara");
+    expect(redirect).toHaveBeenCalledWith("/recipes/pasta-carbonara?created=1");
   });
 
   it("returns error when db.recipe.create throws", async () => {
@@ -76,7 +76,7 @@ describe("updateRecipe", () => {
     expect(db.recipe.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "id-1" } })
     );
-    expect(redirect).toHaveBeenCalledWith("/recipes/pasta-carbonara");
+    expect(redirect).toHaveBeenCalledWith("/recipes/pasta-carbonara?saved=1");
   });
 
   it("revalidates the old slug path when the slug changes", async () => {

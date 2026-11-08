@@ -1,9 +1,10 @@
 "use client";
 
 import imageCompression from "browser-image-compression";
-import { Camera, Check, Loader2, LocateFixed, X } from "lucide-react";
+import { Camera, Loader2, LocateFixed, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Drawer } from "vaul";
 
 import { createFlan, uploadFlanPhoto } from "@/actions/flan";
@@ -88,7 +89,6 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [stage, setStage] = useState<"uploading" | "saving">("saving");
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [geo, setGeo] = useState<GeoState>("pending");
   const [here, setHere] = useState<[number, number] | null>(null);
@@ -97,7 +97,6 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
   const previewRef = useRef<string | null>(null);
   // URL of an already-uploaded photo, reused on retry if createFlan fails after the upload.
   const uploadedRef = useRef<string | null>(null);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locationsRef = useRef(locations);
 
   const allLocations = useMemo(() => [...locations, ...extraLocations], [locations, extraLocations]);
@@ -145,7 +144,6 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
   useEffect(
     () => () => {
       if (previewRef.current) URL.revokeObjectURL(previewRef.current);
-      if (closeTimer.current) clearTimeout(closeTimer.current);
     },
     [],
   );
@@ -207,9 +205,9 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
         onBusyChange(false);
         return;
       }
-      setSaved(true);
+      toast.success("Flan logged");
       onBusyChange(false);
-      closeTimer.current = setTimeout(onClose, 1000);
+      onClose();
     } catch {
       setError("Could not save. Check your connection and try again.");
       setSaving(false);
@@ -218,7 +216,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
   }
 
   const fieldClass =
-    "w-full rounded-lg border border-steam bg-white px-3 text-base text-ink placeholder:text-ink/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil";
+    "w-full rounded-lg border border-steam bg-card px-3 text-base text-ink placeholder:text-ink/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil";
   const labelClass = "mb-1.5 block text-sm font-medium text-ink";
 
   return (
@@ -260,7 +258,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                       type="button"
                       disabled={saving}
                       onClick={() => fileRef.current?.click()}
-                      className="h-11 flex-1 cursor-pointer rounded-lg border border-steam bg-white text-base font-medium text-ink"
+                      className="h-11 flex-1 cursor-pointer rounded-lg border border-steam bg-card text-base font-medium text-ink"
                     >
                       Change photo
                     </button>
@@ -268,7 +266,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                       type="button"
                       disabled={saving}
                       onClick={removePhoto}
-                      className="h-11 flex-1 cursor-pointer rounded-lg border border-steam bg-white text-base font-medium text-paprika"
+                      className="h-11 flex-1 cursor-pointer rounded-lg border border-steam bg-card text-base font-medium text-paprika"
                     >
                       Remove
                     </button>
@@ -278,7 +276,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="flex h-36 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-steam bg-white text-ink/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil"
+                  className="flex h-36 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-steam bg-card text-ink/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil"
                 >
                   <Camera className="size-8" />
                   <span className="text-base font-medium">Add a photo</span>
@@ -304,7 +302,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                 </p>
               )}
               {showSuggestion && nearest && chosen ? (
-                <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-basil/40 bg-white px-3 py-2">
+                <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-basil/40 bg-card px-3 py-2">
                   <p className="flex min-w-0 items-center gap-2 text-base text-ink">
                     <LocateFixed className="size-4 shrink-0 text-basil" />
                     <span className="truncate">
@@ -380,25 +378,15 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                 {error}
               </p>
             )}
-            {saved ? (
-              <p
-                role="status"
-                className="flex h-12 items-center justify-center gap-2 rounded-lg bg-basil/10 text-base font-medium text-basil"
-              >
-                <Check className="size-5" />
-                Flan logged
-              </p>
-            ) : (
               <button
                 type="button"
                 onClick={() => void handleSave()}
                 disabled={saving}
-                className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-basil text-base font-semibold text-white transition-colors hover:bg-basil/90 disabled:opacity-60"
+                className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-basil text-base font-semibold text-on-basil transition-colors hover:bg-basil/90 disabled:opacity-60"
               >
                 {saving && <Loader2 className="size-4 animate-spin" />}
                 {saving ? (stage === "uploading" ? "Uploading photo…" : "Saving…") : "Save flan"}
               </button>
-            )}
           </div>
     </>
   );
@@ -416,7 +404,7 @@ export function QuickLogSheet({ open, onOpenChange, locations, isMobile }: Quick
       direction={isMobile ? "bottom" : "right"}
     >
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[60] bg-ink/50" />
+        <Drawer.Overlay className="fixed inset-0 z-[60] bg-black/50" />
         <Drawer.Content
           aria-describedby={undefined}
           className={cn(

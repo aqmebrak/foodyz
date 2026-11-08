@@ -209,7 +209,7 @@ export function RecipeForm({
             action={async () => {
               const result = await deleteRecipe(recipeId);
               if (result?.error) setServerError(result.error);
-              else router.push("/recipes");
+              else router.push("/recipes?deleted=1");
             }}
             trigger={
               <Button

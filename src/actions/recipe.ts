@@ -171,7 +171,7 @@ export async function createRecipe(data: RecipeFormValues) {
   revalidatePath("/");
   revalidatePath("/recipes");
   revalidatePath(`/recipes/${parsed.data.slug}`);
-  redirect(`/recipes/${parsed.data.slug}`);
+  redirect(`/recipes/${parsed.data.slug}?created=1`);
 }
 
 export async function updateRecipe(id: string, data: RecipeFormValues) {
@@ -226,7 +226,7 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
   revalidatePath("/recipes");
   revalidatePath(`/recipes/${parsed.data.slug}`);
   if (oldSlug && oldSlug !== parsed.data.slug) revalidatePath(`/recipes/${oldSlug}`);
-  redirect(`/recipes/${parsed.data.slug}`);
+  redirect(`/recipes/${parsed.data.slug}?saved=1`);
 }
 
 export async function deleteRecipe(id: string) {
