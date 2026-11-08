@@ -263,7 +263,7 @@ export function FlansClient({ flans, locations: initialLocations }: FlansClientP
         )}
 
         {flans.map((flan) => (
-          <div key={flan.id} className="rounded-lg border border-gray-100 bg-white p-4">
+          <div key={flan.id} data-testid="flan-row" className="rounded-lg border border-gray-100 bg-white p-4">
             {editingId === flan.id ? (
               <>
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">

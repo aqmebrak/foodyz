@@ -1,11 +1,13 @@
-import { Clock, Timer, Users } from "lucide-react";
+import { Clock, Pencil, Timer, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Difficulty } from "@prisma/client";
 
 import { getAllPublishedSlugs, getRecipeBySlug } from "@/actions/recipe";
 import { RecipeClientContent } from "@/components/recipes/RecipeClientContent";
+import { auth } from "@/lib/auth";
 import { formatDuration } from "@/lib/utils";
 
 const difficultyStyles: Record<Difficulty, string> = {
@@ -45,7 +47,7 @@ export default async function RecipePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const recipe = await getRecipeBySlug(slug);
+  const [recipe, session] = await Promise.all([getRecipeBySlug(slug), auth()]);
   if (!recipe) notFound();
 
   const steps = recipe.instructions
@@ -89,7 +91,18 @@ export default async function RecipePage({
       </div>
 
       {/* Title */}
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">{recipe.title}</h1>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <h1 className="text-3xl font-bold text-gray-900">{recipe.title}</h1>
+        {session?.user.role === "ADMIN" && (
+          <Link
+            href={`/recipes?recipe=${recipe.slug}`}
+            className="shrink-0 mt-1.5 flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            Edit recipe
+          </Link>
+        )}
+      </div>
 
       {/* Description */}
       {recipe.description && (

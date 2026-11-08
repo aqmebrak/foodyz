@@ -22,7 +22,7 @@ export async function createUnit(data: UnitFormValues) {
     return { error: "Failed to create unit. Name or abbreviation may already exist." };
   }
 
-  revalidatePath("/admin/units");
+  revalidatePath("/units");
 }
 
 export async function updateUnit(id: string, data: UnitFormValues) {
@@ -38,7 +38,7 @@ export async function updateUnit(id: string, data: UnitFormValues) {
     return { error: "Failed to update unit. Name or abbreviation may already be taken." };
   }
 
-  revalidatePath("/admin/units");
+  revalidatePath("/units");
 }
 
 export async function deleteUnit(id: string) {
@@ -49,5 +49,5 @@ export async function deleteUnit(id: string) {
     return { error: "Failed to delete unit. It may be in use by recipes." };
   }
 
-  revalidatePath("/admin/units");
+  revalidatePath("/units");
 }

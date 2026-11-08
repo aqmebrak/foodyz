@@ -2,215 +2,339 @@
 
 Each phase is a small, self-contained unit of work. Complete and review each step before moving to the next.
 
----
-
-## Phase 1 — Project Scaffolding
-
-> Goal: an empty but fully configured Next.js project that builds with zero errors.
-
-- [ ] **1.1** Scaffold with `pnpm create next-app@latest` — App Router, TypeScript, Tailwind, `src/`, no Turbopack
-- [ ] **1.2** Clean up boilerplate — remove default content from `page.tsx`, `globals.css`, `layout.tsx`
-- [ ] **1.3** Configure `tsconfig.json` — enable `strict: true`, set `@/` path alias to `./src`
-- [ ] **1.4** Configure `next.config.ts` — enable `images.remotePatterns` for localhost (future CDN entries go here)
-- [ ] **1.5** Install and initialise shadcn/ui — `pnpm dlx shadcn@latest init` (choose New York style, CSS variables)
-- [ ] **1.6** Install core utilities — `zod`, `clsx`, `tailwind-merge`, `lucide-react`
-- [ ] **1.7** Create `src/lib/utils.ts` — export `cn()`, `slugify()`, `formatDuration()`
-- [ ] **1.8** Create `src/types/index.ts` — empty file, ready for shared types
-- [ ] **1.9** Add `.env.example` and `.gitignore` entries for `.env`
-- [ ] **1.10** Verify: `pnpm build` passes with zero errors
+> Merged 2026-11-08: this file now also contains the former `Plan_flanfan.md` (see **Phase 19**).
+> Checkbox states below were re-verified against the current codebase on main, not just assumed from
+> git history. Items marked `[x] (verified)` were confirmed by reading the actual implementation.
+> Items marked `⚠` are implemented but have a known bug or are unreachable dead code — see the note.
 
 ---
 
-## Phase 2 — Database: Schema & Migrations
+## Phase 1 — Project Scaffolding ✅ done
 
-> Goal: Prisma connected to a local PostgreSQL database with a complete schema.
-
-- [ ] **2.1** Install Prisma — `pnpm add -D prisma` and `pnpm add @prisma/client`
-- [ ] **2.2** Initialise Prisma — `pnpm dlx prisma init` — creates `prisma/schema.prisma` and `.env`
-- [ ] **2.3** Add `DATABASE_URL` and `DIRECT_URL` to `.env` (local Postgres) and `.env.example`
-- [ ] **2.4** Configure `datasource db` in `schema.prisma` with both `url` and `directUrl`
-- [ ] **2.5** Add `pnpm db:*` scripts to `package.json`
-  ```json
-  "db:migrate": "prisma migrate dev",
-  "db:generate": "prisma generate",
-  "db:studio": "prisma studio",
-  "db:seed": "tsx prisma/seed.ts",
-  "db:reset": "prisma migrate reset",
-  "postinstall": "prisma generate"
-  ```
-- [ ] **2.6** Write the full Prisma schema — models: `User`, `Recipe`, `Category`, `Ingredient`, `RecipeIngredient`, `IngredientUnit`, `Unit`, `Tag`, `RecipeTag`, `RecipeImage`
-- [ ] **2.7** Run first migration — `pnpm db:migrate --name init`
-- [ ] **2.8** Create `src/lib/db.ts` — Prisma singleton (`globalThis` pattern for dev hot reload)
-- [ ] **2.9** Write `prisma/seed.ts` — seed 3 categories, 5 ingredients, 2 sample recipes (published + draft)
-- [ ] **2.10** Run `pnpm db:seed` and verify with `pnpm db:studio`
+- [x] 1.1–1.10 — Next.js 16 App Router + TS strict + Tailwind v4 + shadcn/ui + zod/clsx/tailwind-merge/lucide-react,
+  `src/lib/utils.ts` (`cn`, `slugify`, `formatDuration`, plus `normalizeStr` and `parseGoogleMapsUrl` added later), `src/types/index.ts`, `.env.example`. `pnpm build` passes.
 
 ---
 
-## Phase 3 — Authentication (Auth.js v5)
+## Phase 2 — Database: Schema & Migrations ✅ done
 
-> Goal: `/admin/*` routes are protected; login/logout works.
-
-- [ ] **3.1** Install Auth.js — `pnpm add next-auth@beta`
-- [ ] **3.2** Add `AUTH_SECRET` to `.env` and `.env.example` (generate with `openssl rand -base64 32`)
-- [ ] **3.3** Create `src/lib/auth.ts` — configure `Credentials` provider using the `User` table (bcrypt password check)
-- [ ] **3.4** Create `src/app/api/auth/[...nextauth]/route.ts` — Auth.js handler
-- [ ] **3.5** Create `middleware.ts` at the root — protect all `/admin/*` routes, redirect unauthenticated users to `/login`
-- [ ] **3.6** Create `src/app/login/page.tsx` — simple login form (email + password), Server Action for sign-in
-- [ ] **3.7** Add a seed admin user to `prisma/seed.ts` (hashed password with `bcryptjs`)
-- [ ] **3.8** Test: unauthenticated `/admin` → redirected to `/login`; login with seed credentials → access granted
+- [x] 2.1–2.10 — Prisma 6 schema, `src/lib/db.ts` singleton, `prisma/seed.ts`, `pnpm db:*` scripts.
+  Schema has evolved since: `Category` was decoupled from `Recipe` (see Phase 16), `Tag`/`RecipeTag` added,
+  `RecipeImage` added, `Flan`/`PastryLocation` added (Phase 19).
 
 ---
 
-## Phase 4 — App Shell & Layouts
+## Phase 3 — Authentication (Auth.js v5) ✅ done, exceeds original spec
 
-> Goal: two distinct visual shells — public site layout and admin backoffice layout.
-
-- [ ] **4.1** Create `src/components/layout/Header.tsx` — site logo, nav links (Home, Recipes, Categories)
-- [ ] **4.2** Create `src/components/layout/Footer.tsx` — minimal footer
-- [ ] **4.3** Update root `src/app/layout.tsx` — add `Header` and `Footer`, import global styles, set font
-- [ ] **4.4** Create the `(public)` route group — move homepage logic inside; confirm URLs unchanged
-- [ ] **4.5** Create `src/components/admin/AdminSidebar.tsx` — nav links: Dashboard, Recipes, Categories, Ingredients + Sign Out button
-- [ ] **4.6** Create `src/app/(admin)/layout.tsx` — wraps all `/admin/*` pages with `AdminSidebar`
-- [ ] **4.7** Create placeholder `src/app/(admin)/admin/page.tsx` — static "Dashboard" heading
-- [ ] **4.8** Verify: public pages show Header/Footer; admin pages show sidebar only; no layout bleed
+- [x] 3.1–3.8 — Auth.js v5 beta, `src/lib/auth.ts` (Node/Credentials/Prisma) + `src/lib/auth.config.ts` (Edge-safe),
+  `src/proxy.ts` (Next.js 16 rename of `middleware.ts`), `/login`, seeded admin user, `src/lib/rate-limit.ts`
+  wired into `loginAction` (10 attempts / 15 min per IP).
+- Scope note: the plan originally said "protect `/admin/*`"; the actual proxy protects **every** route except
+  `/login` and `/api/auth/*` — the whole app is private, not just a backoffice. This supersedes the plan text.
 
 ---
 
-## Phase 5 — Public Frontend: Recipe Browsing
+## Phase 4 — App Shell & Layouts ✅ done
 
-> Goal: visitors can browse and read recipes; pages are server-rendered.
-
-- [ ] **5.1** Create `src/actions/recipe.ts` — read-only queries: `getPublishedRecipes()`, `getRecipeBySlug()`, `getRecipesByCategory()`
-- [ ] **5.2** Create `src/components/recipes/RecipeCard.tsx` — card with image, title, category, prep time, difficulty badge
-- [ ] **5.3** Create `src/components/recipes/RecipeGrid.tsx` — responsive grid wrapper for `RecipeCard`
-- [ ] **5.4** Create `src/app/page.tsx` (homepage) — featured recipes grid, link to `/recipes`
-- [ ] **5.5** Create `src/app/(public)/recipes/page.tsx` — list all published recipes with `RecipeGrid`
-- [ ] **5.6** Create `src/app/(public)/recipes/[slug]/page.tsx` — full recipe detail: image, description, ingredients list, instructions, metadata
-- [ ] **5.7** Add `generateStaticParams` to the `[slug]` page for static generation
-- [ ] **5.8** Add `generateMetadata` to the `[slug]` page for SEO (title, description, OG image)
-- [ ] **5.9** Create `src/app/(public)/categories/[slug]/page.tsx` — recipes filtered by category
-- [ ] **5.10** Create `src/components/shared/Breadcrumbs.tsx` — used on recipe detail and category pages
+- [x] 4.1–4.8 — `Header`/`Footer` for the `(public)` group, `AdminSidebar` (with a mobile hamburger/drawer —
+  covers Phase 8.8 too) + `(admin)/layout.tsx`. No separate `/admin` URL prefix (see Phase 3 note) — admin
+  pages live at root paths (`/recipes`, `/categories`, `/ingredients`, `/units`, `/flans`, `/flan`).
 
 ---
 
-## Phase 6 — Admin: Recipes CRUD
+## Phase 5 — Public Frontend: Recipe Browsing ⚠ partially superseded
 
-> Goal: admins can list, create, edit, and delete recipes from the backoffice.
-
-- [ ] **6.1** Add mutation Server Actions to `src/actions/recipe.ts` — `createRecipe()`, `updateRecipe()`, `deleteRecipe()` with Zod validation + `revalidatePath()`
-- [ ] **6.2** Create `src/lib/validations/recipe.ts` — Zod schema for recipe form fields
-- [ ] **6.3** Add shadcn form components — `pnpm dlx shadcn@latest add form input textarea select button badge`
-- [ ] **6.4** Create `src/app/(admin)/admin/recipes/page.tsx` — data table: title, category, status (draft/published), actions (edit / delete)
-- [ ] **6.5** Create `src/components/admin/RecipeForm.tsx` — full form: title, slug (auto-computed), description, category select, difficulty, prep/cook time, servings, published toggle, instructions textarea
-- [ ] **6.6** Create `src/app/(admin)/admin/recipes/new/page.tsx` — renders `RecipeForm` in create mode
-- [ ] **6.7** Create `src/app/(admin)/admin/recipes/[id]/page.tsx` — renders `RecipeForm` pre-filled for editing
-- [ ] **6.8** Add inline ingredient management to `RecipeForm` — add/remove/reorder ingredients with quantity, unit, notes fields
-- [ ] **6.9** Add image upload field — stores file to `public/images/recipes/` and saves relative path via Server Action
-- [ ] **6.10** Create `src/components/admin/ConfirmDialog.tsx` — confirmation modal for delete actions
-- [ ] **6.11** Wire delete button in the recipes table → `ConfirmDialog` → `deleteRecipe()` Server Action
-- [ ] **6.12** Test full CRUD cycle: create → edit → publish → delete; verify public pages reflect changes
+- [x] `getRecipeBySlug()` + `/recipes/[slug]` detail page, `generateStaticParams`, `generateMetadata`,
+  `Breadcrumbs` component exists.
+- [ ] ⚠ **Dead code**: `src/components/recipes/RecipesClient.tsx` (public browse-all grid with `SearchBar` +
+  `Pagination`) and the `(public)/recipes/page.tsx` / `(public)/categories/[slug]/page.tsx` routes that used
+  to render it were **removed** in the private-app-unified-recipes pivot. `RecipesClient.tsx` is still in the
+  tree but imported by nothing — it should be deleted, along with `Pagination.tsx`/`SearchBar.tsx` if nothing
+  else uses them (admin's `RecipeFilters` has its own `SearchBar` usage — keep that one).
+- Superseded: `RecipeCard`/`RecipeGrid` are also only reachable from the dead `RecipesClient.tsx` — confirm
+  before deleting whether the homepage (`src/app/page.tsx`) still uses them.
 
 ---
 
-## Phase 7 — Admin: Categories & Ingredients
+## Phase 6 — Admin: Recipes CRUD ✅ done, UI redesigned from plan
 
-> Goal: admins can manage the lookup tables used by recipes.
-
-- [ ] **7.1** Create `src/actions/category.ts` — `getCategories()`, `createCategory()`, `updateCategory()`, `deleteCategory()` with Zod + `revalidatePath()`
-- [ ] **7.2** Create `src/lib/validations/category.ts` — Zod schema for category fields
-- [ ] **7.3** Create `src/app/(admin)/admin/categories/page.tsx` — table of categories with edit/delete; inline create form
-- [ ] **7.4** Create `src/actions/ingredient.ts` — `getIngredients()`, `createIngredient()`, `updateIngredient()`, `deleteIngredient()`
-- [ ] **7.5** Create `src/app/(admin)/admin/ingredients/page.tsx` — table of ingredients with edit/delete; inline create form
-- [ ] **7.6** Update `RecipeForm` category select to pull from live DB data
-
----
-
-## Phase 8 — UX Polish
-
-> Goal: loading states, error handling, empty states, and responsive design.
-
-- [ ] **8.1** Add `loading.tsx` files for admin routes — skeleton UI using shadcn `Skeleton`
-- [ ] **8.2** Add `error.tsx` files for admin routes — error boundary with retry button
-- [ ] **8.3** Add `not-found.tsx` for the `[slug]` recipe page — styled 404
-- [ ] **8.4** Add empty states to recipe and ingredient tables ("No recipes yet — create one")
-- [ ] **8.5** Create `src/components/shared/Pagination.tsx` — paginate the recipes list page (12 per page)
-- [ ] **8.6** Create `src/components/shared/SearchBar.tsx` — client-side search input with `use-debounce`
-- [ ] **8.7** Wire `SearchBar` into the admin recipes list — filter by title in real time
-- [ ] **8.8** Audit mobile layout — admin sidebar collapses to hamburger menu on small screens
+- [x] 6.1–6.12 — Full CRUD via Server Actions, Zod validation, `RecipeForm` (`BasicInfoSection`,
+  `DetailsSection`, `IngredientsSection`, `InstructionsSection`, `TagsSection`, `SaveBar`), image upload to
+  Vercel Blob, `ConfirmDialog` for deletes.
+- Design deviation from the original plan (Phase 12.2/17.1 superseded the same way): instead of a separate
+  `/recipes/[id]` edit route or a literal split-view/modal, recipes are edited via a right-side `Drawer`
+  (`RecipeViewDrawer`, 55vw on desktop / full-screen on mobile) opened by clicking a table row, with a
+  view/edit mode toggle. This satisfies the intent of Phase 12.2 and 17.1 in one component.
+- [ ] ⚠ **Dead code**: `RecipeEditModal.tsx` and `RecipeEditPanel.tsx` were earlier iterations of this same
+  idea and are no longer imported anywhere (`RecipeViewDrawer` replaced them) — delete.
+- [ ] ⚠ **Bug — lost feature**: `RecipeEditModal`/`RecipeEditPanel` (the dead ones) had a "view on site" link
+  to the public recipe page. The live `RecipeViewDrawer` only has a "Share" button (copies the URL) — there is
+  **no way to open the public page from the admin drawer** today. This is Phase 14.1, and it regressed when
+  the drawer replaced the modal/panel. Needs re-adding to `RecipeViewDrawer`.
 
 ---
 
-## Phase 9 — Deployment to Vercel
+## Phase 7 — Admin: Categories & Ingredients ✅ done (Category now standalone)
 
-> Goal: the app runs in production on Vercel with a cloud Postgres database.
-
-- [ ] **9.1** Create a Postgres database on Vercel (or Neon/Supabase) — copy `DATABASE_URL` and `DIRECT_URL`
-- [ ] **9.2** Add all environment variables to Vercel project settings
-- [ ] **9.3** Push project to GitHub; connect repo to Vercel
-- [ ] **9.4** Run `pnpm db:migrate` against the production database via `DIRECT_URL`
-- [ ] **9.5** Run `pnpm db:seed` to populate production database with initial data
-- [ ] **9.6** Trigger first Vercel deploy; resolve any build errors
-- [ ] **9.7** Verify: public recipe pages load; admin login works; CRUD operations persist
+- [x] 7.1–7.6 — `src/actions/category.ts`, `src/actions/ingredient.ts`, `src/actions/unit.ts` (added beyond
+  original plan), `/categories`, `/ingredients`, `/units` admin pages.
+- Scope note: `Category` is **no longer linked to `Recipe`** (migration `20260309000000_remove_category_from_recipe`,
+  Phase 16.0) — it's a fully standalone CRUD lookup table today, kept for its own sake.
+- [ ] ⚠ **Bug**: `createCategory`/`updateCategory`/`deleteCategory` (`src/actions/category.ts`) and all of
+  `createIngredient`/`updateIngredient`/`deleteIngredient` (`src/actions/ingredient.ts`) and all of
+  `createUnit`/`updateUnit`/`deleteUnit` (`src/actions/unit.ts`) call
+  `revalidatePath("/admin/categories")` / `"/admin/ingredients"` / `"/admin/units"` — paths that haven't
+  existed since the admin URL prefix was dropped. The real routes are `/categories`, `/ingredients`, `/units`.
+  These calls are no-ops; the actual pages aren't being told to revalidate (masked in practice by client-side
+  re-fetching/optimistic UI, but still wrong and worth fixing to 9 call sites total).
 
 ---
 
-## Phase 10 — Hardening & Nice-to-Haves
+## Phase 8 — UX Polish ✅ done
 
-> Goal: production-quality finishing touches.
+- [x] 8.1–8.8 — `loading.tsx`/`error.tsx` for admin routes, `not-found.tsx` for `[slug]`, empty states,
+  mobile hamburger sidebar (see Phase 4). `Pagination`/`SearchBar` components exist and are used by the
+  **admin** recipes list (`RecipeFilters`) — the public-facing instance is dead code (Phase 5).
 
-- [ ] **10.1** Add `robots.txt` and `sitemap.xml` (use Next.js Metadata API)
-- [ ] **10.2** Add Open Graph image generation for recipe pages (`opengraph-image.tsx`)
-- [ ] **10.3** Rate-limit the login Server Action (prevent brute force)
-- [ ] **10.5** Write Prisma query tests for critical Server Actions
-- [ ] **10.6** Lighthouse audit — fix CLS, LCP, accessibility issues
+---
 
+## Phase 9 — Deployment to Vercel — not verifiable from the repo
 
-## Phase 11 - UX enhancements
+- Can't confirm from source alone; CLAUDE.md and memory describe a working Vercel + Prisma Accelerate
+  deployment with CI (Playwright workflow fixed in PR #10). Treat as done but verify live if in doubt.
 
-- [] **11.1** Improve mobile recipe page interactions: do not make the menubar sticky on mobile
-- [] **11.2** Keep the buttons "jump to ingredients" "steps" sticky at the bottom of the screen on mobile when scrolling through a recipe. make them a little bit smaller and add icons to them.
-- [] **11.4** Admin recipes list: Add filter fields: categories, difficulty, prep time, cook time, servings, published status
+---
 
+## Phase 10 — Hardening & Nice-to-Haves ⚠ partially done
 
-## Phase 12 - Additional features
-- [] **12.1** Search functionality on the public recipes page. don't forget to skip diacritics (same for the admin search). This can be implemented using a simple text input that filters the displayed recipes in real time as the user types. The filtering should be case-insensitive and ignore diacritics to ensure a smooth user experience. For example, searching for "cafe" should match recipes with "café" in the title or description.
-- [] **12.2** Admin: on desktop, list recipes and when selecting a recipe displays the edit form on the right side of the screen (split view) 
-- [] **12.3** Admin: enhanced ingredient Select input: add a search value inside the Select component. Also add the ability to create a new ingredient directly from the Select dropdown (without leaving the recipe form). This could be implemented as an "Add new ingredient" option at the bottom of the dropdown, which opens a small modal or inline form to enter the new ingredient details. Once created, the new ingredient should be automatically selected in the original dropdown.
+- [x] 10.1 `robots.ts`/`sitemap.ts` exist.
+  - [ ] ⚠ `robots.ts` still disallows `/admin/`, a path that no longer exists (same stale-prefix bug family
+    as Phase 7). Harmless since the whole app requires auth anyway, but should be removed or fixed.
+  - Note: `sitemap.ts` returns `[]` — arguably correct now that the whole app is private and nothing should
+    be indexed, but confirm that's intentional rather than an unfinished TODO.
+- [ ] 10.2 — **Not implemented**: no `opengraph-image.tsx` anywhere in `src/app`.
+- [x] 10.3 — Login rate-limiting implemented (`src/lib/rate-limit.ts`, in-memory, 10/15min per IP — noted in
+  its own comment as not multi-instance-safe on serverless; fine for a personal app).
+- [x] 10.5 — Unit tests exist for recipe/category/ingredient Server Actions (see Testing section below for gaps).
+- [ ] 10.6 — Lighthouse audit — not verifiable from source.
 
-## Phase 13 - 
-- [] **13.1** Like for the ingredients, add a tick step action to the recipe steps, so that when you are cooking you can tick off each step as you go. This state should be kept in local storage so that it persists across page reloads but is not shared between users (not stored in the database).
-- [] **13.2** add a mechanism that allow the user to divide or muliply the ingredient quantities based on the number of servings they want to make. This could be a Plus and Minus button next to the servings field in the recipe details page. When the user clicks on the Plus button, it multiplies the ingredient quantities by +1 one serving and updates the displayed quantities accordingly. When they click on the Minus button, it reduces the quantities by -1 serving and updates the displayed quantities accordingly. The original quantities should be stored as a reference so that the user can always go back to the default values.
+---
 
-## Phase 14
-- [] **14.1** Add a button linking to the public recipe page from the admin recipe edit page
-- [] **14.2** If we are connected as admin and we visit a public recipe page, show an "Edit Recipe" button that links to the admin edit page for that recipe
-- [] **14.3** Under ingredients admin page: show the list of recipes that use each ingredient, with links to edit those recipes. This will help admins understand the impact of editing or deleting an ingredient.
-- [] **14.4** Admin edit recipe: when we create a new ingredient, the first click in the quantity input must clear the default value of 0
-- [] **14.5** Admin edit recipe: when we add a new ingredient to a recipe, the ingredient select input should be focused automatically to speed up data entry.
-- [] **14.6** Admin edit recipe: sort ingredient select list alphabetically and show the most used ingredients at the top of the list for easier access.
-- [] **14.6** Admin: avoid capitalizin the ingredient name when creating a new ingredient (for example "olive oil" instead of "Olive Oil") to avoid duplicates like "Olive Oil" and "olive oil" which are the same ingredient but will be treated as different ones by the system.
+## Phase 11 — UX enhancements ⚠ partially done
 
+- [ ] **11.1 / 11.2 — Not implemented.** No sticky mobile nav or "jump to ingredients/steps" buttons exist
+  anywhere in `src/components/recipes/` or the `(public)/recipes/[slug]` page. The `#ingredients` /
+  `#instructions` section anchors exist (`RecipeClientContent.tsx`) but nothing links to them, sticky or not.
+- [x] 11.4 — Admin recipe filters fully implemented (`RecipeFilters.tsx`): tag (replaces "categories" per
+  Phase 16), difficulty, status, max prep/cook time, max servings.
 
-## Phase 15 - 
-- [] **15.1** Admin recipe edit: add ingredients reordering functionality. This can be implemented using drag-and-drop or up/down buttons to allow admins to change the order of ingredients in a recipe. The new order should be saved in the database and reflected on the public recipe page.
-- [] **15.2** If we entered a quantity of 0 for an ingredient in the recipe form, we should hide the quantity on the public recipe page to avoid confusion (for example "Olive Oil" instead of "0 Olive Oil") since some ingredients may not require a specific quantity.
+---
 
+## Phase 12 — Additional features ⚠ mostly done
 
-## Phase 16 - Categorization with tags
-- [] **16.0** Remove the category field, we will only add tags to recipes it is easier to maintain, no need for a separate entity.
-- [] **16.1** Add a new field "tags" to the recipe model, which will be an array of strings. This will allow us to add multiple tags to each recipe for better categorization and filtering.
-- [] **16.2** Update the recipe form in the admin panel to include a multi-select input for tags, allowing admins to add or remove tags for each recipe. The multi-select should allow for both selecting from existing tags and creating new tags on the fly.
-- [] **16.3** On the public recipes page, add a filter component that allows users to filter recipes by tags. This will help users find recipes that match their interests or dietary preferences (e.g., "vegan", "gluten-free", "quick meals").
-- [] **16.4** Update the recipe detail page to display the tags associated with each recipe, allowing users to see at a glance the key attributes of the recipe and click on tags to view other recipes with the same tag.
+- [ ] ⚠ 12.1 — **Dead code**, see Phase 5. The diacritic-insensitive search itself (`normalizeStr()` in
+  `src/lib/utils.ts`) is correctly implemented and is actually used — by the **admin** recipe filter and the
+  flan page search — just not by a reachable public recipe list.
+- [x] 12.2 — Done via the `RecipeViewDrawer` pattern, see Phase 6 note (drawer, not literal side-by-side split).
+- [x] 12.3 — Done (`IngredientCombobox.tsx`): search input, inline "Add new ingredient" creation flow,
+  auto-selects the newly created ingredient.
 
+---
 
-## Phase 17 - Polish mobile UX
-- [] **17.1** On mobile admin page, make the recipe edit content appear in a modal because the split view is unusable
-- [] **17.2** Increase the image upload body limit from 1mb to 5mb to allow for higher quality images to be uploaded from mobile devices.
-- [] **17.3** Add client-side image compression before uploading to reduce file size and improve upload times on mobile networks. This can be implemented using a library like `browser-image-compression` to compress images in the browser before they are sent to the server.
-- [] **17.4** On the public recipe list, when using pagination make scroll to top
+## Phase 13 — Cooking-mode UX ✅ done
 
-## Phase 18 - 
-- [x] **18.1** When opening a recipe I want the URL to be updated with the recipe slug so that I can share the link to a specific recipe.
-- [x] **18.2** on mobile remove scroll on the recipe table, we should be able to see everything without having to scroll
-- [x] **18.3** Verify dark mode is working correctly: for a text it has to be white, I see the Recipes title does not work even with dark:text-white
+- [x] 13.1 — Step tick-off in `RecipeClientContent.tsx`, persisted to `localStorage` under
+  `recipe-steps-<slug>`, per-recipe, not shared between users/devices.
+  - Minor inconsistency (not a blocker): the **ingredient** checklist (`IngredientChecklist.tsx`) has its own
+    tick state but does **not** persist to `localStorage` the way steps do — ingredient check-offs reset on
+    reload. Worth deciding if that's intentional or should match steps.
+- [x] 13.2 — Servings +/- control in `RecipeClientContent.tsx`, scales ingredient quantities by ratio against
+  `originalServings` (not persisted — resets to the recipe's default servings on reload, which matches "always
+  be able to go back to the default values").
+
+---
+
+## Phase 14 — Admin ergonomics ⚠ partially done, 1 confirmed bug
+
+- [ ] ⚠ 14.1 — **Regressed**, see Phase 6 note — link from admin edit to public page is missing in the live drawer.
+- [x] 14.2 — **Fixed in this pass.** `(public)/recipes/[slug]/page.tsx` now calls `auth()` and renders an
+  "Edit recipe" link to `/recipes?recipe=<slug>` when `session.user.role === "ADMIN"`.
+  - Trade-off worth knowing: calling `auth()` (reads cookies) makes Next.js treat the whole route as dynamic —
+    `pnpm build`'s route table no longer lists the individual pre-rendered recipe slugs as static (●), it's
+    now server-rendered per request (ƒ) like every other route. Given the whole app is already auth-gated
+    and dynamic at the proxy level, this is a reasonable trade for the feature, but it is a real loss of the
+    static-generation benefit `generateStaticParams` was giving these pages — flagging in case that matters
+    for a personal app with low traffic (probably doesn't) vs. a future higher-traffic use case.
+- [x] 14.3 — Done, but with a bug: `getIngredients()` includes each ingredient's using recipes and
+  `IngredientsClient.tsx` renders an expandable "Used in" list — **but the link
+  (`href={\`/recipes/${recipe.id}\`}`) is wrong.** There's no `/recipes/[id]` route; admin editing is keyed by
+  `?recipe=<slug>` on `/recipes`, and the public route is keyed by slug too. `getIngredients()` doesn't even
+  select `slug`, only `id`/`title`. This link currently 404s. Needs a fix: select `slug` in the query and link
+  to `/recipes?recipe=<slug>` (or the public `/recipes/<slug>` if that's the intended destination).
+- [x] 14.4 — Done (`onFocus` selects an all-zero quantity input in `IngredientsSection.tsx`).
+- [x] 14.5 — Done (`autoOpen`/`onOpen` props drive focus to the newly-added ingredient's combobox).
+- [x] 14.6 — Done: `getAllIngredients()` orders by recipe-usage count desc, then name asc (most-used-first +
+  alphabetical). Ingredient names are not force-capitalized anywhere in the create path.
+
+---
+
+## Phase 15 — Ingredient display refinements ✅ done
+
+- [x] 15.1 — Up/down reorder buttons in `IngredientsSection.tsx` (`useFieldArray().move`), order persisted via
+  the `order` field on save.
+- [x] 15.2 — Done: `IngredientChecklist.tsx` hides the quantity/unit span entirely when `quantity === 0`.
+
+---
+
+## Phase 16 — Categorization with tags ✅ done
+
+- [x] 16.0–16.4 — `Category` decoupled from `Recipe`; `Tag`/`RecipeTag` added; `TagsSection.tsx` in the admin
+  form (select existing + create on the fly); admin `RecipeFilters` filters by tag; public recipe detail page
+  renders tags (no click-through to a tag-filtered list currently, since the public browse page is gone —
+  acceptable given Phase 5's pivot, but worth a decision either way).
+
+---
+
+## Phase 17 — Polish mobile UX ✅ done
+
+- [x] 17.1 — Superseded by the `RecipeViewDrawer` full-screen-on-mobile pattern (Phase 6).
+- [x] 17.2 — `next.config.ts` sets `experimental.serverActions.bodySizeLimit: "5mb"`.
+- [x] 17.3 — `browser-image-compression` is a direct dependency and used in `RecipeForm/index.tsx`.
+- [ ] ⚠ 17.4 — The `Pagination` component itself relies on default Next `<Link>` scroll behavior (scrolls to
+  top automatically), so the mechanism is in place, but it's only reachable from the dead public recipe list
+  (Phase 5) — nothing currently exercises it live.
+
+---
+
+## Phase 18 — Share & dark mode fixes ✅ done
+
+- [x] 18.1–18.3 — URL updates with recipe slug (`?recipe=<slug>` in the admin drawer, confirmed in
+  `AdminRecipesClient/index.tsx`); mobile table scroll fixed; dark-mode text contrast fixed.
+
+---
+
+## Phase 19 — FlanFan sideproject (merged from `Plan_flanfan.md`) ✅ done
+
+> Personal, public-within-the-private-app view of flan (French custard tart) tasting around Lyon.
+
+### Phase 19.1 — Simple view
+- [x] 19.1.1 — `/flan` page renders a Leaflet map of Lyon (`FlanMap.tsx`, dynamically imported with
+  `ssr: false` inside a `"use client"` wrapper, per the project's Leaflet convention).
+- [x] 19.1.2 — Admin sidebar has a `/flans` entry (admin CRUD) and `/flan` (personal map view).
+- [x] 19.1.3 — `Flan` + `PastryLocation` Prisma models exist with all the planned fields (name, location via
+  `PastryLocation.mapsUrl`, photo via Vercel Blob, rating, tried boolean, triedAt date, plus `comment`
+  beyond the original spec).
+- [x] 19.1.4 — `FlansClient.tsx` + `src/actions/flan.ts` give full CRUD for both `Flan` and `PastryLocation`.
+- [x] 19.1.5 — Markers plotted from `parseGoogleMapsUrl()` extracting lat/lng out of the stored Maps URL.
+- [x] 19.1.6 — Clicking a marker/list item opens a modal (`FlanModal` in `FlanPageClient.tsx`) with photo,
+  name, rating, comment, and a "View on Google Maps" link.
+
+### Phase 19.2 — Advanced view
+- [x] 19.2.1 — Rating-threshold filter (`RATING_OPTIONS`: all / ★3+ / ★4+ / ★5).
+- [x] 19.2.2 — Diacritic-insensitive search by name or location (`normalizeStr`).
+- [x] 19.2.3 — "Tried only" / "To try" toggle filters.
+- [x] 19.2.4 — Marker color differs by `tried` status (amber vs. gray, with a legend).
+
+---
+
+## Phase 20 — Isolate the database for local dev & tests ⚠ not started, high priority
+
+> Confirmed 2026-11-08: `DATABASE_URL`/`DIRECT_URL` in `.env` point at `db.prisma.io` (Prisma's hosted
+> Postgres), and the user confirmed **this is the same database Vercel production uses**. Neither
+> `.env.local` nor `.env.development.local` overrides it. That means `pnpm dev` and the whole Playwright e2e
+> suite (which runs against `pnpm dev`, per `playwright.config.ts`'s `webServer`) have been operating directly
+> on production data this whole time. `e2e/flan.spec.ts` (added in this pass) already had to be defensively
+> written around this — `data-testid` scoping instead of broad text-matching locators, and a Prisma `afterAll`
+> cleanup as a backstop — specifically *because* it's real prod data, not a disposable fixture. That's a
+> workaround, not a fix; the real fix is a separate database.
+>
+> Worse: `recipe-create.spec.ts` creates a real `"E2E Recipe <timestamp>"` row on every run and has **no
+> cleanup at all** — every CI run and every local `pnpm test:e2e` has been leaving permanent orphan recipes in
+> production. Couldn't verify how many have accumulated — a direct Prisma read against this database got
+> blocked by the harness's own production-write/read safeguard once it registered this is prod, which is the
+> correct call. Check via Prisma Studio (`pnpm db:studio`) and clean up manually; don't rely on me to query
+> prod to look.
+
+- [ ] **20.1** — Provision a dedicated dev/test database, separate from the one Vercel production uses. Either:
+  a local Postgres (Docker Compose, or `pnpm dlx` a local instance) for zero network dependency, or a second
+  Prisma Postgres project reserved for dev/test. Local Postgres is the safer default for "can never touch prod"
+  since it's physically a different machine, not just a different row of config.
+- [ ] **20.2** — Point `DATABASE_URL`/`DIRECT_URL` for local dev at that database via `.env.local` (gitignored,
+  not committed, already higher precedence than `.env` in Next.js's env loading — confirmed empty of DB vars
+  today). Leave the shared `.env`/`.env.example` documenting the *shape* of the vars without encouraging
+  reuse of the prod connection string for local work.
+- [ ] **20.3** — Write `prisma/seed.ts` fixtures for `Flan`/`PastryLocation` (currently has none — confirmed
+  during this pass; the flan feature has zero seed data today, unlike recipes/categories/ingredients/units).
+  Needed so `/flan` and `/flans` have deterministic data locally and in e2e without relying on whatever real
+  entries happen to exist in prod.
+- [ ] **20.4** — Point the Playwright `webServer`/CI env at the isolated database (e.g. a dedicated
+  `.env.test` loaded by `playwright.config.ts`, or a CI-only `DATABASE_URL` secret), so e2e runs — including
+  the existing `recipe-create.spec.ts`/`recipe-edit.spec.ts`, which also create/edit real rows today — stop
+  touching prod too.
+- [ ] **20.5** — Once isolated, simplify `e2e/flan.spec.ts`'s defensive `data-testid`/`afterAll`-cleanup
+  pattern if it's no longer load-bearing for safety (optional cleanup, not urgent).
+- [ ] **20.6** — Document the separate dev `DATABASE_URL` requirement in `CLAUDE.md`/`README.md` so this
+  doesn't silently regress back to pointing at prod for a future contributor (or a future session of mine).
+
+---
+
+## Known bugs & cleanup — summary
+
+Found during this verification pass, not yet fixed:
+
+1. **Stale `/admin/*` revalidatePath calls** in `category.ts`, `ingredient.ts`, `unit.ts` (9 call sites) —
+   should be `/categories`, `/ingredients`, `/units`. Same root cause as `robots.ts`'s stale `/admin/` disallow rule.
+2. **Broken ingredient "used in" links** (`IngredientsClient.tsx`) — link to a nonexistent `/recipes/[id]` route;
+   `getIngredients()` doesn't select the `slug` needed to build a working link.
+3. **Admin → public link missing** on the live `RecipeViewDrawer` (only "Share", no "View on site"); existed
+   in the dead `RecipeEditModal`/`RecipeEditPanel`.
+4. **Public → admin "Edit Recipe" button never built** (Phase 14.2) — no session check on the public recipe page.
+5. **Dead code**: `RecipesClient.tsx`, `RecipeEditModal.tsx`, `RecipeEditPanel.tsx`, and (pending confirmation)
+   `RecipeCard.tsx`/`RecipeGrid.tsx` if nothing else references them.
+6. **Missing**: Phase 11.1/11.2 sticky mobile jump-to-section nav; Phase 10.2 OG image generation.
+7. **Minor, found via new unit tests**: `slugify()` strips accented characters instead of transliterating
+   them (`\w` in its regex is ASCII-only) — `"Crème brûlée"` → `"crme-brle"`, not `"creme-brulee"`. Contrast
+   with `normalizeStr()`, which does transliterate for search/filter matching. Not fixed — a product call on
+   whether recipe slugs should read `creme-brulee` instead; flagging since it's surprising and now pinned by
+   a test (`src/__tests__/lib/utils.test.ts`).
+
+Fixed in this pass (2026-11-08): #1 (revalidatePath paths + `robots.ts`), #2 (ingredient "used in" links),
+#3 (re-added "View on site" to `RecipeViewDrawer`), #4 (added "Edit recipe" button on the public page for
+`ADMIN`-role sessions), and the dead-code deletions in #5 (`RecipesClient`, `RecipeGrid`, `RecipeCard`,
+`Pagination`, `RecipeEditModal`, `RecipeEditPanel`). #6 and #7 remain open — deliberately left for a separate
+product decision rather than fixed as a drive-by.
+
+---
+
+## Testing — current coverage & gaps
+
+**Unit (Vitest, `src/__tests__/`):** `recipe.test.ts`, `category.test.ts`, `ingredient.test.ts`, and as of this
+pass `unit.test.ts`, `flan.test.ts`, `lib/utils.test.ts` — Server Action happy/error paths against a mocked
+`db` (+ a mocked `@vercel/blob` for `uploadFlanPhoto`), plus pure-function coverage for `slugify`,
+`normalizeStr`, `formatDuration`, `parseGoogleMapsUrl`, `cn`. 70 tests total.
+
+**E2E (Playwright, `e2e/`):** `public.spec.ts` (recipe detail page, 404, homepage — explicitly documents the
+dead public-grid pivot), `recipe-create.spec.ts`, `recipe-edit.spec.ts` (drawer open → edit → save flow, slug
+auto-gen, ingredient rows), and as of this pass `flan.spec.ts` (public `/flan` map + filters, admin `/flans`
+CRUD).
+
+- These e2e specs run against the real dev database configured in `.env`, not a disposable fixture — there is
+  real personal flan data in it already. `flan.spec.ts` was written defensively because of this: it scopes
+  element selection to a `data-testid="flan-row"` added to `FlansClient.tsx` (a plain text-containing `div`
+  locator would also match ancestor containers wrapping *every* other real flan), and its `afterAll` hook
+  deletes anything matching its own generated name directly via Prisma as a backstop, independent of whether
+  the UI-driven delete step itself succeeded.
+- **Open finding, not root-caused**: the delete test's `page.reload()` right after confirming a delete
+  intermittently (~25–50% of runs locally) still shows the just-deleted row for a moment, even though it's a
+  direct Postgres connection with no `@prisma/extension-accelerate` in `src/lib/db.ts` (ruled out as an
+  Accelerate-cache explanation) and `revalidatePath` runs synchronously before the Server Action resolves. The
+  test now polls with repeated reloads (`toPass({ timeout: 15_000 })`) rather than asserting on a single
+  reload, which reliably passes — but the underlying one-reload staleness is real and unexplained, and would
+  look to a real user like "my delete/edit didn't save until I refreshed again." Worth investigating
+  independently of this test-writing pass.
+
+**Still zero coverage (not in this pass's agreed scope):**
+- `src/actions/auth.ts` — no test for rate-limiting or the login error-mapping branches.
+- Admin `RecipeFilters` (tag/difficulty/status/time filtering) — no e2e coverage.
+- Tags creation/selection in `RecipeForm`, delete-recipe flow, servings +/- scaling, step tick-off +
+  localStorage persistence — no e2e coverage.

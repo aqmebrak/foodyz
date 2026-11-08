@@ -33,6 +33,7 @@ import { type IngredientFormValues, ingredientSchema } from "@/lib/validations/c
 interface RecipeRef {
   id: string;
   title: string;
+  slug: string;
 }
 
 interface Ingredient {
@@ -262,7 +263,7 @@ export function IngredientsClient({ ingredients }: IngredientsClientProps) {
                           {ingredient.recipes.map(({ recipe }) => (
                             <li key={recipe.id}>
                               <Link
-                                href={`/recipes/${recipe.id}`}
+                                href={`/recipes?recipe=${recipe.slug}`}
                                 className="text-sm text-emerald-700 hover:text-emerald-900 hover:underline"
                               >
                                 {recipe.title}

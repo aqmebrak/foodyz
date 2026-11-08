@@ -22,7 +22,7 @@ export async function createCategory(data: CategoryFormValues) {
     return { error: "Failed to create category. The slug may already exist." };
   }
 
-  revalidatePath("/admin/categories");
+  revalidatePath("/categories");
   revalidatePath("/");
 }
 
@@ -39,7 +39,7 @@ export async function updateCategory(id: string, data: CategoryFormValues) {
     return { error: "Failed to update category. The slug may already be taken." };
   }
 
-  revalidatePath("/admin/categories");
+  revalidatePath("/categories");
   revalidatePath("/");
 }
 
@@ -51,6 +51,6 @@ export async function deleteCategory(id: string) {
     return { error: "Failed to delete category. It may still have recipes." };
   }
 
-  revalidatePath("/admin/categories");
+  revalidatePath("/categories");
   revalidatePath("/");
 }

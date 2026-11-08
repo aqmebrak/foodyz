@@ -1,7 +1,8 @@
 "use client";
 
-import { Check, Clock, Link2, Pencil, Timer, Users, X } from "lucide-react";
+import { Check, Clock, ExternalLink, Link2, Pencil, Timer, Users, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Difficulty } from "@prisma/client";
 
@@ -71,18 +72,26 @@ export function RecipeViewDrawer({
           </DrawerTitle>
           <div className="flex items-center gap-2 shrink-0">
             {recipe?.published && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={copyShareLink}
-              >
-                {copied ? (
-                  <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
-                ) : (
-                  <Link2 className="w-3.5 h-3.5 mr-1.5" />
-                )}
-                {copied ? "Copied!" : "Share"}
-              </Button>
+              <>
+                <Button size="sm" variant="outline" asChild>
+                  <Link href={`/recipes/${recipe.slug}`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+                    View on site
+                  </Link>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={copyShareLink}
+                >
+                  {copied ? (
+                    <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
+                  ) : (
+                    <Link2 className="w-3.5 h-3.5 mr-1.5" />
+                  )}
+                  {copied ? "Copied!" : "Share"}
+                </Button>
+              </>
             )}
             {mode === "view" ? (
               <Button

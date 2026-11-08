@@ -10,7 +10,7 @@ export async function getIngredients() {
     orderBy: { name: "asc" },
     include: {
       recipes: {
-        include: { recipe: { select: { id: true, title: true } } },
+        include: { recipe: { select: { id: true, title: true, slug: true } } },
       },
     },
   });
@@ -24,7 +24,7 @@ export async function createIngredient(data: IngredientFormValues) {
 
   try {
     const created = await db.ingredient.create({ data: parsed.data });
-    revalidatePath("/admin/ingredients");
+    revalidatePath("/ingredients");
     return { ingredient: { id: created.id, name: created.name } };
   } catch (e) {
     console.error(e);
@@ -45,7 +45,7 @@ export async function updateIngredient(id: string, data: IngredientFormValues) {
     return { error: "Failed to update ingredient. The slug may already be taken." };
   }
 
-  revalidatePath("/admin/ingredients");
+  revalidatePath("/ingredients");
 }
 
 export async function deleteIngredient(id: string) {
@@ -56,5 +56,5 @@ export async function deleteIngredient(id: string) {
     return { error: "Failed to delete ingredient. It may be in use by recipes." };
   }
 
-  revalidatePath("/admin/ingredients");
+  revalidatePath("/ingredients");
 }
