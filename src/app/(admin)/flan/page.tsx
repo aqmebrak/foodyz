@@ -1,4 +1,4 @@
-import { getFlans } from "@/actions/flan";
+import { getFlans, getPastryLocations } from "@/actions/flan";
 import { FlanPageClient } from "@/components/flan/FlanPageClient";
 
 export const metadata = {
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function FlanPage() {
-  const flans = await getFlans();
+  const [flans, locations] = await Promise.all([getFlans(), getPastryLocations()]);
 
   if (flans.length === 0) {
     return (
@@ -19,5 +19,5 @@ export default async function FlanPage() {
     );
   }
 
-  return <FlanPageClient flans={flans} />;
+  return <FlanPageClient flans={flans} locations={locations} />;
 }

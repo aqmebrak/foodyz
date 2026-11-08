@@ -1,5 +1,6 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
@@ -7,12 +8,15 @@ import { FlanDetail } from "@/components/flan/FlanDetail";
 import { FlanFilters } from "@/components/flan/FlanFilters";
 import { FlanList } from "@/components/flan/FlanList";
 import { FlanSheet, getSnapHeights, useSheetMetrics } from "@/components/flan/FlanSheet";
+import type { PastryLocation } from "@/components/flan/LocationCombobox";
+import { QuickLogSheet } from "@/components/flan/QuickLogSheet";
 import {
   countTried,
   filterFlans,
   type FlanFilterState,
   type FlanItem,
 } from "@/lib/flan-filters";
+import { cn } from "@/lib/utils";
 
 const FlanMap = dynamic(() => import("@/components/flan/FlanMap").then((m) => m.FlanMap), {
   ssr: false,
@@ -25,6 +29,7 @@ const FlanMap = dynamic(() => import("@/components/flan/FlanMap").then((m) => m.
 
 interface FlanPageClientProps {
   flans: FlanItem[];
+  locations: PastryLocation[];
 }
 
 const MOBILE_QUERY = "(max-width: 767px)";
@@ -41,10 +46,11 @@ function useIsMobile(): boolean {
   );
 }
 
-export function FlanPageClient({ flans }: FlanPageClientProps) {
+export function FlanPageClient({ flans, locations }: FlanPageClientProps) {
   const [filters, setFilters] = useState<FlanFilterState>({ query: "", minRating: 0, status: "all" });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [snapIndex, setSnapIndex] = useState(0);
+  const [logOpen, setLogOpen] = useState(false);
   const isMobile = useIsMobile();
   const metrics = useSheetMetrics();
 
@@ -67,6 +73,11 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
 
   const mobileSheet = isMobile && metrics !== null;
   const bottomInset = mobileSheet ? getSnapHeights(metrics)[1] - metrics.tabbar : 0;
+
+  // Sits 16px above the sheet's current peek/half height (measured from the container bottom).
+  const fabBottom = mobileSheet
+    ? getSnapHeights(metrics)[Math.min(snapIndex, 1)] - metrics.tabbar + 16
+    : null;
 
   const body = selected ? (
     <FlanDetail flan={selected} onBack={back} />
@@ -99,8 +110,27 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
         </div>
       </div>
 
-      {/* Slot for Task 10: floating "Log a flan" button (bottom-right, above the sheet peek). */}
-      <div id="flan-fab-slot" className="pointer-events-none absolute bottom-0 right-4 z-20" />
+      {/* Floating "Log a flan" button: rides above the sheet (peek/half), hidden when it is full. */}
+      <div
+        id="flan-fab-slot"
+        className={cn(
+          "pointer-events-none absolute right-4 z-20 transition-[bottom] duration-200 motion-reduce:transition-none md:bottom-4 md:right-[376px]",
+          mobileSheet && snapIndex >= 2 && "hidden",
+        )}
+        style={fabBottom !== null ? { bottom: fabBottom } : undefined}
+      >
+        <button
+          type="button"
+          onClick={() => setLogOpen(true)}
+          aria-label="Log a flan"
+          className="pointer-events-auto flex size-14 cursor-pointer items-center justify-center rounded-full bg-basil text-white shadow-lg transition-colors hover:bg-basil/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil focus-visible:ring-offset-2 md:h-12 md:w-auto md:gap-2 md:px-5"
+        >
+          <Plus className="size-6 md:size-5" />
+          <span className="hidden text-base font-medium md:inline">Log a flan</span>
+        </button>
+      </div>
+
+      <QuickLogSheet open={logOpen} onOpenChange={setLogOpen} locations={locations} isMobile={isMobile} />
 
       {/* Desktop: side panel */}
       <aside className="hidden w-[360px] shrink-0 flex-col border-l border-steam bg-white md:flex">

@@ -5,6 +5,7 @@ import Image from "next/image";
 
 import { FlanStars } from "@/components/flan/FlanStars";
 import type { FlanItem } from "@/lib/flan-filters";
+import { parseGoogleMapsUrl } from "@/lib/utils";
 
 interface FlanDetailProps {
   flan: FlanItem;
@@ -71,11 +72,15 @@ export function FlanDetail({ flan, onBack }: FlanDetailProps) {
           </p>
         )}
 
+        {!parseGoogleMapsUrl(flan.location.mapsUrl) && (
+          <p className="mt-4 text-sm text-ink/60">No map location — open in Google Maps</p>
+        )}
+
         <a
           href={flan.location.mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-basil px-4 text-base font-medium text-white transition-colors hover:bg-basil/90"
+          className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-basil px-4 text-base font-medium text-white transition-colors hover:bg-basil/90"
         >
           <MapPin className="size-4" />
           Open in Google Maps
