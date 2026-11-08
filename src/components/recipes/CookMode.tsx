@@ -8,10 +8,11 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import type { CookTimers } from "@/hooks/use-cook-timers";
 import type { UseRecipeProgress } from "@/hooks/use-recipe-progress";
 import { useWakeLock } from "@/hooks/use-wake-lock";
-import { formatCountdown, parseTimers } from "@/lib/timers";
+import { parseTimers } from "@/lib/timers";
 import { cn } from "@/lib/utils";
 
 import { type ChecklistIngredient, IngredientChecklist } from "./IngredientChecklist";
+import { StepTimerChip, TimerStack } from "./TimerViews";
 
 interface CookModeProps {
   steps: string[];
@@ -158,33 +159,7 @@ export function CookMode({ steps, ingredients, formatQty, progress, timers, onCl
         </button>
       </div>
 
-      {/* Running timers */}
-      {timers.timers.length > 0 && (
-        <ul className="flex gap-2 overflow-x-auto px-4 pb-1 pt-2" aria-label="Timers">
-          {timers.timers.map((t) => (
-            <li
-              key={t.id}
-              className={cn(
-                "flex h-11 shrink-0 items-center gap-1 rounded-full border pl-4 pr-1 text-base font-semibold tabular-nums",
-                t.done
-                  ? "border-yolk bg-yolk text-ink motion-safe:animate-pulse"
-                  : "border-steam bg-white",
-              )}
-              role={t.done ? "alert" : undefined}
-            >
-              <span>{t.done ? `${t.label} done` : formatCountdown(t.remainingSeconds)}</span>
-              <button
-                type="button"
-                onClick={() => timers.cancel(t.id)}
-                aria-label={`${t.done ? "Dismiss" : "Cancel"} ${t.label} timer`}
-                className="flex size-9 items-center justify-center rounded-full hover:bg-black/10"
-              >
-                <X className="size-4" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <TimerStack timers={timers.timers} onCancel={timers.cancel} />
 
       {/* Step text: swipe + tap zones */}
       <div
@@ -212,29 +187,13 @@ export function CookMode({ steps, ingredients, formatQty, progress, timers, onCl
         <div className="flex flex-wrap gap-2 px-6 pb-3">
           {stepTimers.map((t) => {
             const id = timerIdFor(t.index);
-            const running = timers.timers.find((x) => x.id === id);
             return (
-              <button
+              <StepTimerChip
                 key={id}
-                type="button"
-                onClick={() => timers.start(id, t.label, t.seconds)}
-                disabled={!!running}
-                className={cn(
-                  "flex h-12 items-center gap-2 rounded-full border-2 px-5 text-lg font-semibold tabular-nums",
-                  running
-                    ? running.done
-                      ? "border-yolk bg-yolk text-ink motion-safe:animate-pulse"
-                      : "border-basil bg-basil text-white"
-                    : "border-basil bg-white text-basil",
-                )}
-              >
-                <span aria-hidden>⏲</span>
-                {running
-                  ? running.done
-                    ? "Done"
-                    : formatCountdown(running.remainingSeconds)
-                  : t.label}
-              </button>
+                label={t.label}
+                timer={timers.timers.find((x) => x.id === id)}
+                onStart={() => timers.start(id, t.label, t.seconds)}
+              />
             );
           })}
         </div>

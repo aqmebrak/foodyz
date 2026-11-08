@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { CookMode } from "./CookMode";
 import { type ChecklistIngredient,IngredientChecklist } from "./IngredientChecklist";
 import { ServingsStepper } from "./ServingsStepper";
+import { TimerAlarm, TimerBarChip } from "./TimerViews";
 
 interface RecipeClientContentProps {
   ingredients: ChecklistIngredient[];
@@ -188,15 +189,21 @@ export function RecipeClientContent({
       {/* Sticky start-cooking bar: sits above the mobile tab bar */}
       {steps.length > 0 && (
         <div className="sticky bottom-[var(--tabbar-h)] z-20 -mx-4 mt-6 border-t border-steam bg-enamel/95 px-4 py-3 backdrop-blur md:bottom-0 md:mx-0 md:rounded-t-2xl md:border-x">
+          <div className="flex gap-3">
+          {!cookModeOpen && (
+            <TimerBarChip timers={timers.timers} onOpen={() => setCookModeOpen(true)} />
+          )}
           <button
             type="button"
             onClick={() => setCookModeOpen(true)}
-            className="flex h-14 w-full items-center justify-center rounded-xl bg-basil text-lg font-bold text-white transition-colors hover:bg-basil/90 active:bg-basil/80"
+            className="flex h-14 min-w-0 flex-1 items-center justify-center rounded-xl bg-basil text-lg font-bold text-white transition-colors hover:bg-basil/90 active:bg-basil/80"
           >
             {checkedSteps.size > 0 && !allDone ? "Resume cooking" : "Start cooking"}
           </button>
+          </div>
         </div>
       )}
+      <TimerAlarm timers={timers.timers} />
     </>
   );
 }
