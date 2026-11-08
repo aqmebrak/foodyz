@@ -22,3 +22,6 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+
+patchedDependencies:
+  vaul: patches/vaul.patch

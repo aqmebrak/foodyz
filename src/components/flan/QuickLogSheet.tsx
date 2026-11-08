@@ -1,5 +1,6 @@
 "use client";
 
+import imageCompression from "browser-image-compression";
 import { Camera, Check, Loader2, LocateFixed, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -10,7 +11,6 @@ import { LocationCombobox, type PastryLocation } from "@/components/flan/Locatio
 import { cn, formatDistance, rankLocationsByDistance } from "@/lib/utils";
 
 const NEAREST_RADIUS_M = 300;
-const MAX_PHOTO_EDGE = 1600;
 
 interface QuickLogSheetProps {
   open: boolean;
@@ -26,24 +26,6 @@ function todayLocal(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-/** Downscale big phone photos (server actions cap bodies at 5 MB). Falls back to the original. */
-async function shrinkImage(file: File): Promise<File> {
-  try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_PHOTO_EDGE / Math.max(bitmap.width, bitmap.height));
-    if (scale === 1 && file.size < 1_500_000) return file;
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.82));
-    if (!blob) return file;
-    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
-  } catch {
-    return file;
-  }
 }
 
 function RatingInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
@@ -102,11 +84,10 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
   const [locationId, setLocationId] = useState("");
   const [comment, setComment] = useState("");
   const [triedAt, setTriedAt] = useState(todayLocal);
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [photoError, setPhotoError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [stage, setStage] = useState<"uploading" | "saving">("saving");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [geo, setGeo] = useState<GeoState>("pending");
@@ -114,6 +95,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
   const [changing, setChanging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<string | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locationsRef = useRef(locations);
 
   const allLocations = useMemo(() => [...locations, ...extraLocations], [locations, extraLocations]);
@@ -161,41 +143,25 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
   useEffect(
     () => () => {
       if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+      if (closeTimer.current) clearTimeout(closeTimer.current);
     },
     [],
   );
 
-  async function handlePick(file: File) {
+  // The photo stays local (object-URL preview) until Save; nothing is uploaded before then.
+  function handlePick(file: File) {
     if (previewRef.current) URL.revokeObjectURL(previewRef.current);
     const url = URL.createObjectURL(file);
     previewRef.current = url;
     setPreview(url);
-    setPhotoError(null);
-    setUploading(true);
-    onBusyChange(true);
-    try {
-      const fd = new FormData();
-      fd.append("file", await shrinkImage(file));
-      const result = await uploadFlanPhoto(fd);
-      if (result && "url" in result && result.url) setPhotoUrl(result.url);
-      else throw new Error("upload failed");
-    } catch {
-      setPhotoError("Photo upload failed. Try again or save without it.");
-      URL.revokeObjectURL(url);
-      previewRef.current = null;
-      setPreview(null);
-      setPhotoUrl("");
-    } finally {
-      setUploading(false);
-      onBusyChange(false);
-    }
+    setPhotoFile(file);
   }
 
   function removePhoto() {
     if (previewRef.current) URL.revokeObjectURL(previewRef.current);
     previewRef.current = null;
     setPreview(null);
-    setPhotoUrl("");
+    setPhotoFile(null);
   }
 
   async function handleSave() {
@@ -206,13 +172,28 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
     setSaving(true);
     onBusyChange(true);
     try {
+      let photoUrl: string | undefined;
+      if (photoFile) {
+        setStage("uploading");
+        const compressed = await imageCompression(photoFile, {
+          maxSizeMB: 1.5,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        });
+        const fd = new FormData();
+        fd.append("file", new File([compressed], photoFile.name, { type: compressed.type }));
+        const up = await uploadFlanPhoto(fd);
+        if (!up || !("url" in up) || !up.url) throw new Error("upload failed");
+        photoUrl = up.url;
+      }
+      setStage("saving");
       const result = await createFlan({
         name: name.trim(),
         locationId,
         rating,
         tried: true,
         triedAt: triedAt || undefined,
-        photoUrl: photoUrl || undefined,
+        photoUrl,
         comment: comment.trim() || undefined,
       });
       if (result && "error" in result && result.error) {
@@ -222,7 +203,8 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
         return;
       }
       setSaved(true);
-      setTimeout(onClose, 1000);
+      onBusyChange(false);
+      closeTimer.current = setTimeout(onClose, 1000);
     } catch {
       setError("Could not save. Check your connection and try again.");
       setSaving(false);
@@ -259,7 +241,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) void handlePick(file);
+                  if (file) handlePick(file);
                   e.target.value = "";
                 }}
               />
@@ -267,17 +249,11 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                 <div className="space-y-2">
                   <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-steam">
                     <Image src={preview} alt="Flan photo" fill unoptimized className="object-cover" />
-                    {uploading && (
-                      <div className="absolute inset-0 flex items-center justify-center gap-2 bg-ink/50 text-white">
-                        <Loader2 className="size-5 animate-spin" />
-                        <span className="text-sm font-medium">Uploading…</span>
-                      </div>
-                    )}
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      disabled={uploading}
+                      disabled={saving}
                       onClick={() => fileRef.current?.click()}
                       className="h-11 flex-1 cursor-pointer rounded-lg border border-steam bg-white text-base font-medium text-ink"
                     >
@@ -285,7 +261,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                     </button>
                     <button
                       type="button"
-                      disabled={uploading}
+                      disabled={saving}
                       onClick={removePhoto}
                       className="h-11 flex-1 cursor-pointer rounded-lg border border-steam bg-white text-base font-medium text-paprika"
                     >
@@ -303,7 +279,6 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
                   <span className="text-base font-medium">Add a photo</span>
                 </button>
               )}
-              {photoError && <p className="mt-1.5 text-sm text-paprika">{photoError}</p>}
             </div>
 
             {/* Rating */}
@@ -412,11 +387,11 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
               <button
                 type="button"
                 onClick={() => void handleSave()}
-                disabled={saving || uploading}
+                disabled={saving}
                 className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-basil text-base font-semibold text-white transition-colors hover:bg-basil/90 disabled:opacity-60"
               >
-                {(saving || uploading) && <Loader2 className="size-4 animate-spin" />}
-                {uploading ? "Uploading photo…" : "Save flan"}
+                {saving && <Loader2 className="size-4 animate-spin" />}
+                {saving ? (stage === "uploading" ? "Uploading photo…" : "Saving…") : "Save flan"}
               </button>
             )}
           </div>
