@@ -95,9 +95,11 @@ export function FlanSheet({ metrics, snapIndex, onSnapIndexChange, header, child
           <div
             className={cn(
               "min-h-0 flex-1 overscroll-contain",
-              snapIndex === 2 ? "overflow-y-auto" : "overflow-hidden",
+              "overflow-y-auto",
             )}
-            style={{ paddingBottom: metrics.tabbar }}
+            // The sheet extends below the viewport at peek/half: pad by the hidden part so
+            // the last rows can scroll into the visible area.
+            style={{ paddingBottom: metrics.vh - heights[snapIndex] + metrics.tabbar }}
           >
             {children}
           </div>

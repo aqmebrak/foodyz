@@ -53,10 +53,15 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
   const { tried, toTry } = countTried(flans);
   const summary = `${tried} tried · ${toTry} to try`;
 
-  const select = (id: string) => {
+  // Marker tap: show the detail at least at half height.
+  const selectFromMap = (id: string) => {
     setSelectedId(id);
-    // Show the detail at least at half height.
     setSnapIndex((i) => Math.max(i, 1));
+  };
+  // List row tap: always half, so the flown-to marker is visible above the sheet.
+  const selectFromList = (id: string) => {
+    setSelectedId(id);
+    setSnapIndex(1);
   };
   const back = () => setSelectedId(null);
 
@@ -66,7 +71,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
   const body = selected ? (
     <FlanDetail flan={selected} onBack={back} />
   ) : (
-    <FlanList flans={filtered} selectedId={selectedId} onSelect={select} />
+    <FlanList flans={filtered} selectedId={selectedId} onSelect={selectFromList} />
   );
 
   return (
@@ -76,7 +81,7 @@ export function FlanPageClient({ flans }: FlanPageClientProps) {
         <FlanMap
           flans={filtered}
           selectedId={selected?.id ?? null}
-          onSelect={select}
+          onSelect={selectFromMap}
           bottomInset={bottomInset}
         />
       </div>
