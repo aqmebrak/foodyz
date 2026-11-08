@@ -1,4 +1,4 @@
-import { Clock, Pencil, Timer, Users } from "lucide-react";
+import { Clock, Pencil } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,14 +6,15 @@ import { notFound } from "next/navigation";
 import type { Difficulty } from "@prisma/client";
 
 import { getRecipeBySlug } from "@/actions/recipe";
+import { BackButton } from "@/components/recipes/BackButton";
 import { RecipeClientContent } from "@/components/recipes/RecipeClientContent";
 import { auth } from "@/lib/auth";
 import { formatDuration } from "@/lib/utils";
 
 const difficultyStyles: Record<Difficulty, string> = {
-  EASY: "bg-emerald-50 text-emerald-700",
-  MEDIUM: "bg-amber-50 text-amber-700",
-  HARD: "bg-red-50 text-red-700",
+  EASY: "bg-basil/10 text-basil",
+  MEDIUM: "bg-yolk/25 text-ink",
+  HARD: "bg-paprika/10 text-paprika",
 };
 
 const difficultyLabels: Record<Difficulty, string> = {
@@ -53,83 +54,77 @@ export default async function RecipePage({
   const totalTime = recipe.prepTime + recipe.cookTime;
 
   return (
-    <article className="max-w-3xl mx-auto px-4 py-10">
-      {/* Featured image */}
-      {recipe.featuredImage && (
-        <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-100 mb-8">
-          <Image
-            src={recipe.featuredImage}
-            alt={recipe.title}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="object-cover"
-          />
-        </div>
-      )}
+    <article className="mx-auto max-w-5xl px-4 pb-6 md:py-8">
+      {/* Header */}
+      <header className="relative -mx-4 md:mx-0">
+        <BackButton className="absolute left-4 top-[calc(env(safe-area-inset-top)+0.75rem)] z-10 md:static md:mb-4 md:ml-0" />
+        {recipe.featuredImage ? (
+          <div className="relative aspect-[4/3] max-h-[40vh] w-full overflow-hidden bg-steam md:mb-0 md:rounded-2xl">
+            <Image
+              src={recipe.featuredImage}
+              alt={recipe.title}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <div className="h-16 md:hidden" />
+        )}
+      </header>
 
-      {/* Tags + difficulty */}
-      <div className="flex flex-wrap gap-2 mb-3">
-        {recipe.tags.map(({ tag }) => (
+      <div className="mt-4">
+        {/* Difficulty + tags */}
+        <div className="mb-3 flex flex-wrap gap-2">
           <span
-            key={tag.slug}
-            className="text-xs font-medium text-emerald-600 uppercase tracking-wide"
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${difficultyStyles[recipe.difficulty]}`}
           >
-            {tag.name}
+            {difficultyLabels[recipe.difficulty]}
           </span>
-        ))}
-        <span
-          className={`text-xs font-semibold px-2 py-0.5 rounded-full ${difficultyStyles[recipe.difficulty]}`}
-        >
-          {difficultyLabels[recipe.difficulty]}
-        </span>
-      </div>
-
-      {/* Title */}
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <h1 className="text-3xl font-bold text-gray-900">{recipe.title}</h1>
-        {session?.user.role === "ADMIN" && (
-          <Link
-            href={`/recipes?recipe=${recipe.slug}`}
-            className="shrink-0 mt-1.5 flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            Edit recipe
-          </Link>
-        )}
-      </div>
-
-      {/* Description */}
-      {recipe.description && (
-        <p className="text-gray-600 text-base mb-6 leading-relaxed">{recipe.description}</p>
-      )}
-
-      {/* Stats */}
-      <div className="flex flex-wrap gap-5 text-sm text-gray-500 mb-10 pb-10 border-b border-gray-100">
-        {recipe.prepTime > 0 && (
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4" />
-            <span>Prep {formatDuration(recipe.prepTime)}</span>
-          </div>
-        )}
-        {recipe.cookTime > 0 && (
-          <div className="flex items-center gap-1.5">
-            <Timer className="w-4 h-4" />
-            <span>Cook {formatDuration(recipe.cookTime)}</span>
-          </div>
-        )}
-        {totalTime > 0 && (
-          <div className="flex items-center gap-1.5 font-medium text-gray-700">
-            <span>Total {formatDuration(totalTime)}</span>
-          </div>
-        )}
-        <div className="flex items-center gap-1.5">
-          <Users className="w-4 h-4" />
-          <span>{recipe.servings} servings</span>
+          {recipe.tags.map(({ tag }) => (
+            <span
+              key={tag.slug}
+              className="rounded-full bg-steam px-2.5 py-1 text-xs font-medium text-ink/70"
+            >
+              {tag.name}
+            </span>
+          ))}
         </div>
+
+        {/* Title */}
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <h1 className="font-display text-[28px] font-bold leading-tight tracking-tight text-ink md:text-4xl md:leading-tight">
+            {recipe.title}
+          </h1>
+          {session?.user.role === "ADMIN" && (
+            <Link
+              href={`/recipes/${recipe.slug}/edit`}
+              aria-label="Edit recipe"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full border border-steam bg-white text-ink transition-colors hover:bg-enamel"
+            >
+              <Pencil className="size-5" />
+            </Link>
+          )}
+        </div>
+
+        {recipe.description && (
+          <p className="mb-4 text-base leading-relaxed text-ink/80">{recipe.description}</p>
+        )}
+
+        {/* Stats */}
+        {totalTime > 0 && (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-ink/70">
+            <div className="flex items-center gap-1.5 text-base font-semibold text-ink">
+              <Clock className="size-5 text-basil" />
+              <span>{formatDuration(totalTime)} total</span>
+            </div>
+            {recipe.prepTime > 0 && <span>Prep {formatDuration(recipe.prepTime)}</span>}
+            {recipe.cookTime > 0 && <span>Cook {formatDuration(recipe.cookTime)}</span>}
+          </div>
+        )}
       </div>
 
-      {/* Interactive ingredients + instructions */}
       <RecipeClientContent
         ingredients={recipe.ingredients}
         steps={steps}

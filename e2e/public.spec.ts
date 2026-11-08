@@ -35,7 +35,7 @@ test.describe("Public recipe browsing", () => {
       page.getByRole("heading", { name: /ingredients/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: /instructions/i })
+      page.getByRole("heading", { name: /steps/i })
     ).toBeVisible();
   });
 
