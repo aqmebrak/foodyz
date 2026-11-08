@@ -19,7 +19,6 @@ const { redirect } = await import("next/navigation");
 const validRecipe = {
   title: "Pasta Carbonara",
   slug: "pasta-carbonara",
-  categoryId: "cat-1",
   difficulty: "EASY" as const,
   prepTime: 10,
   cookTime: 20,
@@ -29,6 +28,7 @@ const validRecipe = {
   description: undefined,
   featuredImage: undefined,
   ingredients: [],
+  tags: [],
 };
 
 beforeEach(() => {
@@ -49,7 +49,7 @@ describe("createRecipe", () => {
     vi.mocked(db.recipe.create).mockResolvedValueOnce({} as never);
     await createRecipe(validRecipe);
     expect(db.recipe.create).toHaveBeenCalledOnce();
-    expect(redirect).toHaveBeenCalledWith("/admin/recipes");
+    expect(redirect).toHaveBeenCalledWith("/recipes");
   });
 
   it("returns error when db.recipe.create throws", async () => {
