@@ -95,6 +95,8 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
   const [changing, setChanging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<string | null>(null);
+  // URL of an already-uploaded photo, reused on retry if createFlan fails after the upload.
+  const uploadedRef = useRef<string | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locationsRef = useRef(locations);
 
@@ -155,6 +157,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
     previewRef.current = url;
     setPreview(url);
     setPhotoFile(file);
+    uploadedRef.current = null;
   }
 
   function removePhoto() {
@@ -162,6 +165,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
     previewRef.current = null;
     setPreview(null);
     setPhotoFile(null);
+    uploadedRef.current = null;
   }
 
   async function handleSave() {
@@ -172,8 +176,8 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
     setSaving(true);
     onBusyChange(true);
     try {
-      let photoUrl: string | undefined;
-      if (photoFile) {
+      let photoUrl: string | undefined = uploadedRef.current ?? undefined;
+      if (photoFile && !photoUrl) {
         setStage("uploading");
         const compressed = await imageCompression(photoFile, {
           maxSizeMB: 1.5,
@@ -185,6 +189,7 @@ function QuickLogForm({ locations, onClose, onBusyChange }: QuickLogFormProps) {
         const up = await uploadFlanPhoto(fd);
         if (!up || !("url" in up) || !up.url) throw new Error("upload failed");
         photoUrl = up.url;
+        uploadedRef.current = up.url;
       }
       setStage("saving");
       const result = await createFlan({
