@@ -170,7 +170,9 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
 
   const { ingredients, tags, description, featuredImage, ...rest } = parsed.data;
 
+  let oldSlug: string | undefined;
   try {
+    oldSlug = (await db.recipe.findUnique({ where: { id }, select: { slug: true } }))?.slug;
     await db.recipe.update({
       where: { id },
       data: {
@@ -211,6 +213,7 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
   revalidatePath("/");
   revalidatePath("/recipes");
   revalidatePath(`/recipes/${parsed.data.slug}`);
+  if (oldSlug && oldSlug !== parsed.data.slug) revalidatePath(`/recipes/${oldSlug}`);
   redirect(`/recipes/${parsed.data.slug}`);
 }
 

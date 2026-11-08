@@ -12,7 +12,9 @@ interface NumberStepperProps {
   min?: number;
   step?: number;
   suffix?: string;
-  invalid?: boolean;
+  ref?: React.Ref<HTMLInputElement>;
+  "aria-invalid"?: boolean | "true" | "false";
+  "aria-describedby"?: string;
   onBlur?: () => void;
   name?: string;
 }
@@ -28,7 +30,9 @@ export function NumberStepper({
   min = 0,
   step = 1,
   suffix,
-  invalid,
+  ref,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
   onBlur,
   name,
 }: NumberStepperProps) {
@@ -47,6 +51,7 @@ export function NumberStepper({
       </button>
       <div className="relative min-w-0 flex-1">
         <input
+          ref={ref}
           id={id}
           name={name}
           type="text"
@@ -54,7 +59,8 @@ export function NumberStepper({
           pattern="[0-9]*"
           autoComplete="off"
           enterKeyHint="next"
-          aria-invalid={invalid || undefined}
+          aria-invalid={ariaInvalid}
+          aria-describedby={ariaDescribedBy}
           value={value === "" || Number.isNaN(value) ? "" : value}
           onBlur={onBlur}
           onChange={(e) => {
@@ -64,7 +70,7 @@ export function NumberStepper({
           className={cn(
             "h-11 w-full rounded-lg border border-steam bg-white px-2 text-center text-base tabular-nums text-ink outline-none focus-visible:ring-2 focus-visible:ring-basil",
             suffix && "pr-9",
-            invalid && "border-paprika",
+            "aria-invalid:border-paprika",
           )}
         />
         {suffix && (

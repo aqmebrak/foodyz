@@ -9,6 +9,7 @@ vi.mock("@/lib/db", () => ({
       update: vi.fn(),
       delete: vi.fn(),
       findMany: vi.fn(),
+      findUnique: vi.fn(),
     },
     recipeTag: { deleteMany: vi.fn(), create: vi.fn() },
     tag: { upsert: vi.fn() },
@@ -17,6 +18,7 @@ vi.mock("@/lib/db", () => ({
 
 const { db } = await import("@/lib/db");
 const { redirect } = await import("next/navigation");
+const { revalidatePath } = await import("next/cache");
 
 const validRecipe = {
   title: "Pasta Carbonara",
@@ -75,6 +77,14 @@ describe("updateRecipe", () => {
       expect.objectContaining({ where: { id: "id-1" } })
     );
     expect(redirect).toHaveBeenCalledWith("/recipes/pasta-carbonara");
+  });
+
+  it("revalidates the old slug path when the slug changes", async () => {
+    vi.mocked(db.recipe.findUnique).mockResolvedValueOnce({ slug: "old-slug" } as never);
+    vi.mocked(db.recipe.update).mockResolvedValueOnce({} as never);
+    await updateRecipe("id-1", validRecipe);
+    expect(revalidatePath).toHaveBeenCalledWith("/recipes/old-slug");
+    expect(revalidatePath).toHaveBeenCalledWith("/recipes/pasta-carbonara");
   });
 
   it("returns error when db throws", async () => {
