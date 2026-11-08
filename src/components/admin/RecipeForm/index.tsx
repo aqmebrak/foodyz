@@ -4,19 +4,22 @@ import imageCompression from "browser-image-compression";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import type { Resolver } from "react-hook-form";
-import { useFieldArray,useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
 import { createRecipe, deleteRecipe, updateRecipe, uploadRecipeImage } from "@/actions/recipe";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { useFormDraft } from "@/hooks/use-form-draft";
+import { setUnsavedChanges } from "@/lib/unsaved-guard";
 import { slugify } from "@/lib/utils";
 import { type RecipeFormValues,recipeSchema } from "@/lib/validations/recipe";
 
 import { AdvancedSection } from "./AdvancedSection";
 import { BasicInfoSection } from "./BasicInfoSection";
 import { DetailsSection } from "./DetailsSection";
+import { DraftBanner } from "./DraftBanner";
 import { IngredientsSection } from "./IngredientsSection";
 import { InstructionsSection } from "./InstructionsSection";
 import { PhotoSection } from "./PhotoSection";
@@ -61,13 +64,45 @@ export function RecipeForm({
     }
   }, [titleValue, isEdit, form]);
 
+  const watched = useWatch({ control: form.control }) as RecipeFormValues;
+  const isDirty = form.formState.isDirty;
+
+  const draft = useFormDraft<RecipeFormValues>({
+    storageKey: "recipe-draft-new",
+    values: watched,
+    enabled: !isEdit && !isPending,
+    dirty: isDirty,
+  });
+
+  // Unsaved-changes guard (off while submitting).
+  const guardActive = isDirty && !isPending;
+  useEffect(() => {
+    setUnsavedChanges(guardActive);
+    if (!guardActive) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+      setUnsavedChanges(false);
+    };
+  }, [guardActive]);
+
   function onSubmit(data: RecipeFormValues) {
     setServerError(null);
     startTransition(async () => {
+      // createRecipe redirects on success, so clear the draft up front and
+      // put it back if the action reports an error.
+      if (!isEdit) draft.clear();
       const result = isEdit
         ? await updateRecipe(recipeId, data)
         : await createRecipe(data);
-      if (result?.error) setServerError(result.error);
+      if (result?.error) {
+        setServerError(result.error);
+        if (!isEdit) draft.save(data);
+      }
     });
   }
 
@@ -117,6 +152,22 @@ export function RecipeForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
+        {!isEdit && draft.pending && (
+          <DraftBanner
+            savedAt={draft.pending.savedAt}
+            onRestore={() => {
+              const pending = draft.pending;
+              if (!pending) return;
+              form.reset({ ...DEFAULT_FORM_VALUES, ...pending.values }, { keepDefaultValues: true });
+              draft.dismiss();
+            }}
+            onDiscard={() => {
+              draft.clear();
+              draft.dismiss();
+            }}
+          />
+        )}
+
         <PhotoSection
           featuredImage={featuredImage}
           previewUrl={previewUrl}

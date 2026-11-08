@@ -9,6 +9,7 @@ import { getRecipeBySlug } from "@/actions/recipe";
 import { BackButton } from "@/components/recipes/BackButton";
 import { RecipeClientContent } from "@/components/recipes/RecipeClientContent";
 import { auth } from "@/lib/auth";
+import { splitSteps } from "@/lib/steps";
 import { formatDuration } from "@/lib/utils";
 
 const difficultyStyles: Record<Difficulty, string> = {
@@ -46,10 +47,7 @@ export default async function RecipePage({
   const [recipe, session] = await Promise.all([getRecipeBySlug(slug), auth()]);
   if (!recipe) notFound();
 
-  const steps = recipe.instructions
-    .split(/\n\n+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const steps = splitSteps(recipe.instructions);
 
   const totalTime = recipe.prepTime + recipe.cookTime;
 

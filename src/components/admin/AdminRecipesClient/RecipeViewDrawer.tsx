@@ -14,6 +14,7 @@ import {
   DrawerContent,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { splitSteps } from "@/lib/steps";
 import { formatDuration } from "@/lib/utils";
 
 import { difficultyBadge, type SelectedRecipe } from "./types";
@@ -122,10 +123,7 @@ function RecipeDetailView({
 
   if (!recipe) return null;
 
-  const steps = recipe.instructions
-    .split(/\n\n+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const steps = splitSteps(recipe.instructions);
 
   return (
     <article className="max-w-2xl mx-auto px-4 py-5 pb-10">
