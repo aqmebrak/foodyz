@@ -1,11 +1,13 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { useCookTimers } from "@/hooks/use-cook-timers";
 import { useRecipeProgress } from "@/hooks/use-recipe-progress";
 import { cn } from "@/lib/utils";
 
+import { CookMode } from "./CookMode";
 import { type ChecklistIngredient,IngredientChecklist } from "./IngredientChecklist";
 import { ServingsStepper } from "./ServingsStepper";
 
@@ -28,10 +30,12 @@ export function RecipeClientContent({
   originalServings,
   recipeSlug,
 }: RecipeClientContentProps) {
+  const ingredientIds = useMemo(() => ingredients.map((i) => i.id), [ingredients]);
   const [currentServings, setCurrentServings] = useState(originalServings);
   const [panel, setPanel] = useState<Panel>("ingredients");
-  const [, setCookModeOpen] = useState(false);
-  const progress = useRecipeProgress(recipeSlug, steps.length);
+  const [cookModeOpen, setCookModeOpen] = useState(false);
+  const progress = useRecipeProgress(recipeSlug, steps.length, ingredientIds);
+  const timers = useCookTimers();
   const { checkedSteps, firstUncheckedStep } = progress;
 
   const ratio = currentServings / originalServings;
@@ -169,6 +173,17 @@ export function RecipeClientContent({
           )}
         </section>
       </div>
+
+      {cookModeOpen && (
+        <CookMode
+          steps={steps}
+          ingredients={scaledIngredients}
+          formatQty={formatQty}
+          progress={progress}
+          timers={timers}
+          onClose={() => setCookModeOpen(false)}
+        />
+      )}
 
       {/* Sticky start-cooking bar: sits above the mobile tab bar */}
       {steps.length > 0 && (
