@@ -3,7 +3,7 @@
 import { Check, ExternalLink, MapPin, TriangleAlert } from "lucide-react";
 import { useState, useTransition } from "react";
 
-import { updatePastryLocationUrl } from "@/actions/flan";
+import { updatePastryLocation } from "@/actions/flan";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { isShortMapsUrl } from "@/lib/maps-url";
@@ -53,35 +53,43 @@ function PositionHint({ url }: { url: string }) {
 }
 
 function ShopCard({ shop }: { shop: Shop }) {
-  const [value, setValue] = useState(shop.mapsUrl);
-  const [saved, setSaved] = useState(shop.mapsUrl);
+  const [name, setName] = useState(shop.name);
+  const [url, setUrl] = useState(shop.mapsUrl);
+  // Last values known to be stored: what the heading, "Open in Maps" and the dirty check compare against.
+  const [saved, setSaved] = useState({ name: shop.name, mapsUrl: shop.mapsUrl });
   const [error, setError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const dirty = value.trim() !== saved;
+  const dirty = name.trim() !== saved.name || url.trim() !== saved.mapsUrl;
   const triedCount = shop.flans.filter((f) => f.tried).length;
 
   function handleSave() {
     setError(null);
     setJustSaved(false);
     startTransition(async () => {
-      const result = await updatePastryLocationUrl(shop.id, value);
+      const result = await updatePastryLocation(shop.id, { name, mapsUrl: url });
       if (result?.error) {
         setError(result.error);
         return;
       }
-      const next = result?.location?.mapsUrl ?? value.trim();
-      setValue(next);
+      const next = {
+        name: result?.location?.name ?? name.trim(),
+        mapsUrl: result?.location?.mapsUrl ?? url.trim(),
+      };
+      setName(next.name);
+      setUrl(next.mapsUrl);
       setSaved(next);
       setJustSaved(true);
     });
   }
 
+  const fieldClass = "h-11 bg-card text-base";
+
   return (
     <li data-testid="shop-row" className="rounded-lg border border-steam bg-card p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <h2 className="text-lg font-semibold text-ink">{shop.name}</h2>
+        <h2 className="text-lg font-semibold text-ink">{saved.name}</h2>
         <p className="text-sm text-ink/60">
           {shop.flans.length === 0
             ? "No flans yet"
@@ -90,7 +98,7 @@ function ShopCard({ shop }: { shop: Shop }) {
       </div>
 
       {shop.flans.length > 0 && (
-        <ul className="mt-3 flex flex-wrap gap-2" aria-label={`Flans at ${shop.name}`}>
+        <ul className="mt-3 flex flex-wrap gap-2" aria-label={`Flans at ${saved.name}`}>
           {shop.flans.map((flan) => (
             <li
               key={flan.id}
@@ -110,59 +118,72 @@ function ShopCard({ shop }: { shop: Shop }) {
       )}
 
       <form
-        className="mt-4 flex flex-col gap-2"
+        className="mt-4 flex flex-col gap-3"
         onSubmit={(e) => {
           e.preventDefault();
           if (dirty && !isPending) handleSave();
         }}
       >
-        <label htmlFor={`maps-url-${shop.id}`} className="text-sm font-medium text-ink">
-          Google Maps URL
-        </label>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={`shop-name-${shop.id}`} className="text-sm font-medium text-ink">
+            Name
+          </label>
+          <Input
+            id={`shop-name-${shop.id}`}
+            required
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setJustSaved(false);
+            }}
+            className={fieldClass}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={`maps-url-${shop.id}`} className="text-sm font-medium text-ink">
+            Google Maps URL
+          </label>
           <Input
             id={`maps-url-${shop.id}`}
             type="url"
             inputMode="url"
-            value={value}
+            required
+            value={url}
             onChange={(e) => {
-              setValue(e.target.value);
+              setUrl(e.target.value);
               setJustSaved(false);
             }}
-            placeholder="https://www.google.com/maps/place/…"
-            className="h-11 flex-1 bg-card text-base"
+            placeholder="https://www.google.com/maps/place/… or https://maps.app.goo.gl/…"
+            className={fieldClass}
           />
-          <div className="flex gap-2">
-            <Button type="submit" className="h-11 flex-1 sm:flex-none" disabled={!dirty || isPending}>
-              {isPending ? "Saving…" : "Save URL"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-11 shrink-0"
-              asChild
-            >
-              <a
-                href={saved}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open ${shop.name} in Google Maps`}
-              >
-                <ExternalLink className="size-4" />
-              </a>
-            </Button>
-          </div>
+          <PositionHint url={url} />
         </div>
-        <PositionHint url={value} />
+
+        <div className="flex items-center gap-2">
+          <Button type="submit" className="h-11 flex-1 sm:flex-none" disabled={!dirty || isPending}>
+            {isPending ? "Saving…" : "Save"}
+          </Button>
+          <Button type="button" variant="outline" className="h-11 shrink-0" asChild>
+            <a
+              href={saved.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${saved.name} in Google Maps`}
+            >
+              <ExternalLink className="size-4" />
+              <span className="max-sm:sr-only">Open in Maps</span>
+            </a>
+          </Button>
+          {justSaved && !dirty && (
+            <p role="status" className="text-sm text-basil">
+              Saved
+            </p>
+          )}
+        </div>
         {error && (
           <p role="alert" className="text-sm text-paprika">
             {error}
-          </p>
-        )}
-        {justSaved && !dirty && (
-          <p role="status" className="text-sm text-basil">
-            URL saved
           </p>
         )}
       </form>
@@ -176,7 +197,7 @@ export function ShopsClient({ shops }: ShopsClientProps) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Flan shops</h1>
         <p className="mt-0.5 text-sm text-gray-500">
-          {shops.length} shop{shops.length !== 1 ? "s" : ""} · edit the Maps URL to move a pin
+          {shops.length} shop{shops.length !== 1 ? "s" : ""} · rename a shop or edit its Maps URL to move its pin
         </p>
       </div>
 

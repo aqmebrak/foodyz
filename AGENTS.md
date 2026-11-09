@@ -79,7 +79,7 @@ foodyz/
     │       │       └── edit/page.tsx # dedicated edit route
     │       ├── categories/, ingredients/, units/   # CRUD pages
     │       ├── flans/page.tsx    # admin CRUD for flans + pastry locations
-    │       ├── shops/page.tsx    # shop editing view: shops + their flans (read-only) + editable Maps URL
+    │       │   └── shops/page.tsx    # /flans/shops: shops + their flans (read-only) + editable name and Maps URL
     │       └── flan/page.tsx     # personal flan tasting map
     ├── components/
     │   ├── ui/                   # shadcn/ui primitives — do not edit directly

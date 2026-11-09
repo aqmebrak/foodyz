@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 
-// Shop editing view (/shops): flans are read-only, the Maps URL is editable and moves the map pin.
+// Shop editing view (/flans/shops): flans are read-only; the name and Maps URL are editable and the URL moves the map pin.
 
 const runId = Date.now();
 const shopName = `E2E Edit Shop ${runId}`;
@@ -14,9 +14,10 @@ const OLD_PIN: [number, number] = [45.75, 4.8];
 const NEW_PIN: [number, number] = [45.77, 4.88];
 
 const db = new PrismaClient();
+let shopId = "";
 
 test.beforeAll(async () => {
-  await db.pastryLocation.create({
+  const shop = await db.pastryLocation.create({
     data: {
       name: shopName,
       mapsUrl: urlFor(...OLD_PIN),
@@ -28,19 +29,20 @@ test.beforeAll(async () => {
       },
     },
   });
+  shopId = shop.id;
 });
 
 test.afterAll(async () => {
   await db.flan.deleteMany({ where: { name: { in: [triedFlan, untriedFlan] } } });
-  await db.pastryLocation.deleteMany({ where: { name: shopName } });
+  await db.pastryLocation.deleteMany({ where: { id: shopId } });
   await db.$disconnect();
 });
 
-const shopRow = (page: import("@playwright/test").Page) =>
-  page.getByTestId("shop-row").filter({ hasText: shopName });
+const shopRow = (page: import("@playwright/test").Page, name = shopName) =>
+  page.getByTestId("shop-row").filter({ has: page.getByRole("heading", { name, exact: true }) });
 
 test("lists the shop with its flans, tried and not tried, read-only", async ({ page }) => {
-  await page.goto("/shops");
+  await page.goto("/flans/shops");
   const row = shopRow(page);
   await expect(row).toHaveCount(1);
   await expect(row.getByRole("heading", { name: shopName })).toBeVisible();
@@ -49,22 +51,23 @@ test("lists the shop with its flans, tried and not tried, read-only", async ({ p
   const flans = row.getByRole("list", { name: `Flans at ${shopName}` });
   await expect(flans.getByRole("listitem").filter({ hasText: triedFlan })).toContainText("(tried)");
   await expect(flans.getByRole("listitem").filter({ hasText: untriedFlan })).toContainText("(not tried)");
-  // Flans and the shop name are not editable here: the only input is the Maps URL.
-  await expect(row.getByRole("textbox")).toHaveCount(1);
+  // Flans are read-only: the only editable fields are the shop name and the Maps URL.
+  await expect(row.getByRole("textbox")).toHaveCount(2);
+  await expect(row.getByLabel("Name", { exact: true })).toHaveValue(shopName);
   await expect(row.getByLabel("Google Maps URL")).toHaveValue(urlFor(...OLD_PIN));
   await expect(row.getByTestId("shop-position")).toContainText("45.75000, 4.80000");
 });
 
 test("editing the Maps URL saves it and moves the pin on the map", async ({ page }) => {
-  await page.goto("/shops");
+  await page.goto("/flans/shops");
   const row = shopRow(page);
-  const save = row.getByRole("button", { name: "Save URL" });
+  const save = row.getByRole("button", { name: "Save", exact: true });
   await expect(save).toBeDisabled();
 
   await row.getByLabel("Google Maps URL").fill(urlFor(...NEW_PIN));
   await expect(row.getByTestId("shop-position")).toContainText("45.77000, 4.88000");
   await save.click();
-  await expect(row.getByRole("status")).toHaveText("URL saved");
+  await expect(row.getByRole("status")).toHaveText("Saved");
   await expect(save).toBeDisabled();
 
   await page.reload();
@@ -77,15 +80,43 @@ test("editing the Maps URL saves it and moves the pin on the map", async ({ page
 });
 
 test("warns when a URL has no position but still saves it", async ({ page }) => {
-  await page.goto("/shops");
+  await page.goto("/flans/shops");
   const row = shopRow(page);
   await row.getByLabel("Google Maps URL").fill("https://example.com/no-coordinates");
   await expect(row.getByTestId("shop-position")).toContainText("No position found");
-  await row.getByRole("button", { name: "Save URL" }).click();
-  await expect(row.getByRole("status")).toHaveText("URL saved");
+  await row.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(row.getByRole("status")).toHaveText("Saved");
 
   // Put a valid pin back so later runs/tests start from a clean shop.
   await row.getByLabel("Google Maps URL").fill(urlFor(...OLD_PIN));
-  await row.getByRole("button", { name: "Save URL" }).click();
-  await expect(row.getByRole("status")).toHaveText("URL saved");
+  await row.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(row.getByRole("status")).toHaveText("Saved");
+});
+
+test("renames the shop and the new name shows everywhere", async ({ page }) => {
+  const renamed = `${shopName} renamed`;
+  const save = (name: string) => shopRow(page, name).getByRole("button", { name: "Save", exact: true });
+
+  await page.goto("/flans/shops");
+  await shopRow(page).getByLabel("Name", { exact: true }).fill(renamed);
+  await save(shopName).click();
+  // The row is found by its heading, so it now answers to the new name.
+  await expect(shopRow(page, renamed).getByRole("status")).toHaveText("Saved");
+
+  await page.reload();
+  const renamedRow = shopRow(page, renamed);
+  await expect(renamedRow).toHaveCount(1);
+  await expect(renamedRow.getByLabel("Name", { exact: true })).toHaveValue(renamed);
+  // The flans stay attached to the renamed shop.
+  await expect(renamedRow.getByText("2 flans · 1 tried")).toBeVisible();
+
+  // An empty name cannot be saved.
+  await renamedRow.getByLabel("Name", { exact: true }).fill("   ");
+  await save(renamed).click();
+  await expect(renamedRow.getByRole("alert")).toBeVisible();
+
+  // Restore the original name.
+  await renamedRow.getByLabel("Name", { exact: true }).fill(shopName);
+  await save(renamed).click();
+  await expect(shopRow(page, shopName).getByRole("status")).toHaveText("Saved");
 });

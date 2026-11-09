@@ -21,8 +21,8 @@ export const adminNav: NavItem[] = [
   { href: "/categories", label: "Categories", icon: Tag },
   { href: "/ingredients", label: "Ingredients", icon: Package },
   { href: "/units", label: "Units", icon: Scale },
-  { href: "/flans", label: "Manage flans", icon: Cake },
-  { href: "/shops", label: "Flan shops", icon: Store },
+  { href: "/flans", label: "Manage flans", icon: Cake, exact: true },
+  { href: "/flans/shops", label: "Flan shops", icon: Store },
 ];
 
 export function isNavActive(pathname: string, { href, exact }: NavItem): boolean {

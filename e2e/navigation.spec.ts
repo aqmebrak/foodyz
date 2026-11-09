@@ -30,12 +30,16 @@ test.describe("Desktop sidebar", () => {
   });
 
   test("opens the Admin submenu on an admin route and marks the page as current", async ({ page }) => {
-    await page.goto("/shops");
+    await page.goto("/flans/shops");
     await expect(page.getByRole("button", { name: "Admin" })).toHaveAttribute("aria-expanded", "true");
     await expect(
       page.getByRole("navigation", { name: "Admin" }).getByRole("link", { name: "Flan shops" }),
     ).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("heading", { name: "Flan shops" })).toBeVisible();
+    // "Manage flans" (/flans) is a sibling, not the parent: it must not light up too.
+    await expect(
+      page.getByRole("navigation", { name: "Admin" }).getByRole("link", { name: "Manage flans" }),
+    ).not.toHaveAttribute("aria-current", "page");
   });
 
   test("Recipes is not highlighted on the new-recipe page", async ({ page }) => {
@@ -51,5 +55,5 @@ test("mobile More sheet links to the shop editing view", async ({ page }) => {
   await page.goto("/recipes");
   await page.getByRole("button", { name: "More" }).click();
   await page.getByRole("link", { name: "Flan shops" }).click();
-  await expect(page).toHaveURL(/\/shops$/);
+  await expect(page).toHaveURL(/\/flans\/shops$/);
 });

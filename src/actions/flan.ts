@@ -81,7 +81,7 @@ export async function createFlan(data: FlanFormValues) {
 
   revalidatePath("/flans");
   revalidatePath("/flan");
-  revalidatePath("/shops");
+  revalidatePath("/flans/shops");
 }
 
 export async function updateFlan(id: string, data: FlanFormValues) {
@@ -103,7 +103,7 @@ export async function updateFlan(id: string, data: FlanFormValues) {
 
   revalidatePath("/flans");
   revalidatePath("/flan");
-  revalidatePath("/shops");
+  revalidatePath("/flans/shops");
 }
 
 export async function deleteFlan(id: string) {
@@ -113,7 +113,7 @@ export async function deleteFlan(id: string) {
   await db.flan.delete({ where: { id } });
   revalidatePath("/flans");
   revalidatePath("/flan");
-  revalidatePath("/shops");
+  revalidatePath("/flans/shops");
 }
 
 // ---------------------------------------------------------------------------
@@ -137,23 +137,31 @@ export async function createPastryLocation(data: PastryLocationFormValues) {
 
   revalidatePath("/flans");
   revalidatePath("/flan");
-  revalidatePath("/shops");
+  revalidatePath("/flans/shops");
   return { location };
 }
 
-export async function updatePastryLocationUrl(id: string, mapsUrl: string) {
+export async function updatePastryLocation(id: string, data: PastryLocationFormValues) {
   const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) return { error: parsedId.error.issues[0]?.message ?? "Invalid id" };
-  const parsed = pastryLocationSchema.shape.mapsUrl.safeParse(mapsUrl.trim());
+  const parsed = pastryLocationSchema.safeParse({
+    name: data.name?.trim(),
+    mapsUrl: data.mapsUrl?.trim(),
+  });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid data" };
 
-  const url = isShortMapsUrl(parsed.data) ? await expandMapsShortUrl(parsed.data) : parsed.data;
+  const mapsUrl = isShortMapsUrl(parsed.data.mapsUrl)
+    ? await expandMapsShortUrl(parsed.data.mapsUrl)
+    : parsed.data.mapsUrl;
 
   try {
-    const location = await db.pastryLocation.update({ where: { id }, data: { mapsUrl: url } });
+    const location = await db.pastryLocation.update({
+      where: { id },
+      data: { name: parsed.data.name, mapsUrl },
+    });
     revalidatePath("/flans");
     revalidatePath("/flan");
-    revalidatePath("/shops");
+    revalidatePath("/flans/shops");
     return { location };
   } catch (e) {
     console.error(e);
@@ -168,7 +176,7 @@ export async function deletePastryLocation(id: string) {
   await db.pastryLocation.delete({ where: { id } });
   revalidatePath("/flans");
   revalidatePath("/flan");
-  revalidatePath("/shops");
+  revalidatePath("/flans/shops");
 }
 
 // ---------------------------------------------------------------------------
