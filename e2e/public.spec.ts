@@ -15,8 +15,13 @@ test.describe("Public recipe browsing", () => {
     await page.goto("/recipes");
     const rows = page.locator('main ul a[href^="/recipes/"]');
     await expect(rows.first()).toBeVisible();
-    await page.getByRole("searchbox", { name: /search recipes/i }).fill("zzzxqj-no-match");
-    await expect(page.getByText(/No recipes match/)).toBeVisible();
+    // Retry the fill: on slower engines (WebKit in dev) typing can land before hydration.
+    const search = page.getByRole("searchbox", { name: /search recipes/i });
+    await expect(async () => {
+      await search.fill("");
+      await search.fill("zzzxqj-no-match");
+      await expect(page.getByText(/No recipes match/)).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 15_000 });
     await expect(rows).toHaveCount(0);
     await page.getByRole("button", { name: "Clear filters" }).click();
     await expect(rows.first()).toBeVisible();

@@ -7,13 +7,13 @@ test.describe("Recipe creation form", () => {
 
   test("auto-generates slug from title", async ({ page }) => {
     await page.getByLabel("Title").fill("My Awesome Recipe");
-    await page.getByText("Advanced", { exact: true }).click();
+    await page.locator("summary", { hasText: "Advanced" }).click();
     await expect(page.getByLabel("Slug")).toHaveValue("my-awesome-recipe");
   });
 
   test("slug updates live as title changes", async ({ page }) => {
     const title = page.getByLabel("Title");
-    await page.getByText("Advanced", { exact: true }).click();
+    await page.locator("summary", { hasText: "Advanced" }).click();
     const slug = page.getByLabel("Slug");
 
     await title.fill("First Title");
@@ -43,15 +43,15 @@ test.describe("Recipe creation form", () => {
     await page.getByLabel("Cook time", { exact: true }).fill("20");
     await page.getByLabel("Servings", { exact: true }).fill("2");
 
+    // Steps editor: one textarea per step ("Step N"); a blank line splits on blur
     await page
-      .getByPlaceholder(/Describe each step/)
+      .getByLabel("Step 1", { exact: true })
       .fill("Step 1: Boil water.\n\nStep 2: Add pasta.\n\nStep 3: Serve.");
 
     // Add one ingredient — combobox auto-opens after clicking "Add ingredient"
     await page.getByRole("button", { name: "Add ingredient" }).click();
-    // Ingredient options are <button> elements containing a check icon (lucide-check)
-    await page.locator("button:has(svg.lucide-check)").first().click();
-    await page.getByPlaceholder("Qty").fill("100");
+    await page.getByRole("option").first().click();
+    await page.getByPlaceholder("Qty").last().fill("100");
 
     await page.getByRole("button", { name: "Create recipe" }).first().click();
 

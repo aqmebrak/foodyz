@@ -6,8 +6,9 @@ test.describe("Recipe edit form", () => {
     page: import("@playwright/test").Page
   ) {
     await page.goto("/recipes");
-    // Open the first recipe's drawer, then follow its Edit link
-    await page.getByRole("row").nth(1).click();
+    // Desktop: clicking a list row opens the drawer; follow its Edit link.
+    // Use a known seeded recipe (has prep time + ingredients) rather than list order.
+    await page.getByRole("link", { name: /Gâteau au Chocolat/i }).first().click();
     const editLink = page.getByRole("link", { name: "Edit" });
     await expect(editLink).toBeVisible({ timeout: 15_000 });
     await editLink.click();
@@ -20,7 +21,7 @@ test.describe("Recipe edit form", () => {
   test("pre-fills title and slug from existing recipe", async ({ page }) => {
     await openFirstRecipePanel(page);
     await expect(page.getByLabel("Title")).not.toHaveValue("");
-    await page.getByText("Advanced", { exact: true }).click();
+    await page.locator("summary", { hasText: "Advanced" }).click();
     await expect(page.getByLabel("Slug")).not.toHaveValue("");
   });
 
@@ -40,7 +41,7 @@ test.describe("Recipe edit form", () => {
     page,
   }) => {
     await openFirstRecipePanel(page);
-    await page.getByText("Advanced", { exact: true }).click();
+    await page.locator("summary", { hasText: "Advanced" }).click();
 
     const slugInput = page.getByLabel("Slug");
     const originalSlug = await slugInput.inputValue();
@@ -75,7 +76,7 @@ test.describe("Recipe edit form", () => {
 
   test("shows ingredient rows pre-populated", async ({ page }) => {
     await openFirstRecipePanel(page);
-    // pasta-carbonara has 5 ingredients seeded
+    // gateau-au-chocolat has ingredients seeded
     const count = await page.getByPlaceholder("Qty").count();
     expect(count).toBeGreaterThan(0);
   });
@@ -94,16 +95,12 @@ test.describe("Recipe edit form", () => {
 
     await page.getByRole("button", { name: "Add ingredient" }).click();
 
-    // Combobox auto-opens after adding a row — ingredient options are
-    // rendered as <button> elements containing a check icon (lucide-check)
-    await page.locator("button:has(svg.lucide-check)").first().click();
+    // Combobox auto-opens after adding a row
+    await page.getByRole("option").first().click();
 
     // Fill in quantity for the new (last) row
     await page.getByPlaceholder("Qty").last().fill("2");
 
-    // The ingredient combobox should now show a name (not the placeholder "Ingredient")
-    await page.locator("button").filter({ hasNotText: "Ingredient" });
-    // Just verify no error appeared and qty was filled
     await expect(page.getByPlaceholder("Qty").last()).toHaveValue("2");
   });
 });
