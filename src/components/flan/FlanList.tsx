@@ -10,14 +10,23 @@ interface FlanListProps {
   flans: FlanItem[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  /** True when filters hide flans; false when there are none at all. */
+  filtered?: boolean;
 }
 
-export function FlanList({ flans, selectedId, onSelect }: FlanListProps) {
+export function FlanList({ flans, selectedId, onSelect, filtered = true }: FlanListProps) {
   if (flans.length === 0) {
     return (
       <div className="px-4 py-10 text-center text-ink/60">
         <p className="mb-2 text-3xl">🍮</p>
-        <p className="text-base font-medium">No flans match your filters.</p>
+        {filtered ? (
+          <p className="text-base font-medium">No flans match your filters.</p>
+        ) : (
+          <>
+            <p className="text-base font-medium">No flans yet.</p>
+            <p className="mt-1 text-sm">Tap “Log a flan” to add your first one.</p>
+          </>
+        )}
       </div>
     );
   }

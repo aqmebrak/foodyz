@@ -82,7 +82,7 @@ export function FlanPageClient({ flans, locations }: FlanPageClientProps) {
   const body = selected ? (
     <FlanDetail flan={selected} onBack={back} />
   ) : (
-    <FlanList flans={filtered} selectedId={selectedId} onSelect={selectFromList} />
+    <FlanList flans={filtered} selectedId={selectedId} onSelect={selectFromList} filtered={flans.length > 0} />
   );
 
   return (

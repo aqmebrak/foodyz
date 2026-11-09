@@ -9,15 +9,6 @@ export const metadata = {
 export default async function FlanPage() {
   const [flans, locations] = await Promise.all([getFlans(), getPastryLocations()]);
 
-  if (flans.length === 0) {
-    return (
-      <div className="flex min-h-[60dvh] flex-col items-center justify-center px-4 text-center text-ink/60">
-        <p className="mb-3 text-4xl">🍮</p>
-        <p className="text-base font-medium">No flans yet.</p>
-        <p className="mt-1 text-sm">Go eat some flan and come back!</p>
-      </div>
-    );
-  }
-
+  // Always render the map: with zero flans the "Log a flan" button is how you add the first one.
   return <FlanPageClient flans={flans} locations={locations} />;
 }
