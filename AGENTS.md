@@ -190,7 +190,7 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - Use `interface` for component props; use `type` for unions, utilities, and Prisma-derived types
 - Component filenames: `PascalCase.tsx`; utility/hook filenames: `kebab-case.ts`
 - Merge Tailwind classes with `cn()` from `lib/utils.ts` — never string concatenation
-- Never compute slugs inline — always use `slugify()` from `lib/utils.ts` (note: it strips accented characters rather than transliterating them — `"Crème brûlée"` → `"crme-brle"`, not `"creme-brulee"` — use `normalizeStr()` instead when accent-insensitive *matching*, not slugging, is what's needed)
+- Never compute slugs inline — always use `slugify()` from `lib/utils.ts` (it NFD-normalises and strips accents: `"Crème brûlée"` → `"creme-brulee"`; use `normalizeStr()` for accent-insensitive *matching*)
 - Images: store files in `public/images/<category>/` and render with `next/image`
 
 ---

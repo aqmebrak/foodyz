@@ -11,6 +11,8 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function slugify(str: string): string {
   return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
@@ -34,20 +36,44 @@ export function formatDuration(minutes: number): string {
   return m === 0 ? `${h}h` : `${h}h ${m}min`;
 }
 
+const NUM = "(-?\\d+(?:\\.\\d+)?)";
+
+function toPoint(lat: string, lng: string): [number, number] | null {
+  const la = parseFloat(lat);
+  const ln = parseFloat(lng);
+  if (!Number.isFinite(la) || !Number.isFinite(ln)) return null;
+  if (Math.abs(la) > 90 || Math.abs(ln) > 180) return null;
+  return [la, ln];
+}
+
 /**
- * Extracts [lat, lng] from a full Google Maps URL.
- * Supports: /@lat,lng,zoom  |  ?q=lat,lng  |  /place/name/lat,lng
- * Returns null if coordinates cannot be extracted.
+ * Extracts the place [lat, lng] from a full Google Maps URL.
+ * Priority: `!3d<lat>!4d<lng>` (real pin; last pair wins) → `q=` / `query=` / `ll=` lat,lng
+ * → `/place/<name>/lat,lng` → `@lat,lng` (camera centre, offset from the pin; fallback only).
+ * Returns null if coordinates cannot be extracted or are out of range.
  */
 export function parseGoogleMapsUrl(url: string): [number, number] | null {
-  const atMatch = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
-  if (atMatch) return [parseFloat(atMatch[1]), parseFloat(atMatch[2])];
+  const pins = [...url.matchAll(new RegExp(`!3d${NUM}!4d${NUM}`, "g"))];
+  const lastPin = pins.at(-1);
+  if (lastPin) {
+    const p = toPoint(lastPin[1], lastPin[2]);
+    if (p) return p;
+  }
 
-  const qMatch = url.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
-  if (qMatch) return [parseFloat(qMatch[1]), parseFloat(qMatch[2])];
+  const q = url.match(new RegExp(`[?&](?:q|query|ll)=${NUM}(?:,|%2C)${NUM}`, "i"));
+  if (q) {
+    const p = toPoint(q[1], q[2]);
+    if (p) return p;
+  }
 
-  const placeMatch = url.match(/\/place\/[^/]+\/(-?\d+\.?\d*),(-?\d+\.?\d*)/);
-  if (placeMatch) return [parseFloat(placeMatch[1]), parseFloat(placeMatch[2])];
+  const place = url.match(new RegExp(`/place/[^/]+/${NUM},${NUM}`));
+  if (place) {
+    const p = toPoint(place[1], place[2]);
+    if (p) return p;
+  }
+
+  const at = url.match(new RegExp(`@${NUM},${NUM}`));
+  if (at) return toPoint(at[1], at[2]);
 
   return null;
 }

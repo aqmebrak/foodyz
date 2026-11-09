@@ -47,7 +47,7 @@ function CategoryForm({
   submitLabel,
 }: {
   defaultValues?: Partial<CategoryFormValues>;
-  onSubmit: (data: CategoryFormValues) => Promise<void>;
+  onSubmit: (data: CategoryFormValues) => Promise<{ error?: string } | void>;
   onCancel?: () => void;
   submitLabel: string;
 }) {
@@ -69,7 +69,8 @@ function CategoryForm({
   function handleSubmit(data: CategoryFormValues) {
     setServerError(null);
     startTransition(async () => {
-      await onSubmit(data);
+      const result = await onSubmit(data);
+      if (result?.error) setServerError(result.error);
     });
   }
 
@@ -148,11 +149,13 @@ export function CategoriesClient({ categories }: CategoriesClientProps) {
   async function handleCreate(data: CategoryFormValues) {
     const result = await createCategory(data);
     if (!result?.error) setShowCreate(false);
+    return result;
   }
 
   async function handleUpdate(id: string, data: CategoryFormValues) {
     const result = await updateCategory(id, data);
     if (!result?.error) setEditingId(null);
+    return result;
   }
 
   return (
