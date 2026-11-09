@@ -58,6 +58,16 @@ export function countActiveFilters(f: RecipeFilterState): number {
   return [f.diff, f.time, f.serv, f.drafts].filter(Boolean).length;
 }
 
+/** Resets only what the Filters sheet controls; search text and tag stay. */
+export function clearSheetFilters(f: RecipeFilterState): RecipeFilterState {
+  return { ...f, diff: "", time: 0, serv: "", drafts: false };
+}
+
+/** Recipes visible under the drafts setting, ignoring search/tag/sheet filters. */
+export function countVisible(recipes: Array<{ published: boolean }>, drafts: boolean): number {
+  return drafts ? recipes.length : recipes.filter((r) => r.published).length;
+}
+
 export function hasAnyFilter(f: RecipeFilterState): boolean {
   return !!f.q.trim() || !!f.tag || countActiveFilters(f) > 0;
 }

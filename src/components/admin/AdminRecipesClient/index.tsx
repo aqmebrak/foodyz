@@ -9,6 +9,8 @@ import { getRecipeForAdmin } from "@/actions/recipe";
 import { Button } from "@/components/ui/button";
 import { useRecentRecipes } from "@/hooks/use-recent-recipes";
 import {
+  clearSheetFilters,
+  countVisible,
   filterRecipes,
   hasAnyFilter,
   parseFilters,
@@ -74,6 +76,10 @@ export function AdminRecipesClient({ recipes }: AdminRecipesClientProps) {
     setFilters((f) => ({ ...f, ...patch }));
   }
 
+  function clearSheet() {
+    setFilters(clearSheetFilters);
+  }
+
   function clearFilters() {
     setFilters({ q: "", tag: "", diff: "", time: 0, serv: "", drafts: false });
   }
@@ -132,7 +138,7 @@ export function AdminRecipesClient({ recipes }: AdminRecipesClientProps) {
       <div className="flex items-end justify-between pt-5 md:mb-2 md:pt-0">
         <div>
           <h1 className="font-display text-3xl font-semibold text-ink">Recipes</h1>
-          <p className="mt-0.5 text-sm text-ink/60">{recipes.length} total</p>
+          <p className="mt-0.5 text-sm text-ink/60">{countVisible(recipes, filters.drafts)} total</p>
         </div>
         {newRecipeButton}
       </div>
@@ -142,7 +148,7 @@ export function AdminRecipesClient({ recipes }: AdminRecipesClientProps) {
         tags={uniqueTags}
         resultCount={filtered.length}
         onChange={patchFilters}
-        onClear={clearFilters}
+        onClear={clearSheet}
       />
 
       {recipes.length === 0 ? (

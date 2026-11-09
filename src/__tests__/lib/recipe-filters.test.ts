@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  clearSheetFilters,
   countActiveFilters,
+  countVisible,
   type FilterableRecipe,
   filterRecipes,
   parseFilters,
@@ -82,5 +84,20 @@ describe("pushRecent", () => {
   it("puts newest first, dedupes, caps at 5", () => {
     expect(pushRecent(["a", "b"], "b")).toEqual(["b", "a"]);
     expect(pushRecent(["a", "b", "c", "d", "e"], "f")).toEqual(["f", "a", "b", "c", "d"]);
+  });
+});
+
+describe("clearSheetFilters", () => {
+  it("clears sheet filters but keeps search text and tag", () => {
+    const f = { q: "pâtes", tag: "Dessert", diff: "HARD", time: 30, serv: "5+", drafts: true };
+    expect(clearSheetFilters(f)).toEqual({ q: "pâtes", tag: "Dessert", diff: "", time: 0, serv: "", drafts: false });
+  });
+});
+
+describe("countVisible", () => {
+  const rs = [r({ title: "A" }), r({ title: "B", published: false })];
+  it("excludes drafts unless shown", () => {
+    expect(countVisible(rs, false)).toBe(1);
+    expect(countVisible(rs, true)).toBe(2);
   });
 });
