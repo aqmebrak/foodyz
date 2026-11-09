@@ -34,19 +34,24 @@ A personal recipe manager built with Next.js. The whole app sits behind login �
 
    | Variable | Description |
    |---|---|
-   | `DATABASE_URL` | Pooled Postgres connection string, used at runtime |
-   | `DIRECT_URL` | Direct (non-pooled) connection string, used by Prisma migrations |
+   | `DATABASE_URL` | Postgres connection string — **local Docker dev DB** (`localhost:5433`), never production |
+   | `DIRECT_URL` | Same as `DATABASE_URL` locally (used by Prisma migrations) |
    | `AUTH_SECRET` | Session signing secret — generate with `openssl rand -base64 32` |
    | `AUTH_URL` | Base URL of the app — `http://localhost:3000` locally |
    | `BLOB_READ_WRITE_TOKEN` | Vercel Blob read/write token |
    | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Credentials for the seeded admin account |
 
-3. Set up the database:
+3. Start the local databases (Docker) and seed them:
 
    ```bash
-   pnpm db:migrate   # apply migrations
-   pnpm db:seed      # seed categories, units, ingredients, tags, admin user
+   pnpm db:up          # dev DB :5433 (persistent) + test DB :5434 (disposable, used by e2e)
+   pnpm db:setup       # migrate + seed dev DB: ~60 recipes, tags, 9 flans / 7 Lyon locations, admin user
+   pnpm db:test:setup  # same for the test DB (uses .env.test; Playwright does this DB's reads/writes)
    ```
+
+   Local dev and e2e never use the production database. Production connection strings live only in
+   Vercel (and `.env.production.local`, loaded by `next build`/`next start` only — `vercel env pull` to refresh).
+   `prisma/seed.ts` and Playwright refuse to run against a non-local host (`prisma/guard.ts`).
 
 4. Start the dev server:
 
@@ -70,6 +75,10 @@ pnpm db:generate      # prisma generate (run after every schema change)
 pnpm db:studio        # open Prisma Studio
 pnpm db:seed          # run prisma/seed.ts
 pnpm db:reset         # prisma migrate reset
+pnpm db:up / db:down  # start / stop local Docker Postgres (dev + test)
+pnpm db:setup         # migrate deploy + seed the dev DB
+pnpm db:test:setup    # migrate deploy + seed the test DB
+pnpm db:test:reset    # wipe + re-seed the test DB
 
 pnpm test             # run unit tests (Vitest)
 pnpm test:watch       # unit tests in watch mode

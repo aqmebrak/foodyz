@@ -201,12 +201,13 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - Create migrations with `prisma migrate dev --name <short-description>`
 - Never manually edit files inside `prisma/migrations/`
 - Always set both `DATABASE_URL` (pooled) and `DIRECT_URL` (non-pooled) — required for Vercel + connection poolers (PgBouncer / Supabase / Neon)
-- **`DATABASE_URL`/`DIRECT_URL` in `.env` point at the same database Vercel production uses — confirmed
-  with the project owner.** There is no separate dev/test database yet (see Plan.md Phase 20). Until that
-  phase lands: never write a script, test, or seed command that assumes it's safe to mutate freely. E2E specs
-  that create/edit/delete data must clean up after themselves (see `e2e/flan.spec.ts`'s `afterAll` Prisma
-  cleanup for the pattern) — `recipe-create.spec.ts` currently does not and has been leaving orphan rows in
-  production on every run; don't copy that pattern for new specs.
+- **Local dev/test DBs are isolated from production (Plan.md Phase 20).** `.env` points at the Docker dev DB
+  (`localhost:5433/foodyz_dev`, `pnpm db:up` + `pnpm db:setup`); `.env.test` points at the disposable test DB
+  (`localhost:5434/foodyz_test`, `pnpm db:test:setup`) and is force-loaded by `playwright.config.ts` outside CI. Prod
+  strings live only in Vercel and `.env.production.local` (gitignored, read only by `next build`/`start`). 
+  `prisma/guard.ts` (`assertLocalDatabase`) makes `prisma/seed.ts` and Playwright abort on non-local hosts — never
+  bypass with `ALLOW_NON_LOCAL_DB=1` without the owner's explicit say-so. Prisma CLI only reads `.env`, not `.env.local`, which is why the dev URL lives in `.env`.
+- e2e specs should still clean up what they create, but the test DB is disposable (`pnpm db:test:reset`).
 
 ---
 
