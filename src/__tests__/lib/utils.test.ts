@@ -42,10 +42,12 @@ describe("slugify", () => {
     expect(slugify("Pasta (homemade)!!")).toBe("pasta-homemade");
   });
 
-  it("strips accented characters rather than transliterating them", () => {
-    // \w in the slugify regex is ASCII-only, so accents are dropped, not
-    // normalized — "Crème brûlée" becomes "crme-brle", not "creme-brulee".
-    expect(slugify("Crème brûlée")).toBe("crme-brle");
+  it("transliterates accented characters", () => {
+    expect(slugify("Crème brûlée")).toBe("creme-brulee");
+  });
+
+  it("handles ç, ñ and œ-free mixed input", () => {
+    expect(slugify("Garçon à l'été")).toBe("garcon-a-lete");
   });
 
   it("returns an empty string for only-punctuation input", () => {
@@ -108,6 +110,60 @@ describe("parseGoogleMapsUrl", () => {
     expect(parseGoogleMapsUrl("https://maps.google.com/?q=-33.87,151.21")).toEqual([
       -33.87, 151.21,
     ]);
+  });
+
+  it("prefers !3d!4d over the @ camera centre", () => {
+    expect(
+      parseGoogleMapsUrl(
+        "https://www.google.com/maps/place/Boulangerie+X/@45.7612,4.8412,17z/data=!3m1!4b1!4m6!3m5!1s0x47f4ea5a:0x1!8m2!3d45.7578!4d4.832!16s%2Fg%2F1"
+      )
+    ).toEqual([45.7578, 4.832]);
+  });
+
+  it("uses the last !3d!4d pair when several appear", () => {
+    expect(
+      parseGoogleMapsUrl(
+        "https://www.google.com/maps/dir/A/B/@45.7,4.8,15z/data=!3d45.1!4d4.1!3d45.7578!4d4.832"
+      )
+    ).toEqual([45.7578, 4.832]);
+  });
+
+  it("prefers !3d!4d over ?q=", () => {
+    expect(
+      parseGoogleMapsUrl("https://www.google.com/maps?q=45.1,4.1&data=!3d45.2!4d4.2")
+    ).toEqual([45.2, 4.2]);
+  });
+
+  it("reads query= and ll= forms", () => {
+    expect(
+      parseGoogleMapsUrl("https://www.google.com/maps/search/?api=1&query=45.75,4.85")
+    ).toEqual([45.75, 4.85]);
+    expect(parseGoogleMapsUrl("https://maps.google.com/?ll=45.75,4.85&z=15")).toEqual([
+      45.75, 4.85,
+    ]);
+  });
+
+  it("prefers ?q= over @", () => {
+    expect(parseGoogleMapsUrl("https://www.google.com/maps/@45.1,4.1,15z?q=45.75,4.85")).toEqual(
+      [45.75, 4.85]
+    );
+  });
+
+  it("prefers /place/name/lat,lng over @", () => {
+    expect(
+      parseGoogleMapsUrl("https://www.google.com/maps/place/Pat/45.75,4.85/@45.1,4.1,17z")
+    ).toEqual([45.75, 4.85]);
+  });
+
+  it("rejects out-of-range coordinates", () => {
+    expect(parseGoogleMapsUrl("https://maps.google.com/?q=95.5,4.85")).toBeNull();
+    expect(parseGoogleMapsUrl("https://www.google.com/maps/@45.7,190.5,17z")).toBeNull();
+    expect(parseGoogleMapsUrl("https://x/data=!3d91!4d4")).toBeNull();
+  });
+
+  it("returns null for garbage and short links", () => {
+    expect(parseGoogleMapsUrl("garbage")).toBeNull();
+    expect(parseGoogleMapsUrl("https://maps.app.goo.gl/abc123")).toBeNull();
   });
 
   it("returns null when no coordinates can be found", () => {

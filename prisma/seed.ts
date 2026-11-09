@@ -681,6 +681,11 @@ async function main() {
   // -------------------------------------------------------------------------
   const maps = (name: string, lat: number, lng: number) =>
     `https://www.google.com/maps/place/${encodeURIComponent(name)}/@${lat},${lng},17z`;
+  // Realistic shared-place URL: camera centre (@) offset ~200 m from the true pin (!3d!4d).
+  // parseGoogleMapsUrl must return the !3d!4d point, not the @ one.
+  const realMaps = (name: string, lat: number, lng: number) =>
+    `https://www.google.com/maps/place/${encodeURIComponent(name)}/@${(lat + 0.0018).toFixed(4)},${(lng - 0.0015).toFixed(4)},17z/data=!3m1!4b1!4m6!3m5!1s0x47f4ea5a:0x1!8m2!3d${lat}!4d${lng}!16s%2Fg%2F1`;
+  const realPins = new Set(["seed-loc-vieux-lyon", "seed-loc-bellecour", "seed-loc-confluence"]);
   const locationDefs = [
     { id: "seed-loc-croix-rousse", name: "P\u00e2tisserie de la Croix-Rousse", lat: 45.7743, lng: 4.8326 },
     { id: "seed-loc-vieux-lyon", name: "Maison du Flan Vieux-Lyon", lat: 45.7625, lng: 4.827 },
@@ -691,7 +696,7 @@ async function main() {
     { id: "seed-loc-guillotiere", name: "P\u00e2tisserie Guilloti\u00e8re", lat: 45.7527, lng: 4.842 },
   ];
   for (const l of locationDefs) {
-    const data = { name: l.name, mapsUrl: maps(l.name, l.lat, l.lng) };
+    const data = { name: l.name, mapsUrl: (realPins.has(l.id) ? realMaps : maps)(l.name, l.lat, l.lng) };
     await db.pastryLocation.upsert({ where: { id: l.id }, update: data, create: { id: l.id, ...data } });
   }
   const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000);

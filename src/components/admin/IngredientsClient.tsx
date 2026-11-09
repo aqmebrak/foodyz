@@ -54,7 +54,7 @@ function IngredientForm({
   submitLabel,
 }: {
   defaultValues?: Partial<IngredientFormValues>;
-  onSubmit: (data: IngredientFormValues) => Promise<void>;
+  onSubmit: (data: IngredientFormValues) => Promise<{ error?: string } | void>;
   onCancel?: () => void;
   submitLabel: string;
 }) {
@@ -77,7 +77,7 @@ function IngredientForm({
     setServerError(null);
     startTransition(async () => {
       const result = await onSubmit(data);
-      void result;
+      if (result?.error) setServerError(result.error);
     });
   }
 
@@ -146,11 +146,13 @@ export function IngredientsClient({ ingredients }: IngredientsClientProps) {
   async function handleCreate(data: IngredientFormValues) {
     const result = await createIngredient(data);
     if (!result?.error) setShowCreate(false);
+    return result;
   }
 
   async function handleUpdate(id: string, data: IngredientFormValues) {
     const result = await updateIngredient(id, data);
     if (!result?.error) setEditingId(null);
+    return result;
   }
 
   return (

@@ -5,6 +5,7 @@ import { z } from "zod/v4";
 import { put } from "@vercel/blob";
 
 import { db } from "@/lib/db";
+import { expandMapsShortUrl, isShortMapsUrl } from "@/lib/maps-url";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -24,6 +25,8 @@ const pastryLocationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   mapsUrl: z.string().url("Must be a valid URL"),
 });
+
+const idSchema = z.string().min(1, "Invalid id");
 
 export type FlanFormValues = z.infer<typeof flanSchema>;
 export type PastryLocationFormValues = z.infer<typeof pastryLocationSchema>;
@@ -89,6 +92,9 @@ export async function updateFlan(id: string, data: FlanFormValues) {
 }
 
 export async function deleteFlan(id: string) {
+  const parsedId = idSchema.safeParse(id);
+  if (!parsedId.success) return { error: parsedId.error.issues[0]?.message ?? "Invalid id" };
+
   await db.flan.delete({ where: { id } });
   revalidatePath("/flans");
   revalidatePath("/flan");
@@ -102,20 +108,29 @@ export async function createPastryLocation(data: PastryLocationFormValues) {
   const parsed = pastryLocationSchema.safeParse(data);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid data" };
 
+  const mapsUrl = isShortMapsUrl(parsed.data.mapsUrl)
+    ? await expandMapsShortUrl(parsed.data.mapsUrl)
+    : parsed.data.mapsUrl;
+
   const location = await db.pastryLocation.create({
     data: {
       name: parsed.data.name,
-      mapsUrl: parsed.data.mapsUrl,
+      mapsUrl,
     },
   });
 
   revalidatePath("/flans");
+  revalidatePath("/flan");
   return { location };
 }
 
 export async function deletePastryLocation(id: string) {
+  const parsedId = idSchema.safeParse(id);
+  if (!parsedId.success) return { error: parsedId.error.issues[0]?.message ?? "Invalid id" };
+
   await db.pastryLocation.delete({ where: { id } });
   revalidatePath("/flans");
+  revalidatePath("/flan");
 }
 
 // ---------------------------------------------------------------------------

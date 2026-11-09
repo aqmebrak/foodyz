@@ -45,7 +45,7 @@ function UnitForm({
   submitLabel,
 }: {
   defaultValues?: Partial<UnitFormValues>;
-  onSubmit: (data: UnitFormValues) => Promise<void>;
+  onSubmit: (data: UnitFormValues) => Promise<{ error?: string } | void>;
   onCancel?: () => void;
   submitLabel: string;
 }) {
@@ -60,7 +60,8 @@ function UnitForm({
   function handleSubmit(data: UnitFormValues) {
     setServerError(null);
     startTransition(async () => {
-      await onSubmit(data);
+      const result = await onSubmit(data);
+      if (result?.error) setServerError(result.error);
     });
   }
 
@@ -122,11 +123,13 @@ export function UnitsClient({ units }: UnitsClientProps) {
   async function handleCreate(data: UnitFormValues) {
     const result = await createUnit(data);
     if (!result?.error) setShowCreate(false);
+    return result;
   }
 
   async function handleUpdate(id: string, data: UnitFormValues) {
     const result = await updateUnit(id, data);
     if (!result?.error) setEditingId(null);
+    return result;
   }
 
   return (

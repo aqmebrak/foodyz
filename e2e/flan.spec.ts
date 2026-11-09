@@ -7,12 +7,9 @@ import { PrismaClient } from "@prisma/client";
 // and share one flan created in the first test, matching the style of
 // recipe-edit.spec.ts.
 //
-// This exercises the real dev database (not a disposable fixture), so the
-// UI-driven delete test is backed by an afterAll Prisma cleanup that removes
-// anything matching our generated name prefix — belt-and-suspenders against
-// a flaky UI delete leaving orphaned rows behind. There is no "delete
-// location" UI anywhere in the app (locations are meant to be reused across
-// flans), so the created PastryLocation always needs this direct cleanup.
+// There is no "delete location" UI (locations are reused across flans), so the
+// created PastryLocation is removed directly via Prisma in afterAll. The flan
+// delete is also swept there in case the UI delete test fails midway.
 
 const runId = Date.now();
 const uniqueName = `E2E Flan ${runId}`;
@@ -96,23 +93,11 @@ test.describe("Flan admin CRUD", () => {
     await expect(row).toHaveCount(1);
     await row.getByRole("button").last().click(); // trash icon
 
-    const confirmButton = page.getByRole("button", { name: "Delete" });
-    await confirmButton.click();
-    // Wait for the confirm dialog itself to close — the Server Action await
-    // inside ConfirmDialog only flips `open` to false once the delete (and
-    // its revalidatePath) has actually completed.
-    await expect(confirmButton).not.toBeVisible();
+    await page.getByRole("button", { name: "Delete" }).click();
+    // The dialog only closes after the Server Action (and revalidation) completes.
+    await expect(page.getByRole("dialog")).toBeHidden();
 
-    // Re-fetch from the server (not just a client-side state check) to
-    // confirm the row is actually gone. This has been observed to be
-    // intermittently stale on the very first reload immediately after
-    // delete (same symptom a real user would see as "my edit didn't seem
-    // to save until I refreshed again") — poll with fresh reloads rather
-    // than asserting once, and reload() each time since a soft navigation
-    // wouldn't force a new server request.
-    await expect(async () => {
-      await page.reload();
-      await expect(page.getByTestId("flan-row").filter({ hasText: uniqueName })).toHaveCount(0);
-    }).toPass({ timeout: 15_000 });
+    await page.reload();
+    await expect(page.getByTestId("flan-row").filter({ hasText: uniqueName })).toHaveCount(0);
   });
 });
