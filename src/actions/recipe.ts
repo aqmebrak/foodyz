@@ -9,18 +9,8 @@ import { slugify } from "@/lib/utils";
 import { type RecipeFormValues,recipeSchema } from "@/lib/validations/recipe";
 
 // ---------------------------------------------------------------------------
-// Public reads (no auth required)
+// Reads
 // ---------------------------------------------------------------------------
-
-export async function getPublishedRecipes() {
-  return db.recipe.findMany({
-    where: { published: true },
-    include: {
-      tags: { include: { tag: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-}
 
 export async function getRecipeBySlug(slug: string) {
   return db.recipe.findUnique({
@@ -33,24 +23,6 @@ export async function getRecipeBySlug(slug: string) {
       tags: { include: { tag: true } },
       images: { orderBy: { order: "asc" } },
     },
-  });
-}
-
-export async function getRecipesByTag(tagSlug: string) {
-  return db.recipe.findMany({
-    where: {
-      published: true,
-      tags: { some: { tag: { slug: tagSlug } } },
-    },
-    include: { tags: { include: { tag: true } } },
-    orderBy: { createdAt: "desc" },
-  });
-}
-
-export async function getAllPublishedSlugs() {
-  return db.recipe.findMany({
-    where: { published: true },
-    select: { slug: true },
   });
 }
 
@@ -88,10 +60,6 @@ export async function getRecipeForAdmin(id: string) {
       tags: { include: { tag: true } },
     },
   });
-}
-
-export async function getAllCategories() {
-  return db.category.findMany({ orderBy: { name: "asc" } });
 }
 
 export async function getAllIngredients() {
