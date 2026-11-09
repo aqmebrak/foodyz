@@ -109,6 +109,14 @@ function StepsEditor({
     commit(next);
   }
 
+  // A blank line typed inside a step becomes a separate step on save, so split it now.
+  function handleBlur(index: number) {
+    const texts = items.map((i) => i.text);
+    const result = pasteIntoSteps(texts, index, texts[index]);
+    if (result) commit(toItems(result.steps));
+    onBlur();
+  }
+
   return (
     <ol className="flex flex-col gap-4">
       {items.map((item, index) => (
@@ -135,7 +143,7 @@ function StepsEditor({
               className="min-h-[5.5rem] bg-card text-[17px] leading-relaxed md:text-[17px]"
               onChange={(e) => updateText(item.id, e.target.value)}
               onPaste={(e) => handlePaste(e, index)}
-              onBlur={onBlur}
+              onBlur={() => handleBlur(index)}
             />
             <div className="flex items-center justify-end gap-1">
               <Button

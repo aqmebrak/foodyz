@@ -24,6 +24,19 @@ describe("joinSteps", () => {
   });
 });
 
+describe("pasteIntoSteps on blur (own text)", () => {
+  it("splits a step that contains a blank line", () => {
+    const steps = ["a", "b\n\nc", "d"];
+    expect(pasteIntoSteps(steps, 1, steps[1])).toEqual({
+      steps: ["a", "b", "c", "d"],
+      focusIndex: 2,
+    });
+  });
+  it("leaves a step without blank line alone", () => {
+    expect(pasteIntoSteps(["a\nb"], 0, "a\nb")).toBeNull();
+  });
+});
+
 describe("pasteIntoSteps", () => {
   it("returns null when the paste has no blank line", () => {
     expect(pasteIntoSteps(["a", "b"], 0, "one\ntwo")).toBeNull();
