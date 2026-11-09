@@ -5,13 +5,15 @@ export interface ParsedTimer {
 }
 
 const NUM = String.raw`\d+(?:[.,]\d+)?`;
+// Simple fractions ("1/2") and the "½" glyph count as numbers too.
+const NUMF = String.raw`(?:\d+\s*/\s*\d+|½|${NUM})`;
 const NOT_LETTER = String.raw`(?![\p{L}])`;
 
 // number [range upper bound] + unit. "1h30" / "1 h 30" supported for hours.
 const TIMER_RE = new RegExp(
-  String.raw`(?<![\d.,\p{L}])(?:${NUM}\s*(?:-|–|—|à|to)\s*)?(?<n>${NUM})\s*(?:` +
-    String.raw`(?<h>h|heures?|hours?|hrs?)${NOT_LETTER}` +
-    String.raw`(?:\s*(?<hm>\d{1,2})(?:\s*(?:minutes?|min|mn)${NOT_LETTER}|(?![\d\p{L}°%])(?:(?<=[hH]\d{1,2})|(?!\s*(?:(?:kg|g|cl|ml|dl|l|cm|mm)${NOT_LETTER}|\p{L}{3,})))))?` +
+  String.raw`(?<![\d.,\p{L}])(?:${NUMF}\s*(?:-|–|—|à|to)\s*)?(?<n>${NUMF})\s*(?:` +
+    String.raw`(?:d['’]\s*)?(?<h>h|heures?|hours?|hrs?)${NOT_LETTER}` +
+    String.raw`(?:(?<half>\s+et\s+demi[e]?)${NOT_LETTER}|\s*(?<hm>\d{1,2})(?:\s*(?:minutes?|min|mn)${NOT_LETTER}|(?![\d\p{L}°%])(?:(?<=[hH]\d{1,2})|(?!\s*(?:(?:kg|g|cl|ml|dl|l|cm|mm)${NOT_LETTER}|\p{L}{3,})))))?` +
     String.raw`|(?<m>minutes?|mins?|mn)${NOT_LETTER}` +
     String.raw`|(?<s>secondes?|seconds?|secs?|s)(?![\p{L}'’])` +
     String.raw`)`,
@@ -19,6 +21,9 @@ const TIMER_RE = new RegExp(
 );
 
 function num(v: string): number {
+  if (v === "½") return 0.5;
+  const f = v.match(/^(\d+)\s*\/\s*(\d+)$/);
+  if (f) return Number(f[2]) === 0 ? 0 : Number(f[1]) / Number(f[2]);
   return parseFloat(v.replace(",", "."));
 }
 
@@ -42,7 +47,7 @@ export function parseTimers(step: string): ParsedTimer[] {
     const g = m.groups!;
     const n = num(g.n);
     let seconds = 0;
-    if (g.h) seconds = Math.round(n * 3600) + (g.hm ? parseInt(g.hm, 10) * 60 : 0);
+    if (g.h) seconds = Math.round(n * 3600) + (g.hm ? parseInt(g.hm, 10) * 60 : 0) + (g.half ? 1800 : 0);
     else if (g.m) seconds = Math.round(n * 60);
     else if (g.s) seconds = Math.round(n);
     if (seconds <= 0) continue;

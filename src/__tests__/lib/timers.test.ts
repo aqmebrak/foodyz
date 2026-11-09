@@ -23,6 +23,21 @@ describe("parseTimers", () => {
     expect(secs("1,5 heure")).toEqual([5400]);
   });
 
+  it("parses simple fractions and half-hours", () => {
+    expect(secs("Laisser 1/2 heure")).toEqual([1800]);
+    expect(secs("½ h")).toEqual([1800]);
+    expect(secs("Cuire 1/2 h")).toEqual([1800]);
+    expect(secs("1/4 d'heure")).toEqual([900]);
+    expect(secs("1/2 minute")).toEqual([30]);
+    expect(secs("1 heure et demie")).toEqual([5400]);
+    expect(secs("2 heures et demi")).toEqual([9000]);
+  });
+
+  it("does not misread fractions of quantities as timers", () => {
+    expect(secs("Ajouter 1/2 cuillère")).toEqual([]);
+    expect(secs("Verser 1/2 l de lait")).toEqual([]);
+  });
+
   it("parses seconds", () => {
     expect(secs("30 secondes")).toEqual([30]);
     expect(secs("Saisir 45 s")).toEqual([45]);
