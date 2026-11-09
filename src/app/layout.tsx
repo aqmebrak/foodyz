@@ -8,6 +8,9 @@ import "./globals.css";
 const atkinson = Atkinson_Hyperlegible_Next({
   variable: "--font-sans-next",
   subsets: ["latin"],
+  // Next has no fallback metrics for this family; skip the adjusted fallback instead of warning.
+  adjustFontFallback: false,
+  fallback: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
 });
 
 const bricolage = Bricolage_Grotesque({
