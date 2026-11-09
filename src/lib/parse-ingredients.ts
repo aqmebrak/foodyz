@@ -103,6 +103,31 @@ const UNIT_ALIASES: Record<string, string> = {
   piece: "piece",
 };
 
+/**
+ * Count/container words: only units when followed by "de"/"d'" and present in
+ * the user's units; otherwise part of the ingredient name ("2 noix de coco").
+ */
+const CONTAINER_WORDS = new Set([
+  "noix",
+  "noisette",
+  "pot",
+  "feuille",
+  "gousse",
+  "brin",
+  "tranche",
+  "sachet",
+  "botte",
+  "boite",
+  "filet",
+  "morceau",
+  "piece",
+]);
+
+function isContainerWord(tokens: string[]): boolean {
+  const key = norm(tokens.join(" ").replace(/[,;:]+$/, ""));
+  return CONTAINER_WORDS.has(key) || CONTAINER_WORDS.has(singular(key));
+}
+
 interface UnitIndex {
   byKey: Map<string, ParseUnit>;
 }
@@ -164,6 +189,11 @@ const QTY_PATTERNS: Array<{
     value: (m) => Number(m[1]) + Number(m[2]) / Number(m[3]),
   },
   { re: /^(\d+)\/(\d+)(?!\d)/, value: (m) => Number(m[1]) / Number(m[2]) },
+  {
+    // Range: "2-3", "2 à 3" -> upper bound
+    re: /^(\d+(?:[.,]\d+)?)\s*(?:-|–|—|à)\s*(\d+(?:[.,]\d+)?)(?![\d/])/,
+    value: (m) => Number(m[2].replace(",", ".")),
+  },
   {
     re: /^(\d+(?:[.,]\d+)?)/,
     value: (m) => Number(m[1].replace(",", ".")),
@@ -232,7 +262,11 @@ export function parseIngredientLine(
     const rest = tokens.slice(match.tokens).join(" ");
     // Without a quantity, only accept a unit followed by "de"/"d'" (e.g. "pincée de sel").
     const afterIsPartitive = /^(?:de |d')/i.test(rest);
-    if (hasQty || afterIsPartitive) {
+    const container = isContainerWord(tokens.slice(0, match.tokens));
+    const accept =
+      (hasQty || afterIsPartitive) &&
+      (!container || (afterIsPartitive && match.kind === "unit"));
+    if (accept) {
       if (match.kind === "unit") unitId = match.unit.id;
       else noteParts.unshift(match.word);
       text = rest;

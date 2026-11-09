@@ -179,6 +179,41 @@ describe("parseIngredientLine", () => {
   });
 });
 
+describe("container words and ranges", () => {
+  it("keeps container words in the name when no matching unit exists", () => {
+    expect(p("2 noix de coco")).toMatchObject({
+      quantity: 2,
+      unitId: "",
+      ingredientName: "noix de coco",
+      notes: "",
+    });
+    expect(p("1 pot de yaourt")).toMatchObject({
+      unitId: "",
+      ingredientName: "pot de yaourt",
+      notes: "",
+    });
+    expect(p("3 feuilles de laurier").ingredientName).toBe("feuilles de laurier");
+  });
+
+  it("keeps container words in the name when not followed by de/d'", () => {
+    expect(p("2 pièces citron")).toMatchObject({ unitId: "", ingredientName: "pièces citron" });
+  });
+
+  it("still treats a container as unit when 'de' follows and the unit exists", () => {
+    expect(p("2 gousses d'ail")).toMatchObject({ unitId: "u-gousse", ingredientId: "i-ail" });
+  });
+
+  it("uses the upper bound for ranges", () => {
+    expect(p("2-3 tomates")).toMatchObject({
+      quantity: 3,
+      ingredientName: "tomates",
+      ingredientId: "i-tom",
+    });
+    expect(p("2 à 3 tomates")).toMatchObject({ quantity: 3, ingredientName: "tomates" });
+    expect(p("100–150 g spaghetti")).toMatchObject({ quantity: 150, unitId: "u-g" });
+  });
+});
+
 describe("parseIngredientList", () => {
   it("skips blank lines and parses each line", () => {
     const rows = parseIngredientList("200 g spaghetti\n\n  \n2 oeufs\r\nsel", units, ingredients);
