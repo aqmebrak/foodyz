@@ -16,9 +16,9 @@ const FOCUS_ZOOM = 16;
 // Tried = yolk fill; to-try = white fill with ink outline. Selected = larger, basil ring.
 function makeIcon(tried: boolean, selected: boolean) {
   const size = selected ? 26 : 20;
-  const fill = tried ? "#F2B630" : "#FFFFFF";
-  const border = "#1C2420";
-  const ring = selected ? ",0 0 0 3px #2F6B47" : "";
+  const fill = tried ? "#F2B630" : "#F7F9F3";
+  const border = "#1F2A24";
+  const ring = selected ? ",0 0 0 3px #3D6B50" : "";
   return L.divIcon({
     className: "",
     html: `<div style="width:${size}px;height:${size}px;background:${fill};border:2.5px solid ${border};border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 1px 4px rgba(0,0,0,0.3)${ring}"></div>`,
