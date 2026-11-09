@@ -3,10 +3,9 @@
 import { Check, Clock, ExternalLink, Link2, Pencil, Timer, Users, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Difficulty } from "@prisma/client";
 
-import type { Ingredient, Tag, Unit } from "@/components/admin/RecipeForm/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,19 +14,15 @@ import {
   DrawerContent,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { splitSteps } from "@/lib/steps";
 import { formatDuration } from "@/lib/utils";
 
-import { RecipeEditContent } from "./RecipeEditContent";
 import { difficultyBadge, type SelectedRecipe } from "./types";
 
 interface RecipeViewDrawerProps {
   open: boolean;
   recipe: SelectedRecipe | null;
-  recipeId: string | null;
   loading: boolean;
-  tags: Tag[];
-  ingredients: Ingredient[];
-  units: Unit[];
   onClose: () => void;
 }
 
@@ -40,14 +35,9 @@ const difficultyLabel: Record<Difficulty, string> = {
 export function RecipeViewDrawer({
   open,
   recipe,
-  recipeId,
   loading,
-  tags,
-  ingredients,
-  units,
   onClose,
 }: RecipeViewDrawerProps) {
-  const [mode, setMode] = useState<"view" | "edit">("view");
   const [copied, setCopied] = useState(false);
 
   function copyShareLink() {
@@ -57,20 +47,35 @@ export function RecipeViewDrawer({
     setTimeout(() => setCopied(false), 2000);
   }
 
-  // Reset to view mode when a different recipe is selected
-  useEffect(() => {
-    setMode("view");
-  }, [recipeId]);
-
   return (
     <Drawer open={open} onOpenChange={(o) => !o && onClose()} direction="right">
       <DrawerContent className="w-screen md:w-[55vw] max-w-none flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-2 pb-3 border-b shrink-0">
-          <DrawerTitle className="text-base font-semibold truncate pr-4">
-            {recipe?.title ?? "Recipe"}
-          </DrawerTitle>
-          <div className="flex items-center gap-2 shrink-0">
+        {/* Header: title row + actions row so long titles stay readable */}
+        <div className="shrink-0 border-b px-4 pb-3 pt-2">
+          <div className="flex items-start justify-between gap-2">
+            <DrawerTitle className="text-lg font-semibold leading-snug">
+              {recipe?.title ?? "Recipe"}
+            </DrawerTitle>
+            <DrawerClose asChild>
+              <Button size="icon" variant="ghost" className="-mr-2 size-9 shrink-0" aria-label="Close">
+                <X className="w-4 h-4" />
+              </Button>
+            </DrawerClose>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {recipe ? (
+              <Button size="sm" variant="outline" asChild>
+                <Link href={`/recipes/${recipe.slug}/edit`}>
+                  <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                  Edit
+                </Link>
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" disabled>
+                <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                Edit
+              </Button>
+            )}
             {recipe?.published && (
               <>
                 <Button size="sm" variant="outline" asChild>
@@ -79,11 +84,7 @@ export function RecipeViewDrawer({
                     View on site
                   </Link>
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={copyShareLink}
-                >
+                <Button size="sm" variant="outline" onClick={copyShareLink}>
                   {copied ? (
                     <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
                   ) : (
@@ -93,48 +94,12 @@ export function RecipeViewDrawer({
                 </Button>
               </>
             )}
-            {mode === "view" ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setMode("edit")}
-                disabled={loading || !recipe}
-              >
-                <Pencil className="w-3.5 h-3.5 mr-1.5" />
-                Edit
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setMode("view")}
-                disabled={loading || !recipe}
-              >
-                View
-              </Button>
-            )}
-            <DrawerClose asChild>
-              <Button size="icon" variant="ghost" className="h-8 w-8">
-                <X className="w-4 h-4" />
-              </Button>
-            </DrawerClose>
           </div>
         </div>
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
-          {mode === "edit" ? (
-            <RecipeEditContent
-              loading={loading}
-              recipe={recipe}
-              recipeId={recipeId}
-              tags={tags}
-              ingredients={ingredients}
-              units={units}
-            />
-          ) : (
-            <RecipeDetailView recipe={recipe} loading={loading} />
-          )}
+          <RecipeDetailView recipe={recipe} loading={loading} />
         </div>
       </DrawerContent>
     </Drawer>
@@ -158,10 +123,7 @@ function RecipeDetailView({
 
   if (!recipe) return null;
 
-  const steps = recipe.instructions
-    .split(/\n\n+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const steps = splitSteps(recipe.instructions);
 
   return (
     <article className="max-w-2xl mx-auto px-4 py-5 pb-10">

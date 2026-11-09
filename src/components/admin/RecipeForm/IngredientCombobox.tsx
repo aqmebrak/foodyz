@@ -1,13 +1,57 @@
 "use client";
 
 import { Check, ChevronDown, Loader2, Plus, Search } from "lucide-react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from "react";
 
 import { createIngredient } from "@/actions/ingredient";
 import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { cn, normalizeStr, slugify } from "@/lib/utils";
 
 import type { Ingredient } from "./types";
+
+/**
+ * The single code path for creating an ingredient from the recipe form.
+ * Shared by the combobox "create new" flow and the paste-list sheet.
+ */
+export async function createIngredientByName(
+  rawName: string,
+): Promise<{ ingredient: Ingredient } | { error: string }> {
+  const name = rawName.trim();
+  const result = await createIngredient({ name, slug: slugify(name) });
+  if (!result) return { error: "Unknown error" };
+  if ("error" in result) return { error: result.error ?? "Unknown error" };
+  return { ingredient: result.ingredient };
+}
+
+const MOBILE_QUERY = "(max-width: 767px)";
+
+function subscribeMobile(cb: () => void) {
+  const mq = window.matchMedia(MOBILE_QUERY);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+function useIsMobile() {
+  return useSyncExternalStore(
+    subscribeMobile,
+    () => window.matchMedia(MOBILE_QUERY).matches,
+    () => false,
+  );
+}
 
 interface IngredientComboboxProps {
   value: string;
@@ -16,16 +60,30 @@ interface IngredientComboboxProps {
   onIngredientCreated: (ingredient: Ingredient) => void;
   autoOpen?: boolean;
   onOpen?: () => void;
+  id?: string;
+  onBlur?: () => void;
+  "aria-invalid"?: boolean | "true" | "false";
+  "aria-describedby"?: string;
 }
 
-export function IngredientCombobox({
-  value,
-  onChange,
-  ingredients,
-  onIngredientCreated,
-  autoOpen,
-  onOpen,
-}: IngredientComboboxProps) {
+export const IngredientCombobox = forwardRef<
+  HTMLButtonElement,
+  IngredientComboboxProps
+>(function IngredientCombobox(
+  {
+    value,
+    onChange,
+    ingredients,
+    onIngredientCreated,
+    autoOpen,
+    onOpen,
+    id,
+    onBlur,
+    "aria-invalid": ariaInvalid,
+    "aria-describedby": ariaDescribedBy,
+  },
+  ref,
+) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
@@ -33,42 +91,54 @@ export function IngredientCombobox({
   const [isPending, startTransition] = useTransition();
   const [createError, setCreateError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const selected = ingredients.find((i) => i.id === value);
 
+  function close() {
+    setOpen(false);
+    setCreating(false);
+    setQuery("");
+  }
+
+  // Desktop popover: close on outside tap/click and on Escape.
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (!containerRef.current?.contains(e.target as Node)) {
-        setOpen(false);
-        setCreating(false);
-        setQuery("");
-      }
+    if (!open || isMobile) return;
+    function handlePointer(e: PointerEvent) {
+      if (!containerRef.current?.contains(e.target as Node)) close();
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
+    document.addEventListener("pointerdown", handlePointer);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointer);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open, isMobile]);
 
   useEffect(() => {
     if (autoOpen) {
       setOpen(true);
       onOpen?.();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpen]);
 
   const filtered = query
-    ? ingredients.filter((i) => normalizeStr(i.name).includes(normalizeStr(query)))
+    ? ingredients.filter((i) =>
+        normalizeStr(i.name).includes(normalizeStr(query)),
+      )
     : ingredients;
 
   const exactMatch = ingredients.some(
-    (i) => normalizeStr(i.name) === normalizeStr(query)
+    (i) => normalizeStr(i.name) === normalizeStr(query),
   );
 
-  function handleSelect(id: string) {
-    onChange(id);
-    setOpen(false);
-    setQuery("");
-    setCreating(false);
+  function handleSelect(ingredientId: string) {
+    onChange(ingredientId);
+    close();
   }
 
   function startCreating(prefill?: string) {
@@ -82,143 +152,186 @@ export function IngredientCombobox({
     if (!name) return;
     setCreateError(null);
     startTransition(async () => {
-      const result = await createIngredient({ name, slug: slugify(name) });
-      if (!result) return;
+      const result = await createIngredientByName(name);
       if ("error" in result) {
-        setCreateError(result.error ?? "Unknown error");
+        setCreateError(result.error);
         return;
       }
       onIngredientCreated(result.ingredient);
       onChange(result.ingredient.id);
-      setOpen(false);
-      setCreating(false);
-      setQuery("");
+      close();
       setNewName("");
     });
   }
 
+  const optionClass =
+    "flex min-h-11 w-full items-center gap-2 px-3 py-2 text-base text-left text-ink cursor-pointer transition-colors hover:bg-enamel active:bg-steam";
+
+  const panel = (
+    <>
+      <div className="border-b border-steam p-2">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink/40" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setCreating(false);
+            }}
+            placeholder="Search ingredients"
+            aria-label="Search ingredients"
+            autoComplete="off"
+            className="h-11 w-full rounded-lg border border-steam bg-card pl-9 pr-3 text-base text-ink outline-none focus-visible:ring-2 focus-visible:ring-basil"
+          />
+        </div>
+      </div>
+
+      <div
+        role="listbox"
+        aria-label="Ingredients"
+        className={cn(
+          "overflow-y-auto overscroll-contain",
+          isMobile ? "max-h-[50dvh]" : "max-h-64",
+        )}
+      >
+        {filtered.length === 0 && !query && (
+          <p className="px-3 py-3 text-sm text-ink/60">No ingredients.</p>
+        )}
+        {filtered.length === 0 && query && !creating && (
+          <p className="px-3 py-3 text-sm text-ink/60">
+            No results for &ldquo;{query}&rdquo;.
+          </p>
+        )}
+        {filtered.map((ing) => (
+          <button
+            key={ing.id}
+            type="button"
+            role="option"
+            aria-selected={value === ing.id}
+            onClick={() => handleSelect(ing.id)}
+            className={optionClass}
+          >
+            <Check
+              className={cn(
+                "size-4 shrink-0 text-basil",
+                value === ing.id ? "opacity-100" : "opacity-0",
+              )}
+            />
+            {ing.name}
+          </button>
+        ))}
+
+        {!creating && query && !exactMatch && (
+          <button
+            type="button"
+            onClick={() => startCreating(query)}
+            className={cn(optionClass, "border-t border-steam text-basil")}
+          >
+            <Plus className="size-4 shrink-0" />
+            Add &ldquo;{query}&rdquo;
+          </button>
+        )}
+        {!creating && !query && (
+          <button
+            type="button"
+            onClick={() => startCreating()}
+            className={cn(optionClass, "border-t border-steam text-basil")}
+          >
+            <Plus className="size-4 shrink-0" />
+            New ingredient
+          </button>
+        )}
+      </div>
+
+      {creating && (
+        <div className="flex flex-col gap-2 border-t border-steam p-2">
+          <input
+            autoFocus
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+            placeholder="Ingredient name"
+            aria-label="New ingredient name"
+            autoCapitalize="none"
+            autoCorrect="off"
+            className="h-11 w-full rounded-lg border border-steam bg-card px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-basil"
+          />
+          {createError && <p className="text-sm text-paprika">{createError}</p>}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              onClick={handleCreate}
+              disabled={isPending || !newName.trim()}
+              className="h-11 flex-1"
+            >
+              {isPending ? <Loader2 className="size-4 animate-spin" /> : "Create"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setCreating(false)}
+              className="h-11"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div ref={containerRef} className="relative">
       <button
+        ref={ref}
+        id={id}
         type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        data-invalid={ariaInvalid === true || ariaInvalid === "true" ? "" : undefined}
+        aria-describedby={ariaDescribedBy}
+        onBlur={onBlur}
         onClick={() => {
           setOpen((o) => !o);
           setCreating(false);
         }}
         className={cn(
-          "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring",
-          !selected && "text-muted-foreground"
+          "flex h-11 w-full cursor-pointer items-center justify-between rounded-lg border border-steam bg-card px-3 text-base text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil data-[invalid]:border-paprika",
+          !selected && "text-ink/50",
         )}
       >
-        <span className="truncate">{selected ? selected.name : "Ingredient"}</span>
-        <ChevronDown className="ml-2 w-4 h-4 shrink-0 text-gray-400" />
+        <span className="truncate">
+          {selected ? selected.name : "Choose ingredient"}
+        </span>
+        <ChevronDown className="ml-2 size-4 shrink-0 text-ink/40" />
       </button>
 
-      {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg overflow-hidden">
-          {/* Search input */}
-          <div className="p-2 border-b border-border">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-              <input
-                autoFocus
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setCreating(false);
-                }}
-                placeholder="Search…"
-                className="w-full pl-8 pr-2 py-1.5 text-sm outline-none bg-transparent"
-              />
+      {isMobile ? (
+        <Drawer
+          direction="bottom"
+          open={open}
+          onOpenChange={(o) => (o ? setOpen(true) : close())}
+        >
+          <DrawerContent>
+            <DrawerHeader className="pb-2">
+              <DrawerTitle>Choose ingredient</DrawerTitle>
+              <DrawerDescription className="sr-only">
+                Search the ingredient list or add a new one
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {panel}
             </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        open && (
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-steam bg-card shadow-lg">
+            {panel}
           </div>
-
-          {/* List */}
-          <div className="max-h-48 overflow-y-auto">
-            {filtered.length === 0 && !query && (
-              <p className="px-3 py-2 text-sm text-muted-foreground">No ingredients.</p>
-            )}
-            {filtered.length === 0 && query && !creating && (
-              <p className="px-3 py-2 text-sm text-muted-foreground">No results for &ldquo;{query}&rdquo;.</p>
-            )}
-            {filtered.map((ing) => (
-              <button
-                key={ing.id}
-                type="button"
-                onClick={() => handleSelect(ing.id)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left cursor-pointer hover:bg-muted transition-colors"
-              >
-                <Check
-                  className={cn(
-                    "w-3.5 h-3.5 text-emerald-600 shrink-0",
-                    value === ing.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {ing.name}
-              </button>
-            ))}
-
-            {/* Add new option */}
-            {!creating && query && !exactMatch && (
-              <button
-                type="button"
-                onClick={() => startCreating(query)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 cursor-pointer hover:bg-emerald-50 transition-colors border-t border-border"
-              >
-                <Plus className="w-3.5 h-3.5 shrink-0" />
-                Add &ldquo;{query}&rdquo;
-              </button>
-            )}
-            {!creating && !query && (
-              <button
-                type="button"
-                onClick={() => startCreating()}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-emerald-700 cursor-pointer hover:bg-emerald-50 transition-colors border-t border-border"
-              >
-                <Plus className="w-3.5 h-3.5 shrink-0" />
-                New ingredient
-              </button>
-            )}
-          </div>
-
-          {/* Inline create form */}
-          {creating && (
-            <div className="p-2 border-t border-gray-100 flex flex-col gap-2">
-              <input
-                autoFocus
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                placeholder="Ingredient name"
-                autoCapitalize="none"
-                autoCorrect="off"
-                className="w-full px-2 py-1.5 text-sm border border-input bg-background rounded focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-              {createError && <p className="text-xs text-red-500">{createError}</p>}
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleCreate}
-                  disabled={isPending || !newName.trim()}
-                  className="flex-1 h-7 text-xs"
-                >
-                  {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Create"}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setCreating(false)}
-                  className="h-7 text-xs"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+        )
       )}
     </div>
   );
-}
+});

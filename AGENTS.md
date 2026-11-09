@@ -14,9 +14,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project Overview
 
-Foodyz is a personal recipe manager. The entire app sits behind login (Auth.js) — there is no anonymous public browsing. Two route groups exist for layout purposes only, not for access control:
-- `(public)` — marketing-style layout (`Header`/`Footer`), currently just the recipe detail page (`/recipes/[slug]`)
-- `(admin)` — sidebar-shell layout, hosting CRUD screens for recipes, categories, ingredients, units, and flans, plus the personal `/flan` tasting-map page
+Foodyz is a personal recipe manager. The entire app sits behind login (Auth.js) — there is no anonymous public browsing. One route group, `(admin)`, provides the app shell (not access control): desktop left sidebar + mobile bottom tab bar (Recipes, Flans, New, More sheet). It hosts the recipe detail page (`/recipes/[slug]`), CRUD screens for recipes, categories, ingredients, units, and flans, plus the personal `/flan` tasting-map page
 
 Also includes `/flan`, a personal flan (custard tart) tasting map around Lyon with rated locations on a Leaflet map.
 
@@ -51,6 +49,7 @@ foodyz/
 ├── .env.example                 # committed env template
 ├── next.config.ts
 ├── tsconfig.json
+├── patches/vaul.patch           # pnpm patch (see Notes)
 ├── prisma/
 │   ├── schema.prisma
 │   ├── seed.ts
@@ -58,61 +57,62 @@ foodyz/
 ├── e2e/                         # Playwright specs (auth.setup.ts writes e2e/.auth/user.json)
 ├── public/
 │   └── images/                  # recipe and category images stored in repo
-│       ├── recipes/
-│       └── categories/
 └── src/
-    ├── proxy.ts                  # Next.js 16 proxy (replaces middleware.ts) — requires auth on every route except /login and /api/auth/*
+    ├── proxy.ts                  # Next.js 16 proxy — requires auth except /login, /api/auth/*, manifest/icons
     ├── app/
-    │   ├── layout.tsx            # Root layout (html, body, fonts)
-    │   ├── globals.css
-    │   ├── page.tsx               # "/" — redirects to /recipes
+    │   ├── layout.tsx            # Root layout (html, body, fonts, viewport)
+    │   ├── globals.css           # tokens, light + prefers-color-scheme dark
+    │   ├── page.tsx              # "/" — redirects to /recipes
+    │   ├── manifest.ts           # PWA manifest
+    │   ├── icon.svg, favicon.ico, apple-icon.tsx
+    │   ├── pwa-icon/[variant]/route.tsx   # 192 / 512 / maskable PNGs
     │   ├── login/page.tsx
-    │   ├── robots.ts
-    │   ├── sitemap.ts
+    │   ├── robots.ts, sitemap.ts
     │   ├── api/auth/[...nextauth]/route.ts
-    │   ├── (public)/             # Header/Footer layout group (still auth-gated by proxy)
-    │   │   ├── layout.tsx
-    │   │   └── recipes/[slug]/page.tsx   # recipe detail view
-    │   └── (admin)/              # Sidebar-shell layout group — CRUD screens
-    │       ├── layout.tsx
+    │   └── (admin)/              # App shell (sidebar md+, bottom tab bar < md); loading.tsx/error.tsx per area
+    │       ├── layout.tsx, not-found.tsx, error.tsx
     │       ├── recipes/
-    │       │   ├── page.tsx      # /recipes — admin CRUD table
-    │       │   └── new/page.tsx
-    │       ├── categories/page.tsx
-    │       ├── ingredients/page.tsx
-    │       ├── units/page.tsx
-    │       ├── flans/page.tsx    # /flans — admin CRUD for flans + pastry locations
-    │       └── flan/page.tsx     # /flan — personal flan tasting map (admin layout, non-CRUD content)
+    │       │   ├── page.tsx          # /recipes — list (search, tag, filters sheet)
+    │       │   ├── new/page.tsx
+    │       │   └── [slug]/
+    │       │       ├── page.tsx      # recipe detail (+ cook mode)
+    │       │       └── edit/page.tsx # dedicated edit route
+    │       ├── categories/, ingredients/, units/   # CRUD pages
+    │       ├── flans/page.tsx    # admin CRUD for flans + pastry locations
+    │       └── flan/page.tsx     # personal flan tasting map
     ├── components/
     │   ├── ui/                   # shadcn/ui primitives — do not edit directly
-    │   ├── layout/               # Header, Footer
-    │   ├── recipes/              # RecipeClientContent, IngredientChecklist
+    │   ├── layout/               # BottomTabBar, MoreSheet
+    │   ├── recipes/              # RecipeClientContent, CookMode, TimerViews, BackButton,
+    │   │                         # IngredientChecklist, ServingsStepper
     │   ├── admin/                # AdminSidebar, FlansClient, CategoriesClient, IngredientsClient,
-    │   │                         # UnitsClient, AdminRecipesClient/, ConfirmDialog
-    │   │                         # RecipeForm/ (sub-components + IngredientCombobox)
-    │   ├── flan/                 # FlanMap, FlanPageClient, FlanMapWrapper, LocationCombobox
-    │   └── shared/               # Breadcrumbs, SearchBar
+    │   │                         # UnitsClient, ConfirmDialog
+    │   │   ├── AdminRecipesClient/   # list, filters, RecentRecipes, RecipeViewDrawer (desktop)
+    │   │   └── RecipeForm/       # sections, SaveBar, PasteIngredientsSheet, IngredientCombobox, DraftBanner...
+    │   ├── flan/                 # FlanMap, FlanPageClient, FlanSheet, QuickLogSheet, FlanList,
+    │   │                         # FlanDetail, FlanFilters, FlanStars, LocationCombobox
+    │   └── shared/               # FlagToast
     ├── lib/
     │   ├── db.ts                 # Prisma singleton — only DB entry point
-    │   ├── auth.ts               # Full Auth.js config (Node.js, Credentials + Prisma)
-    │   ├── auth.config.ts        # Edge-safe auth config (no DB) — used by proxy.ts
+    │   ├── auth.ts / auth.config.ts   # Node full config / Edge-safe config (proxy)
     │   ├── rate-limit.ts
     │   ├── utils.ts              # cn(), slugify(), formatDuration(), parseGoogleMapsUrl(), normalizeStr()
+    │   ├── steps.ts              # instructions string <-> steps (separated by \n\n)
+    │   ├── timers.ts             # parse durations out of step text
+    │   ├── parse-ingredients.ts  # pasted ingredient lines -> rows
+    │   ├── recipe-filters.ts, flan-filters.ts   # pure filter/sort helpers
+    │   ├── recipe-progress.ts, form-draft.ts    # pure (de)serialisers for localStorage state
+    │   ├── unsaved-guard.ts, app-icon.tsx
     │   └── validations/
     │       ├── recipe.ts
     │       └── category.ts        # also exports ingredientSchema and unitSchema — name undersells it
     ├── actions/                  # Server Actions (all mutations live here)
-    │   ├── recipe.ts
-    │   ├── category.ts
-    │   ├── ingredient.ts
-    │   ├── unit.ts
-    │   ├── flan.ts               # Flan + PastryLocation CRUD, photo upload via Vercel Blob
-    │   └── auth.ts
-    ├── hooks/
-    │   └── use-debounce.ts
+    │   ├── recipe.ts, category.ts, ingredient.ts, unit.ts, auth.ts
+    │   └── flan.ts               # Flan + PastryLocation CRUD, photo upload via Vercel Blob
+    ├── hooks/                    # use-debounce, use-cook-timers, use-form-draft, use-recent-recipes,
+    │                             # use-recipe-progress, use-wake-lock
     ├── __tests__/                # Vitest unit tests (actions/*.test.ts, lib/*.test.ts, setup.ts)
-    └── types/
-        └── index.ts
+    └── types/index.ts
 ```
 
 ---
@@ -174,8 +174,13 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - **Validate with Zod first.** Every Server Action must validate its inputs with a Zod schema before calling Prisma.
 - **Revalidate after mutations.** Call `revalidatePath()` or `revalidateTag()` after every create/update/delete — and make sure the path matches an actual route (there is no `/admin` prefix on any route; a past regression had `category`/`ingredient`/`unit` actions revalidating stale `/admin/*` paths that revalidated nothing).
 - **Form state with hooks.** Use `useFormState` + `useFormStatus` for loading and error states in Client Components.
-- **Auth at the proxy level.** `src/proxy.ts` (Next.js 16 rename of `middleware.ts`) requires a session on every route except `/login` and `/api/auth/*` — the whole app is private, not just `/admin`. Auth config is split: `auth.config.ts` (Edge-safe, no DB) used by proxy; `auth.ts` (Node.js, Credentials + Prisma) used by server components. Never put auth checks inside individual pages — the one exception is `(public)/recipes/[slug]/page.tsx`, which calls `auth()` itself to conditionally show an "Edit recipe" link to `ADMIN`-role sessions (this makes that route fully dynamic — no more static generation for recipe slugs, a deliberate trade-off).
+- **Auth at the proxy level.** `src/proxy.ts` (Next.js 16 rename of `middleware.ts`) requires a session on every route except `/login` and `/api/auth/*` — the whole app is private, not just `/admin`. Auth config is split: `auth.config.ts` (Edge-safe, no DB) used by proxy; `auth.ts` (Node.js, Credentials + Prisma) used by server components. Never put auth checks inside individual pages — the one exception is `(admin)/recipes/[slug]/page.tsx`, which calls `auth()` itself to conditionally show an "Edit recipe" link to `ADMIN`-role sessions (this makes that route fully dynamic — no more static generation for recipe slugs, a deliberate trade-off).
 - **Leaflet maps in client components only.** Use `next/dynamic(..., { ssr: false })` inside a `"use client"` file — not in Server Components.
+- **Proxy matcher exemptions.** Besides `/login` and `/api/auth/*`, the matcher skips `manifest.webmanifest`, `icon.svg`, `apple-icon`, `pwa-icon` so the PWA manifest/icons load without a session.
+- **Toasts via redirect flags.** Server actions redirect with `?saved=1` / `?created=1` (recipe update/create); delete redirects to `/recipes?deleted=1`. `components/shared/FlagToast` shows the toast and strips the flag.
+- **localStorage keys:** `foodyz:recent-recipes`, `recipe-progress-<slug>`, `recipe-steps-<slug>` (legacy, migrated into progress on first write), `recipe-draft-new` (new-recipe form autosave). Always wrap access in try/catch.
+- **Dark mode** is `prefers-color-scheme` only (see `globals.css`); no theme toggle.
+- **vaul pnpm patch** (`patches/vaul.patch`, registered in `pnpm-workspace.yaml`): forwards `modal` to Radix Dialog; needed by the non-modal `FlanSheet`. Drop when upstream fixes it. `packageManager` in `package.json` is pinned (`pnpm@11.5.0`).
 
 ---
 

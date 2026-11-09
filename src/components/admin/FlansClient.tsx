@@ -197,10 +197,10 @@ function FlanForm({
       </div>
 
       <div className="flex gap-2 pt-1">
-        <Button type="submit" size="sm" disabled={isPending || uploading}>
+        <Button type="submit" size="sm" className="max-md:h-11" disabled={isPending || uploading}>
           {isPending ? "Saving…" : "Save"}
         </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={onCancel}>
+        <Button type="button" size="sm" className="max-md:h-11" variant="ghost" onClick={onCancel}>
           Cancel
         </Button>
       </div>
@@ -236,7 +236,7 @@ export function FlansClient({ flans, locations: initialLocations }: FlansClientP
             {flans.length} total · {locationsList.length} location{locationsList.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button onClick={() => { setShowNew(true); setEditingId(null); }}>
+        <Button className="max-md:h-11" onClick={() => { setShowNew(true); setEditingId(null); }}>
           <Plus className="w-4 h-4 mr-1.5" />
           New flan
         </Button>
@@ -263,7 +263,7 @@ export function FlansClient({ flans, locations: initialLocations }: FlansClientP
         )}
 
         {flans.map((flan) => (
-          <div key={flan.id} data-testid="flan-row" className="rounded-lg border border-gray-100 bg-white p-4">
+          <div key={flan.id} data-testid="flan-row" className="rounded-lg border border-gray-100 bg-card p-4">
             {editingId === flan.id ? (
               <>
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">
@@ -334,7 +334,7 @@ export function FlansClient({ flans, locations: initialLocations }: FlansClientP
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-400 hover:text-gray-700 cursor-pointer"
+                    className="max-md:size-11 text-gray-400 hover:text-gray-700 cursor-pointer"
                     onClick={() => { setEditingId(flan.id); setShowNew(false); }}
                   >
                     <Pencil className="w-4 h-4" />
@@ -347,7 +347,7 @@ export function FlansClient({ flans, locations: initialLocations }: FlansClientP
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-gray-400 hover:text-red-500 cursor-pointer"
+                        className="max-md:size-11 text-gray-400 hover:text-red-500 cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

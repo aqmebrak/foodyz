@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   cn,
+  formatDistance,
   formatDuration,
+  haversineMeters,
   normalizeStr,
   parseGoogleMapsUrl,
+  rankLocationsByDistance,
   slugify,
 } from "@/lib/utils";
 
@@ -113,5 +116,65 @@ describe("parseGoogleMapsUrl", () => {
 
   it("returns null for an empty string", () => {
     expect(parseGoogleMapsUrl("")).toBeNull();
+  });
+});
+
+describe("haversineMeters", () => {
+  it("is zero for identical points", () => {
+    expect(haversineMeters([45.764, 4.8357], [45.764, 4.8357])).toBe(0);
+  });
+
+  it("computes ~111 km per degree of latitude", () => {
+    const d = haversineMeters([45, 4.8], [46, 4.8]);
+    expect(d).toBeGreaterThan(111_000);
+    expect(d).toBeLessThan(111_400);
+  });
+
+  it("computes a short Lyon distance (~120 m)", () => {
+    const d = haversineMeters([45.764, 4.8357], [45.76508, 4.8357]);
+    expect(d).toBeGreaterThan(115);
+    expect(d).toBeLessThan(125);
+  });
+
+  it("is symmetric", () => {
+    const a: [number, number] = [45.75, 4.85];
+    const b: [number, number] = [45.77, 4.82];
+    expect(haversineMeters(a, b)).toBeCloseTo(haversineMeters(b, a), 6);
+  });
+});
+
+describe("rankLocationsByDistance", () => {
+  const here: [number, number] = [45.764, 4.8357];
+  const locs = [
+    { id: "far", name: "Far", mapsUrl: "https://www.google.com/maps/@45.80,4.90,17z" },
+    { id: "short", name: "Short link", mapsUrl: "https://maps.app.goo.gl/abc" },
+    { id: "near", name: "Near", mapsUrl: "https://www.google.com/maps/@45.7651,4.8357,17z" },
+    { id: "short2", name: "Another short", mapsUrl: "https://maps.app.goo.gl/def" },
+  ];
+
+  it("sorts by distance, with distances attached", () => {
+    const ranked = rankLocationsByDistance(locs, here);
+    expect(ranked.map((r) => r.location.id)).toEqual(["near", "far", "short", "short2"]);
+    expect(ranked[0].distance).toBeGreaterThan(100);
+    expect(ranked[0].distance).toBeLessThan(130);
+  });
+
+  it("puts locations without coords last, keeping input order", () => {
+    const ranked = rankLocationsByDistance(locs, here);
+    expect(ranked[2].distance).toBeNull();
+    expect(ranked[3].distance).toBeNull();
+  });
+
+  it("does not mutate the input", () => {
+    const copy = [...locs];
+    rankLocationsByDistance(locs, here);
+    expect(locs).toEqual(copy);
+  });
+});
+
+describe("formatDistance", () => {
+  it("formats meters and kilometers", () => {
+    expect(formatDistance(120.4)).toBe("120 m");
+    expect(formatDistance(1500)).toBe("1.5 km");
   });
 });

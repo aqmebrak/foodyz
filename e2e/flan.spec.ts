@@ -69,7 +69,7 @@ test.describe("Flan admin CRUD", () => {
 
   test("'Tried only' filter keeps a tried flan visible", async ({ page }) => {
     await page.goto("/flan");
-    await page.getByRole("button", { name: "✓ Tried only" }).click();
+    await page.getByRole("button", { name: "Tried", exact: true }).click();
     await expect(page.getByText(uniqueName)).toBeVisible();
   });
 

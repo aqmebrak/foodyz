@@ -27,6 +27,16 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
+    {
+      // Read-only spec only: mobile viewport checks must never run the data-writing specs.
+      name: "mobile-safari",
+      testMatch: /public\.spec\.ts/,
+      use: {
+        ...devices["iPhone 13 Pro"],
+        storageState: "e2e/.auth/user.json",
+      },
+      dependencies: ["setup"],
+    },
   ],
   webServer: {
     command: "pnpm dev",

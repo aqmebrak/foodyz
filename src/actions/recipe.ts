@@ -9,22 +9,13 @@ import { slugify } from "@/lib/utils";
 import { type RecipeFormValues,recipeSchema } from "@/lib/validations/recipe";
 
 // ---------------------------------------------------------------------------
-// Public reads (no auth required)
+// Reads
 // ---------------------------------------------------------------------------
-
-export async function getPublishedRecipes() {
-  return db.recipe.findMany({
-    where: { published: true },
-    include: {
-      tags: { include: { tag: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-}
 
 export async function getRecipeBySlug(slug: string) {
   return db.recipe.findUnique({
-    where: { slug, published: true },
+    // No published filter: the app is private, and create/update redirect here for drafts too.
+    where: { slug },
     include: {
       ingredients: {
         include: { ingredient: true, unit: true },
@@ -36,31 +27,25 @@ export async function getRecipeBySlug(slug: string) {
   });
 }
 
-export async function getRecipesByTag(tagSlug: string) {
-  return db.recipe.findMany({
-    where: {
-      published: true,
-      tags: { some: { tag: { slug: tagSlug } } },
-    },
-    include: { tags: { include: { tag: true } } },
-    orderBy: { createdAt: "desc" },
-  });
-}
-
-export async function getAllPublishedSlugs() {
-  return db.recipe.findMany({
-    where: { published: true },
-    select: { slug: true },
-  });
-}
-
 // ---------------------------------------------------------------------------
 // Admin reads
 // ---------------------------------------------------------------------------
 
 export async function getAllRecipesAdmin() {
   return db.recipe.findMany({
-    include: { tags: { include: { tag: true } } },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      published: true,
+      difficulty: true,
+      prepTime: true,
+      cookTime: true,
+      servings: true,
+      featuredImage: true,
+      tags: { select: { tag: { select: { name: true, slug: true } } } },
+      ingredients: { select: { ingredient: { select: { name: true } } } },
+    },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -78,10 +63,6 @@ export async function getRecipeForAdmin(id: string) {
   });
 }
 
-export async function getAllCategories() {
-  return db.category.findMany({ orderBy: { name: "asc" } });
-}
-
 export async function getAllIngredients() {
   return db.ingredient.findMany({
     orderBy: [{ recipes: { _count: "desc" } }, { name: "asc" }],
@@ -97,6 +78,19 @@ export async function getAllTags() {
 }
 
 // ---------------------------------------------------------------------------
+export async function getRecipeForAdminBySlug(slug: string) {
+  return db.recipe.findUnique({
+    where: { slug },
+    include: {
+      ingredients: {
+        include: { ingredient: true, unit: true },
+        orderBy: { order: "asc" },
+      },
+      tags: { include: { tag: true } },
+    },
+  });
+}
+
 // Mutations
 // ---------------------------------------------------------------------------
 
@@ -145,8 +139,8 @@ export async function createRecipe(data: RecipeFormValues) {
 
   revalidatePath("/");
   revalidatePath("/recipes");
-  revalidatePath("/recipes");
-  redirect("/recipes");
+  revalidatePath(`/recipes/${parsed.data.slug}`);
+  redirect(`/recipes/${parsed.data.slug}?created=1`);
 }
 
 export async function updateRecipe(id: string, data: RecipeFormValues) {
@@ -157,7 +151,9 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
 
   const { ingredients, tags, description, featuredImage, ...rest } = parsed.data;
 
+  let oldSlug: string | undefined;
   try {
+    oldSlug = (await db.recipe.findUnique({ where: { id }, select: { slug: true } }))?.slug;
     await db.recipe.update({
       where: { id },
       data: {
@@ -198,8 +194,8 @@ export async function updateRecipe(id: string, data: RecipeFormValues) {
   revalidatePath("/");
   revalidatePath("/recipes");
   revalidatePath(`/recipes/${parsed.data.slug}`);
-  revalidatePath("/recipes");
-  redirect("/recipes");
+  if (oldSlug && oldSlug !== parsed.data.slug) revalidatePath(`/recipes/${oldSlug}`);
+  redirect(`/recipes/${parsed.data.slug}?saved=1`);
 }
 
 export async function deleteRecipe(id: string) {
@@ -211,7 +207,6 @@ export async function deleteRecipe(id: string) {
   }
 
   revalidatePath("/");
-  revalidatePath("/recipes");
   revalidatePath("/recipes");
 }
 

@@ -1,9 +1,7 @@
-import Image from "next/image";
 import type { Control } from "react-hook-form";
 
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,21 +13,11 @@ import type { RecipeFormValues } from "@/lib/validations/recipe";
 
 interface BasicInfoSectionProps {
   control: Control<RecipeFormValues>;
-  featuredImage: string | undefined;
-  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
 }
 
-export function BasicInfoSection({
-  control,
-  featuredImage,
-  onImageUpload,
-}: BasicInfoSectionProps) {
+export function BasicInfoSection({ control }: BasicInfoSectionProps) {
   return (
-    <section className="flex flex-col gap-5">
-      <h2 className="text-base font-semibold text-foreground border-b pb-2">
-        Basic info
-      </h2>
-
+    <section className="flex flex-col gap-4">
       <FormField
         control={control}
         name="title"
@@ -37,23 +25,14 @@ export function BasicInfoSection({
           <FormItem>
             <FormLabel>Title</FormLabel>
             <FormControl>
-              <Input placeholder="e.g. Pasta Carbonara" {...field} />
+              <Input
+                placeholder="e.g. Pasta carbonara"
+                autoComplete="off"
+                enterKeyHint="next"
+                className="h-11"
+                {...field}
+              />
             </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="slug"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Slug</FormLabel>
-            <FormControl>
-              <Input placeholder="pasta-carbonara" {...field} />
-            </FormControl>
-            <FormDescription>URL: /recipes/{field.value}</FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -67,46 +46,15 @@ export function BasicInfoSection({
             <FormLabel>Description</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Short description shown on recipe cards…"
+                placeholder="A short note about this recipe"
                 rows={3}
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="featuredImage"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Featured image</FormLabel>
-            <div className="flex flex-col gap-3">
-              {featuredImage && (
-                <div className="relative w-full aspect-video max-w-xs rounded-lg overflow-hidden bg-muted">
-                  <Image
-                    src={featuredImage}
-                    alt="Featured"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={onImageUpload}
-                className="max-w-xs"
-              />
-              <Input
-                placeholder="/images/recipes/my-photo.jpg"
+                autoComplete="off"
+                enterKeyHint="enter"
+                className="min-h-[88px]"
                 {...field}
                 value={field.value ?? ""}
-                className="max-w-xs text-xs text-muted-foreground"
               />
-            </div>
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}

@@ -7,11 +7,13 @@ test.describe("Recipe creation form", () => {
 
   test("auto-generates slug from title", async ({ page }) => {
     await page.getByLabel("Title").fill("My Awesome Recipe");
+    await page.locator("summary", { hasText: "Advanced" }).click();
     await expect(page.getByLabel("Slug")).toHaveValue("my-awesome-recipe");
   });
 
   test("slug updates live as title changes", async ({ page }) => {
     const title = page.getByLabel("Title");
+    await page.locator("summary", { hasText: "Advanced" }).click();
     const slug = page.getByLabel("Slug");
 
     await title.fill("First Title");
@@ -29,7 +31,7 @@ test.describe("Recipe creation form", () => {
     await expect(page.getByText("Instructions are required")).toBeVisible();
   });
 
-  test("creates a recipe successfully and redirects to list", async ({
+  test("creates a recipe successfully and redirects to its detail page", async ({
     page,
   }) => {
     const uniqueTitle = `E2E Recipe ${Date.now()}`;
@@ -37,24 +39,24 @@ test.describe("Recipe creation form", () => {
     await page.getByLabel("Title").fill(uniqueTitle);
     await page.getByLabel("Description").fill("Created by Playwright E2E test.");
 
-    await page.getByLabel("Prep time (min)").fill("10");
-    await page.getByLabel("Cook time (min)").fill("20");
-    await page.getByLabel("Servings").fill("2");
+    await page.getByLabel("Prep time", { exact: true }).fill("10");
+    await page.getByLabel("Cook time", { exact: true }).fill("20");
+    await page.getByLabel("Servings", { exact: true }).fill("2");
 
+    // Steps editor: one textarea per step ("Step N"); a blank line splits on blur
     await page
-      .getByPlaceholder(/Describe each step/)
+      .getByLabel("Step 1", { exact: true })
       .fill("Step 1: Boil water.\n\nStep 2: Add pasta.\n\nStep 3: Serve.");
 
     // Add one ingredient — combobox auto-opens after clicking "Add ingredient"
     await page.getByRole("button", { name: "Add ingredient" }).click();
-    // Ingredient options are <button> elements containing a check icon (lucide-check)
-    await page.locator("button:has(svg.lucide-check)").first().click();
-    await page.getByPlaceholder("Qty").fill("100");
+    await page.getByRole("option").first().click();
+    await page.getByPlaceholder("Qty").last().fill("100");
 
     await page.getByRole("button", { name: "Create recipe" }).first().click();
 
-    await page.waitForURL(/\/recipes$/);
-    await expect(page.getByText(uniqueTitle)).toBeVisible();
+    await page.waitForURL(/\/recipes\/e2e-recipe-\d+$/);
+    await expect(page.getByRole("heading", { name: uniqueTitle })).toBeVisible();
   });
 
   test("add and remove ingredient row", async ({ page }) => {

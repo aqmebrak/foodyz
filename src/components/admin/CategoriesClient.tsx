@@ -127,11 +127,11 @@ function CategoryForm({
           )}
         />
         <div className="flex gap-2 pt-1">
-          <Button type="submit" size="sm" disabled={isPending}>
+          <Button type="submit" size="sm" className="max-md:h-11" disabled={isPending}>
             {isPending ? "Saving…" : submitLabel}
           </Button>
           {onCancel && (
-            <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+            <Button type="button" variant="ghost" size="sm" className="max-md:h-11" onClick={onCancel}>
               Cancel
             </Button>
           )}
@@ -162,7 +162,7 @@ export function CategoriesClient({ categories }: CategoriesClientProps) {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-foreground">Categories</h1>
           <p className="text-sm text-gray-500 mt-0.5">{categories.length} total</p>
         </div>
-        <Button size="sm" onClick={() => setShowCreate(true)} disabled={showCreate}>
+        <Button size="sm" className="max-md:h-11" onClick={() => setShowCreate(true)} disabled={showCreate}>
           <Plus className="w-4 h-4 mr-1.5" />
           New category
         </Button>
@@ -211,6 +211,7 @@ export function CategoriesClient({ categories }: CategoriesClientProps) {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="max-md:size-11"
                           onClick={() =>
                             setEditingId(editingId === category.id ? null : category.id)
                           }
@@ -229,7 +230,7 @@ export function CategoriesClient({ categories }: CategoriesClientProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-gray-400 hover:text-red-500"
+                              className="max-md:size-11 text-gray-400 hover:text-red-500"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

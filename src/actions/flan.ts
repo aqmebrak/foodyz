@@ -39,14 +39,6 @@ export async function getFlans() {
   });
 }
 
-export async function getTriedFlans() {
-  return db.flan.findMany({
-    where: { tried: true },
-    include: { location: true },
-    orderBy: { rating: "desc" },
-  });
-}
-
 export async function getPastryLocations() {
   return db.pastryLocation.findMany({ orderBy: { name: "asc" } });
 }

@@ -1,18 +1,30 @@
 import { expect, test } from "@playwright/test";
 
-// The (public) route group's grid/browse page was removed in the
-// private-app-unified-recipes pivot — /recipes now serves the admin CRUD
-// table (client-side row clicks, no <a href> per row). The only surviving
-// (public)-layout page is the recipe detail view, reached by a known slug
-// (e.g. shared via the admin "View on site" link) rather than by browsing.
+// /recipes serves a searchable list of <a href="/recipes/[slug]"> rows. The
+// recipe detail view lives in the (admin) shell and is reached by a known slug.
 const KNOWN_SLUG = "gateau-au-chocolat";
 
 test.describe("Public recipe browsing", () => {
   test("admin recipes page loads with recipe rows", async ({ page }) => {
     await page.goto("/recipes");
     await expect(page.getByRole("heading", { name: "Recipes" })).toBeVisible();
-    // Header row + at least one data row
-    await expect(page.getByRole("row").nth(1)).toBeVisible();
+    await expect(page.locator('main a[href^="/recipes/"]:not([href$="/new"])').first()).toBeVisible();
+  });
+
+  test("search filters the list by title or ingredient", async ({ page }) => {
+    await page.goto("/recipes");
+    const rows = page.locator('main ul a[href^="/recipes/"]');
+    await expect(rows.first()).toBeVisible();
+    // Retry the fill: on slower engines (WebKit in dev) typing can land before hydration.
+    const search = page.getByRole("searchbox", { name: /search recipes/i });
+    await expect(async () => {
+      await search.fill("");
+      await search.fill("zzzxqj-no-match");
+      await expect(page.getByText(/No recipes match/)).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 15_000 });
+    await expect(rows).toHaveCount(0);
+    await page.getByRole("button", { name: "Clear filters" }).click();
+    await expect(rows.first()).toBeVisible();
   });
 
   test("recipe detail page renders", async ({ page }) => {
@@ -32,12 +44,14 @@ test.describe("Public recipe browsing", () => {
   test("recipe detail page shows ingredients and steps", async ({ page }) => {
     await page.goto(`/recipes/${KNOWN_SLUG}`);
 
-    // RecipeClientContent renders these sections
+    // RecipeClientContent renders these sections. Below md only one panel shows at a time.
     await expect(
       page.getByRole("heading", { name: /ingredients/i })
     ).toBeVisible();
+    const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
+    if (isMobile) await page.getByRole("tab", { name: /steps/i }).click();
     await expect(
-      page.getByRole("heading", { name: /instructions/i })
+      page.getByRole("heading", { name: /steps/i })
     ).toBeVisible();
   });
 
@@ -46,12 +60,23 @@ test.describe("Public recipe browsing", () => {
   }) => {
     await page.goto("/recipes/this-recipe-does-not-exist-xyz-999");
     await expect(
-      page.getByText(/not found/i)
+      page.getByRole("heading", { name: /not found/i })
     ).toBeVisible({ timeout: 10_000 });
   });
 
   test("homepage loads", async ({ page }) => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
+  });
+
+  test("flan page: Log a flan button is reachable on mobile", async ({ page }) => {
+    const width = page.viewportSize()?.width ?? 1280;
+    test.skip(width >= 768, "mobile-only regression guard (vaul aria-hidden patch)");
+    await page.goto("/flan");
+    const button = page.getByRole("button", { name: "Log a flan" });
+    await expect(button).toBeVisible();
+    await expect(button.locator("xpath=ancestor-or-self::*[@aria-hidden='true']")).toHaveCount(0);
+    await button.focus();
+    await expect(button).toBeFocused();
   });
 });

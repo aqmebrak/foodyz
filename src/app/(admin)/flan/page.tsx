@@ -1,4 +1,4 @@
-import { getFlans } from "@/actions/flan";
+import { getFlans, getPastryLocations } from "@/actions/flan";
 import { FlanPageClient } from "@/components/flan/FlanPageClient";
 
 export const metadata = {
@@ -7,28 +7,8 @@ export const metadata = {
 };
 
 export default async function FlanPage() {
-  const flans = await getFlans();
-  const triedCount = flans.filter((f) => f.tried).length;
+  const [flans, locations] = await Promise.all([getFlans(), getPastryLocations()]);
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="px-6 py-8 max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-foreground">🍮 Flan Tour — Lyon</h1>
-        <p className="text-muted-foreground mt-1">
-          {triedCount} tried · {flans.length - triedCount} on the list
-        </p>
-      </div>
-
-      {flans.length === 0 ? (
-        <div className="px-6 py-16 text-center text-gray-400">
-          <p className="text-4xl mb-3">🍮</p>
-          <p className="text-base font-medium">No flans yet.</p>
-          <p className="text-sm mt-1">Go eat some flan and come back!</p>
-        </div>
-      ) : (
-        <FlanPageClient flans={flans} />
-      )}
-    </div>
-  );
+  // Always render the map: with zero flans the "Log a flan" button is how you add the first one.
+  return <FlanPageClient flans={flans} locations={locations} />;
 }

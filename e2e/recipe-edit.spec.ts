@@ -1,34 +1,36 @@
 import { expect,test } from "@playwright/test";
 
 test.describe("Recipe edit form", () => {
+  // Edit now lives on its own route: /recipes/<slug>/edit
   async function openFirstRecipePanel(
     page: import("@playwright/test").Page
   ) {
     await page.goto("/recipes");
-    // Click the first data row to open the view drawer
-    await page.getByRole("row").nth(1).click();
-    // Wait for the async recipe fetch to complete, enabling the Edit button
-    const editButton = page.getByRole("button", { name: "Edit" });
-    await expect(editButton).toBeEnabled({ timeout: 15_000 });
-    await editButton.click();
-    // Wait for RecipeForm to mount in edit mode (renders its SaveBar)
+    // Desktop: clicking a list row opens the drawer; follow its Edit link.
+    // Use a known seeded recipe (has prep time + ingredients) rather than list order.
+    await page.getByRole("link", { name: /Gâteau au Chocolat/i }).first().click();
+    const editLink = page.getByRole("link", { name: "Edit" });
+    await expect(editLink).toBeVisible({ timeout: 15_000 });
+    await editLink.click();
+    await page.waitForURL(/\/recipes\/[^/]+\/edit$/);
     await expect(
-      page.getByRole("button", { name: "Save changes" }).first()
+      page.getByRole("button", { name: "Save recipe" })
     ).toBeVisible({ timeout: 15_000 });
   }
 
   test("pre-fills title and slug from existing recipe", async ({ page }) => {
     await openFirstRecipePanel(page);
     await expect(page.getByLabel("Title")).not.toHaveValue("");
+    await page.locator("summary", { hasText: "Advanced" }).click();
     await expect(page.getByLabel("Slug")).not.toHaveValue("");
   });
 
   test("pre-fills numeric fields with positive values", async ({ page }) => {
     await openFirstRecipePanel(page);
 
-    const prep = await page.getByLabel("Prep time (min)").inputValue();
-    const cook = await page.getByLabel("Cook time (min)").inputValue();
-    const srv = await page.getByLabel("Servings").inputValue();
+    const prep = await page.getByLabel("Prep time", { exact: true }).inputValue();
+    const cook = await page.getByLabel("Cook time", { exact: true }).inputValue();
+    const srv = await page.getByLabel("Servings", { exact: true }).inputValue();
 
     expect(Number(prep)).toBeGreaterThan(0);
     expect(Number(cook)).toBeGreaterThanOrEqual(0);
@@ -39,6 +41,7 @@ test.describe("Recipe edit form", () => {
     page,
   }) => {
     await openFirstRecipePanel(page);
+    await page.locator("summary", { hasText: "Advanced" }).click();
 
     const slugInput = page.getByLabel("Slug");
     const originalSlug = await slugInput.inputValue();
@@ -49,11 +52,10 @@ test.describe("Recipe edit form", () => {
     await expect(slugInput).toHaveValue(originalSlug);
   });
 
-  test("shows Save changes button (not Create recipe)", async ({ page }) => {
+  test("shows Save recipe button (not Create recipe)", async ({ page }) => {
     await openFirstRecipePanel(page);
-    await expect(
-      page.getByRole("button", { name: "Save changes" }).first()
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Save recipe" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Create recipe" })).toHaveCount(0);
   });
 
   test("saves description change without errors", async ({ page }) => {
@@ -62,19 +64,19 @@ test.describe("Recipe edit form", () => {
     await page
       .getByLabel("Description")
       .fill(`Updated at ${new Date().toISOString()}`);
-    await page.getByRole("button", { name: "Save changes" }).first().click();
+    await page.getByRole("button", { name: "Save recipe" }).click();
 
     // No server error banner should appear
     await expect(page.getByText(/failed to/i)).not.toBeVisible({
       timeout: 5_000,
     });
-    // After save, server action redirects back to the recipe list
-    await expect(page).toHaveURL(/\/recipes/, { timeout: 10_000 });
+    // After save, server action redirects to the recipe detail page
+    await expect(page).toHaveURL(/\/recipes\/[^/]+$/, { timeout: 10_000 });
   });
 
   test("shows ingredient rows pre-populated", async ({ page }) => {
     await openFirstRecipePanel(page);
-    // pasta-carbonara has 5 ingredients seeded
+    // gateau-au-chocolat has ingredients seeded
     const count = await page.getByPlaceholder("Qty").count();
     expect(count).toBeGreaterThan(0);
   });
@@ -93,16 +95,12 @@ test.describe("Recipe edit form", () => {
 
     await page.getByRole("button", { name: "Add ingredient" }).click();
 
-    // Combobox auto-opens after adding a row — ingredient options are
-    // rendered as <button> elements containing a check icon (lucide-check)
-    await page.locator("button:has(svg.lucide-check)").first().click();
+    // Combobox auto-opens after adding a row
+    await page.getByRole("option").first().click();
 
     // Fill in quantity for the new (last) row
     await page.getByPlaceholder("Qty").last().fill("2");
 
-    // The ingredient combobox should now show a name (not the placeholder "Ingredient")
-    await page.locator("button").filter({ hasNotText: "Ingredient" });
-    // Just verify no error appeared and qty was filled
     await expect(page.getByPlaceholder("Qty").last()).toHaveValue("2");
   });
 });

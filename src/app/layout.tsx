@@ -1,24 +1,44 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Atkinson_Hyperlegible_Next, Bricolage_Grotesque } from "next/font/google";
+
+import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const atkinson = Atkinson_Hyperlegible_Next({
+  variable: "--font-sans-next",
+  subsets: ["latin"],
+  // Next has no fallback metrics for this family; skip the adjusted fallback instead of warning.
+  adjustFontFallback: false,
+  fallback: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+});
+
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-display-next",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#2F6B47" },
+    { media: "(prefers-color-scheme: dark)", color: "#141A17" },
+  ],
+};
 
 export const metadata: Metadata = {
   title: {
     default: "Foodyz",
     template: "%s | Foodyz",
   },
-  description: "Discover and share delicious recipes.",
+  description: "Your recipes and flan map.",
+  appleWebApp: {
+    capable: true,
+    title: "Foodyz",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
@@ -29,9 +49,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${atkinson.variable} ${bricolage.variable} bg-background text-foreground font-sans antialiased`}
       >
         {children}
+        <Toaster
+          position="top-center"
+          offset={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
+          mobileOffset={{ top: "calc(env(safe-area-inset-top) + 12px)", left: 16, right: 16 }}
+        />
       </body>
     </html>
   );

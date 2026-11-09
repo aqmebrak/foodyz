@@ -1,26 +1,26 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
+import { useCookTimers } from "@/hooks/use-cook-timers";
+import { recordRecentRecipe } from "@/hooks/use-recent-recipes";
+import { useRecipeProgress } from "@/hooks/use-recipe-progress";
 import { cn } from "@/lib/utils";
 
-import { IngredientChecklist } from "./IngredientChecklist";
-
-interface Ingredient {
-  id: string;
-  quantity: number;
-  notes: string | null;
-  ingredient: { name: string };
-  unit: { abbreviation: string } | null;
-}
+import { CookMode } from "./CookMode";
+import { type ChecklistIngredient,IngredientChecklist } from "./IngredientChecklist";
+import { ServingsStepper } from "./ServingsStepper";
+import { TimerAlarm, TimerBarChip } from "./TimerViews";
 
 interface RecipeClientContentProps {
-  ingredients: Ingredient[];
+  ingredients: ChecklistIngredient[];
   steps: string[];
   originalServings: number;
   recipeSlug: string;
 }
+
+type Panel = "ingredients" | "steps";
 
 function formatQty(n: number): string {
   return parseFloat(n.toFixed(2)).toString();
@@ -32,34 +32,17 @@ export function RecipeClientContent({
   originalServings,
   recipeSlug,
 }: RecipeClientContentProps) {
+  const ingredientIds = useMemo(() => ingredients.map((i) => i.id), [ingredients]);
   const [currentServings, setCurrentServings] = useState(originalServings);
-  const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set());
-  const [mounted, setMounted] = useState(false);
-
-  const storageKey = `recipe-steps-${recipeSlug}`;
+  const [panel, setPanel] = useState<Panel>("ingredients");
+  const [cookModeOpen, setCookModeOpen] = useState(false);
+  const progress = useRecipeProgress(recipeSlug, steps.length, ingredientIds);
+  const timers = useCookTimers();
 
   useEffect(() => {
-    setMounted(true);
-    try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) setCheckedSteps(new Set(JSON.parse(stored) as number[]));
-    } catch {
-      // ignore
-    }
-  }, [storageKey]);
-
-  function toggleStep(index: number) {
-    setCheckedSteps((prev) => {
-      const next = new Set(prev);
-      next.has(index) ? next.delete(index) : next.add(index);
-      try {
-        localStorage.setItem(storageKey, JSON.stringify([...next]));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
-  }
+    recordRecentRecipe(recipeSlug);
+  }, [recipeSlug]);
+  const { checkedSteps, firstUncheckedStep } = progress;
 
   const ratio = currentServings / originalServings;
   const scaledIngredients = ingredients.map((ing) => ({
@@ -67,112 +50,165 @@ export function RecipeClientContent({
     quantity: ing.quantity * ratio,
   }));
 
-  const allDone = mounted && steps.length > 0 && checkedSteps.size === steps.length;
+  const allDone = steps.length > 0 && firstUncheckedStep === null;
+  const tabs: { id: Panel; label: string; count: number }[] = [
+    { id: "ingredients", label: "Ingredients", count: ingredients.length },
+    { id: "steps", label: "Steps", count: steps.length },
+  ];
+
+  const resetButton = (
+    <button
+      type="button"
+      onClick={progress.reset}
+      className="min-h-11 text-sm font-medium text-basil underline-offset-4 hover:underline"
+    >
+      Reset progress
+    </button>
+  );
 
   return (
     <>
-      {/* Ingredients */}
-      <section id="ingredients" className="mb-10">
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <h2 className="text-xl font-bold text-gray-900">
-            Ingredients
-            <span className="ml-2 text-sm font-normal text-gray-400">
-              for {currentServings} serving{currentServings !== 1 ? "s" : ""}
-            </span>
-          </h2>
+      {/* Mobile tab switcher */}
+      <div
+        role="tablist"
+        aria-label="Recipe sections"
+        className="sticky top-0 z-30 -mx-4 flex gap-1 border-b border-steam bg-enamel/95 px-4 py-2 backdrop-blur md:hidden"
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            id={`tab-${tab.id}`}
+            aria-selected={panel === tab.id}
+            aria-controls={`panel-${tab.id}`}
+            onClick={() => setPanel(tab.id)}
+            className={cn(
+              "h-11 flex-1 rounded-lg text-base font-semibold transition-colors",
+              panel === tab.id ? "bg-basil text-on-basil" : "text-ink/70 hover:bg-steam",
+            )}
+          >
+            {tab.label} · {tab.count}
+          </button>
+        ))}
+      </div>
 
-          {/* Servings control */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              type="button"
-              onClick={() => setCurrentServings((s) => Math.max(1, s - 1))}
-              disabled={currentServings <= 1}
-              aria-label="Decrease servings"
-              className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </button>
-            <span className="w-8 text-center text-sm font-semibold text-gray-900 tabular-nums">
-              {currentServings}
-            </span>
-            <button
-              type="button"
-              onClick={() => setCurrentServings((s) => s + 1)}
-              aria-label="Increase servings"
-              className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 cursor-pointer transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </button>
+      <div className="mt-5 md:mt-8 md:grid md:grid-cols-[minmax(280px,360px)_1fr] md:gap-12">
+        {/* Ingredients */}
+        <section
+          id="panel-ingredients"
+          role="tabpanel"
+          aria-labelledby="tab-ingredients"
+          className={cn(
+            panel === "ingredients" ? "block" : "hidden",
+            "md:block md:sticky md:top-6 md:self-start",
+          )}
+        >
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h2 className="font-display text-xl font-bold text-ink">Ingredients</h2>
+            <ServingsStepper value={currentServings} onChange={setCurrentServings} />
+          </div>
+          <IngredientChecklist
+            ingredients={scaledIngredients}
+            checked={progress.checkedIngredients}
+            onToggle={progress.toggleIngredient}
+            formatQty={formatQty}
+          />
+          {progress.hasProgress && <div className="mt-2 md:hidden">{resetButton}</div>}
+        </section>
+
+        {/* Steps */}
+        <section
+          id="panel-steps"
+          role="tabpanel"
+          aria-labelledby="tab-steps"
+          className={cn(panel === "steps" ? "block" : "hidden", "md:block")}
+        >
+          <div className="mb-3 flex min-h-11 items-center justify-between gap-3">
+            <h2 className="font-display text-xl font-bold text-ink">
+              Steps
+              {checkedSteps.size > 0 && !allDone && (
+                <span className="ml-2 text-sm font-normal text-ink/60">
+                  {checkedSteps.size}/{steps.length} done
+                </span>
+              )}
+            </h2>
+            {progress.hasProgress && resetButton}
+          </div>
+          <ol className="flex flex-col gap-2">
+            {steps.map((step, i) => {
+              const isDone = checkedSteps.has(i);
+              const isCurrent = i === firstUncheckedStep;
+              return (
+                <li key={i}>
+                  <button
+                    type="button"
+                    onClick={() => progress.toggleStep(i)}
+                    aria-pressed={isDone}
+                    aria-current={isCurrent ? "step" : undefined}
+                    className={cn(
+                      "flex min-h-12 w-full cursor-pointer items-start gap-3 rounded-r-xl border-l-4 py-3 pl-3 pr-2 text-left transition-colors",
+                      isCurrent ? "border-yolk bg-yolk/10" : "border-transparent",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-on-basil",
+                        isDone ? "bg-basil/40" : "bg-basil",
+                      )}
+                    >
+                      {isDone ? <Check className="size-4" strokeWidth={3} /> : i + 1}
+                    </span>
+                    <p
+                      className={cn(
+                        "text-[17px] leading-[1.6] text-ink md:text-lg md:leading-[1.6]",
+                        isDone && "text-ink/50 line-through",
+                      )}
+                    >
+                      {step}
+                    </p>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+          {allDone && (
+            <p className="mt-6 text-center font-medium text-basil">
+              All steps complete! Enjoy your meal.
+            </p>
+          )}
+        </section>
+      </div>
+
+      {cookModeOpen && (
+        <CookMode
+          steps={steps}
+          ingredients={scaledIngredients}
+          formatQty={formatQty}
+          progress={progress}
+          timers={timers}
+          onClose={() => setCookModeOpen(false)}
+        />
+      )}
+
+      {/* Sticky start-cooking bar: sits above the mobile tab bar */}
+      {steps.length > 0 && (
+        <div className="sticky bottom-[var(--tabbar-h)] z-20 -mx-4 mt-6 border-t border-steam bg-enamel/95 px-4 py-3 backdrop-blur md:bottom-0 md:mx-0 md:rounded-t-2xl md:border-x">
+          <div className="flex gap-3">
+          {!cookModeOpen && (
+            <TimerBarChip timers={timers.timers} onOpen={() => setCookModeOpen(true)} />
+          )}
+          <button
+            type="button"
+            onClick={() => setCookModeOpen(true)}
+            className="flex h-14 min-w-0 flex-1 items-center justify-center rounded-xl bg-basil text-lg font-bold text-on-basil transition-colors hover:bg-basil/90 active:bg-basil/80"
+          >
+            {checkedSteps.size > 0 && !allDone ? "Resume cooking" : "Start cooking"}
+          </button>
           </div>
         </div>
-
-        <IngredientChecklist ingredients={scaledIngredients} formatQty={formatQty} />
-      </section>
-
-      <hr className="border-gray-100 mb-10" />
-
-      {/* Instructions */}
-      <section id="instructions">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">
-          Instructions
-          {mounted && checkedSteps.size > 0 && !allDone && (
-            <span className="ml-2 text-sm font-normal text-emerald-600">
-              {checkedSteps.size}/{steps.length} done
-            </span>
-          )}
-        </h2>
-        <ol className="flex flex-col gap-3">
-          {steps.map((step, i) => {
-            const isDone = mounted && checkedSteps.has(i);
-            return (
-              <li key={i}>
-                <button
-                  type="button"
-                  onClick={() => toggleStep(i)}
-                  className={cn(
-                    "w-full flex gap-4 text-left rounded-xl px-3 py-3 cursor-pointer transition-colors",
-                    isDone ? "opacity-50" : "hover:bg-gray-50"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "shrink-0 w-8 h-8 rounded-full text-white text-sm font-bold flex items-center justify-center mt-0.5 transition-colors",
-                      isDone ? "bg-emerald-300" : "bg-emerald-600"
-                    )}
-                  >
-                    {isDone ? (
-                      <svg className="w-4 h-4" viewBox="0 0 12 12" fill="none">
-                        <path
-                          d="M2 6l3 3 5-5"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    ) : (
-                      i + 1
-                    )}
-                  </span>
-                  <p
-                    className={cn(
-                      "text-gray-800 text-base leading-relaxed pt-1",
-                      isDone && "line-through text-gray-400"
-                    )}
-                  >
-                    {step}
-                  </p>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-        {allDone && (
-          <p className="mt-6 text-center text-emerald-600 font-medium">
-            All steps complete! Enjoy your meal.
-          </p>
-        )}
-      </section>
+      )}
+      <TimerAlarm timers={timers.timers} />
     </>
   );
 }
