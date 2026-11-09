@@ -5,7 +5,9 @@ import {
   createPastryLocation,
   deleteFlan,
   deletePastryLocation,
+  getPastryLocationsWithFlans,
   updateFlan,
+  updatePastryLocationUrl,
   uploadFlanPhoto,
 } from "@/actions/flan";
 import { expandMapsShortUrl } from "@/lib/maps-url";
@@ -20,6 +22,8 @@ vi.mock("@/lib/db", () => ({
     pastryLocation: {
       create: vi.fn(),
       delete: vi.fn(),
+      update: vi.fn(),
+      findMany: vi.fn(),
     },
   },
 }));
@@ -189,6 +193,71 @@ describe("deletePastryLocation", () => {
     const result = await deletePastryLocation("");
     expect(result).toEqual({ error: expect.any(String) });
     expect(db.pastryLocation.delete).not.toHaveBeenCalled();
+  });
+});
+
+describe("getPastryLocationsWithFlans", () => {
+  it("lists shops by name with their flans", async () => {
+    vi.mocked(db.pastryLocation.findMany).mockResolvedValueOnce([] as never);
+    await getPastryLocationsWithFlans();
+    expect(db.pastryLocation.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: { name: "asc" },
+        include: { flans: expect.objectContaining({ orderBy: { name: "asc" } }) },
+      }),
+    );
+  });
+});
+
+describe("updatePastryLocationUrl", () => {
+  const url = "https://www.google.com/maps/place/X/@1,2,17z/data=!3d1.5!4d2.5";
+
+  beforeEach(() => {
+    vi.mocked(db.pastryLocation.update).mockReset();
+    vi.mocked(revalidatePath).mockClear();
+  });
+
+  it("saves the trimmed URL and revalidates the map and shop pages", async () => {
+    vi.mocked(db.pastryLocation.update).mockResolvedValueOnce({ id: "loc-1", mapsUrl: url } as never);
+    const result = await updatePastryLocationUrl("loc-1", `  ${url}  `);
+    expect(db.pastryLocation.update).toHaveBeenCalledWith({
+      where: { id: "loc-1" },
+      data: { mapsUrl: url },
+    });
+    expect(result).toEqual({ location: { id: "loc-1", mapsUrl: url } });
+    for (const path of ["/flans", "/flan", "/shops"]) {
+      expect(revalidatePath).toHaveBeenCalledWith(path);
+    }
+  });
+
+  it("expands a short link before saving", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: url } }))
+        .mockResolvedValueOnce(new Response(null, { status: 200 })),
+    );
+    vi.mocked(db.pastryLocation.update).mockResolvedValueOnce({ id: "loc-1", mapsUrl: url } as never);
+    await updatePastryLocationUrl("loc-1", "https://maps.app.goo.gl/abc");
+    expect(db.pastryLocation.update).toHaveBeenCalledWith({
+      where: { id: "loc-1" },
+      data: { mapsUrl: url },
+    });
+    vi.unstubAllGlobals();
+  });
+
+  it("rejects an invalid URL or empty id without touching the db", async () => {
+    expect(await updatePastryLocationUrl("loc-1", "not a url")).toEqual({ error: expect.any(String) });
+    expect(await updatePastryLocationUrl("", url)).toEqual({ error: expect.any(String) });
+    expect(db.pastryLocation.update).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the shop no longer exists", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(db.pastryLocation.update).mockRejectedValueOnce(new Error("P2025"));
+    expect(await updatePastryLocationUrl("gone", url)).toEqual({ error: expect.any(String) });
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
 

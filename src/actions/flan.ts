@@ -46,6 +46,19 @@ export async function getPastryLocations() {
   return db.pastryLocation.findMany({ orderBy: { name: "asc" } });
 }
 
+/** Every shop with its flans (tried or not), for the shop editing view. */
+export async function getPastryLocationsWithFlans() {
+  return db.pastryLocation.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      flans: {
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, tried: true, rating: true },
+      },
+    },
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Flan mutations
 // ---------------------------------------------------------------------------
@@ -68,6 +81,7 @@ export async function createFlan(data: FlanFormValues) {
 
   revalidatePath("/flans");
   revalidatePath("/flan");
+  revalidatePath("/shops");
 }
 
 export async function updateFlan(id: string, data: FlanFormValues) {
@@ -89,6 +103,7 @@ export async function updateFlan(id: string, data: FlanFormValues) {
 
   revalidatePath("/flans");
   revalidatePath("/flan");
+  revalidatePath("/shops");
 }
 
 export async function deleteFlan(id: string) {
@@ -98,6 +113,7 @@ export async function deleteFlan(id: string) {
   await db.flan.delete({ where: { id } });
   revalidatePath("/flans");
   revalidatePath("/flan");
+  revalidatePath("/shops");
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +137,28 @@ export async function createPastryLocation(data: PastryLocationFormValues) {
 
   revalidatePath("/flans");
   revalidatePath("/flan");
+  revalidatePath("/shops");
   return { location };
+}
+
+export async function updatePastryLocationUrl(id: string, mapsUrl: string) {
+  const parsedId = idSchema.safeParse(id);
+  if (!parsedId.success) return { error: parsedId.error.issues[0]?.message ?? "Invalid id" };
+  const parsed = pastryLocationSchema.shape.mapsUrl.safeParse(mapsUrl.trim());
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid data" };
+
+  const url = isShortMapsUrl(parsed.data) ? await expandMapsShortUrl(parsed.data) : parsed.data;
+
+  try {
+    const location = await db.pastryLocation.update({ where: { id }, data: { mapsUrl: url } });
+    revalidatePath("/flans");
+    revalidatePath("/flan");
+    revalidatePath("/shops");
+    return { location };
+  } catch (e) {
+    console.error(e);
+    return { error: "Failed to update the shop. It may have been deleted." };
+  }
 }
 
 export async function deletePastryLocation(id: string) {
@@ -131,6 +168,7 @@ export async function deletePastryLocation(id: string) {
   await db.pastryLocation.delete({ where: { id } });
   revalidatePath("/flans");
   revalidatePath("/flan");
+  revalidatePath("/shops");
 }
 
 // ---------------------------------------------------------------------------
