@@ -1,0 +1,40 @@
+# Local, disposable Postgres instances — never point these at production.
+#   pnpm db:up   -> start both
+#   pnpm db:setup / pnpm db:test:setup -> migrate + seed dev / test DB
+services:
+  db-dev:
+    image: postgres:16
+    container_name: foodyz-dev-pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: foodyz_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - foodyz-dev-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d foodyz_dev"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  db-test:
+    image: postgres:16
+    container_name: foodyz-test-pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: foodyz_test
+    ports:
+      - "5434:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d foodyz_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  foodyz-dev-pg:

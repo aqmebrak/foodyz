@@ -3,6 +3,11 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { Difficulty, PrismaClient, Role } from "@prisma/client";
 
+import { assertLocalDatabase } from "./guard";
+
+// Seeding must never touch a non-local database (Plan.md Phase 20).
+assertLocalDatabase();
+
 const db = new PrismaClient();
 
 interface RawIngredient {
@@ -455,6 +460,20 @@ async function main() {
     update: {},
     create: { name: "V\u00e9g\u00e9tarien", slug: "vegetarien" },
   });
+  const tagDefs = [
+    { name: "Sal\u00e9", slug: "sale" },
+    { name: "Sucr\u00e9", slug: "sucre-tag" },
+    { name: "Cocktail", slug: "cocktail" },
+    { name: "Maison (non-culinaire)", slug: "maison" },
+  ];
+  const extraTags = Object.fromEntries(
+    await Promise.all(
+      tagDefs.map(async (t) => [t.slug, await db.tag.upsert({ where: { slug: t.slug }, update: {}, create: t })])
+    )
+  );
+  // Same buckets as getCategorySlug(), expressed as tags (recipes are organised by tags, not categories).
+  const tagForIndex = (i: number) =>
+    i < 17 ? extraTags["sale"] : i < 48 ? extraTags["sucre-tag"] : i < 53 ? extraTags["cocktail"] : extraTags["maison"];
   console.log("  \u2713 Tags");
 
   // -------------------------------------------------------------------------
@@ -646,11 +665,59 @@ async function main() {
       await db.recipeIngredient.createMany({ skipDuplicates: true, data: ingredientData });
     }
 
+    await db.recipeTag.createMany({
+      skipDuplicates: true,
+      data: [{ recipeId: recipe.id, tagId: tagForIndex(i).id }],
+    });
+
     imported++;
     process.stdout.write(`\r  ${imported}/${rawData.length} ${r.name.slice(0, 40)}`);
   }
 
   console.log(`\n  \u2713 Scraped recipes (${imported} imported, ${skippedIngredients} ingredient refs skipped)`);
+
+  // -------------------------------------------------------------------------
+  // Flan fixtures (pastry locations around Lyon) — fictional shops, deterministic ids
+  // -------------------------------------------------------------------------
+  const maps = (name: string, lat: number, lng: number) =>
+    `https://www.google.com/maps/place/${encodeURIComponent(name)}/@${lat},${lng},17z`;
+  const locationDefs = [
+    { id: "seed-loc-croix-rousse", name: "P\u00e2tisserie de la Croix-Rousse", lat: 45.7743, lng: 4.8326 },
+    { id: "seed-loc-vieux-lyon", name: "Maison du Flan Vieux-Lyon", lat: 45.7625, lng: 4.827 },
+    { id: "seed-loc-bellecour", name: "Boulangerie Bellecour", lat: 45.7578, lng: 4.832 },
+    { id: "seed-loc-confluence", name: "Fournil de la Confluence", lat: 45.743, lng: 4.818 },
+    { id: "seed-loc-monplaisir", name: "Au Four de Monplaisir", lat: 45.7456, lng: 4.87 },
+    { id: "seed-loc-part-dieu", name: "Gourmandises Part-Dieu", lat: 45.7606, lng: 4.859 },
+    { id: "seed-loc-guillotiere", name: "P\u00e2tisserie Guilloti\u00e8re", lat: 45.7527, lng: 4.842 },
+  ];
+  for (const l of locationDefs) {
+    const data = { name: l.name, mapsUrl: maps(l.name, l.lat, l.lng) };
+    await db.pastryLocation.upsert({ where: { id: l.id }, update: data, create: { id: l.id, ...data } });
+  }
+  const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000);
+  const flanDefs = [
+    { id: "seed-flan-1", loc: "croix-rousse", name: "Flan nature", rating: 4.5, tried: true, triedAt: daysAgo(3), comment: "Cr\u00e8me onctueuse, p\u00e2te croustillante." },
+    { id: "seed-flan-2", loc: "croix-rousse", name: "Flan vanille", rating: 4, tried: true, triedAt: daysAgo(10), comment: "Tr\u00e8s bon, un peu sucr\u00e9." },
+    { id: "seed-flan-3", loc: "vieux-lyon", name: "Flan p\u00e2tissier", rating: 5, tried: true, triedAt: daysAgo(21), comment: "Le meilleur du quartier." },
+    { id: "seed-flan-4", loc: "bellecour", name: "Flan coco", rating: 3, tried: true, triedAt: daysAgo(35), comment: "Correct, sans plus." },
+    { id: "seed-flan-5", loc: "confluence", name: "Flan caramel", rating: 2, tried: true, triedAt: daysAgo(50), comment: "Trop sec." },
+    { id: "seed-flan-6", loc: "monplaisir", name: "Flan nature", rating: 0, tried: false, triedAt: null, comment: null },
+    { id: "seed-flan-7", loc: "part-dieu", name: "Flan pistache", rating: 0, tried: false, triedAt: null, comment: null },
+    { id: "seed-flan-8", loc: "guillotiere", name: "Flan vanille", rating: 3.5, tried: true, triedAt: daysAgo(7), comment: "Bonne texture." },
+    { id: "seed-flan-9", loc: "guillotiere", name: "Flan chocolat", rating: 0, tried: false, triedAt: null, comment: null },
+  ];
+  for (const f of flanDefs) {
+    const data = {
+      name: f.name,
+      locationId: `seed-loc-${f.loc}`,
+      rating: f.rating,
+      tried: f.tried,
+      triedAt: f.triedAt,
+      comment: f.comment,
+    };
+    await db.flan.upsert({ where: { id: f.id }, update: data, create: { id: f.id, ...data } });
+  }
+  console.log(`  \u2713 Flans (${flanDefs.length} flans, ${locationDefs.length} locations)`);
 
   // -------------------------------------------------------------------------
   // Admin user

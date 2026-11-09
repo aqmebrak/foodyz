@@ -237,7 +237,7 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 
 ---
 
-## Phase 20 — Isolate the database for local dev & tests ⚠ not started, high priority
+## Phase 20 — Isolate the database for local dev & tests ✅ done (2026-11-09)
 
 > Confirmed 2026-11-08: `DATABASE_URL`/`DIRECT_URL` in `.env` point at `db.prisma.io` (Prisma's hosted
 > Postgres), and the user confirmed **this is the same database Vercel production uses**. Neither
@@ -255,26 +255,36 @@ Each phase is a small, self-contained unit of work. Complete and review each ste
 > correct call. Check via Prisma Studio (`pnpm db:studio`) and clean up manually; don't rely on me to query
 > prod to look.
 
-- [ ] **20.1** — Provision a dedicated dev/test database, separate from the one Vercel production uses. Either:
+- [x] **20.1** — Provision a dedicated dev/test database, separate from the one Vercel production uses. Either:
   a local Postgres (Docker Compose, or `pnpm dlx` a local instance) for zero network dependency, or a second
   Prisma Postgres project reserved for dev/test. Local Postgres is the safer default for "can never touch prod"
   since it's physically a different machine, not just a different row of config.
-- [ ] **20.2** — Point `DATABASE_URL`/`DIRECT_URL` for local dev at that database via `.env.local` (gitignored,
+- [x] **20.2** — Point `DATABASE_URL`/`DIRECT_URL` for local dev at that database via `.env.local` (gitignored,
   not committed, already higher precedence than `.env` in Next.js's env loading — confirmed empty of DB vars
   today). Leave the shared `.env`/`.env.example` documenting the *shape* of the vars without encouraging
   reuse of the prod connection string for local work.
-- [ ] **20.3** — Write `prisma/seed.ts` fixtures for `Flan`/`PastryLocation` (currently has none — confirmed
+- [x] **20.3** — Write `prisma/seed.ts` fixtures for `Flan`/`PastryLocation` (currently has none — confirmed
   during this pass; the flan feature has zero seed data today, unlike recipes/categories/ingredients/units).
   Needed so `/flan` and `/flans` have deterministic data locally and in e2e without relying on whatever real
   entries happen to exist in prod.
-- [ ] **20.4** — Point the Playwright `webServer`/CI env at the isolated database (e.g. a dedicated
+- [x] **20.4** — Point the Playwright `webServer`/CI env at the isolated database (e.g. a dedicated
   `.env.test` loaded by `playwright.config.ts`, or a CI-only `DATABASE_URL` secret), so e2e runs — including
   the existing `recipe-create.spec.ts`/`recipe-edit.spec.ts`, which also create/edit real rows today — stop
   touching prod too.
 - [ ] **20.5** — Once isolated, simplify `e2e/flan.spec.ts`'s defensive `data-testid`/`afterAll`-cleanup
   pattern if it's no longer load-bearing for safety (optional cleanup, not urgent).
-- [ ] **20.6** — Document the separate dev `DATABASE_URL` requirement in `CLAUDE.md`/`README.md` so this
+- [x] **20.6** — Document the separate dev `DATABASE_URL` requirement in `CLAUDE.md`/`README.md` so this
   doesn't silently regress back to pointing at prod for a future contributor (or a future session of mine).
+
+---
+
+> **Implemented as:** `docker-compose.yml` (dev DB :5433 persistent, test DB :5434 tmpfs); `.env` now points at the dev DB
+> (Prisma CLI ignores `.env.local`, so the URL lives in `.env`); prod URLs moved to gitignored `.env.production.local`;
+> committed `.env.test` (non-secret) force-loaded by `playwright.config.ts` outside CI; `prisma/guard.ts` makes seed and
+> Playwright abort on non-local hosts; seed adds 9 flans / 7 Lyon locations and tags every scraped recipe (salé / sucré /
+> cocktail / maison). Scripts: `db:up|down|setup|test:setup|test:reset`. Playwright no longer reuses a running dev server.
+> 20.5 left optional: `flan.spec.ts` cleanup is harmless, just no longer load-bearing. **Still to do by hand:** check prod
+> via Prisma Studio for orphan `E2E Recipe …` rows left by past runs and delete them.
 
 ---
 
