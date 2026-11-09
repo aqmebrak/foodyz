@@ -61,7 +61,7 @@ foodyz/
     ├── proxy.ts                  # Next.js 16 proxy — requires auth except /login, /api/auth/*, manifest/icons
     ├── app/
     │   ├── layout.tsx            # Root layout (html, body, fonts, viewport)
-    │   ├── globals.css           # tokens, light + prefers-color-scheme dark
+    │   ├── globals.css           # design tokens — single light theme (no dark mode)
     │   ├── page.tsx              # "/" — redirects to /recipes
     │   ├── manifest.ts           # PWA manifest
     │   ├── icon.svg, favicon.ico, apple-icon.tsx
@@ -179,7 +179,7 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - **Proxy matcher exemptions.** Besides `/login` and `/api/auth/*`, the matcher skips `manifest.webmanifest`, `icon.svg`, `apple-icon`, `pwa-icon` so the PWA manifest/icons load without a session.
 - **Toasts via redirect flags.** Server actions redirect with `?saved=1` / `?created=1` (recipe update/create); delete redirects to `/recipes?deleted=1`. `components/shared/FlagToast` shows the toast and strips the flag.
 - **localStorage keys:** `foodyz:recent-recipes`, `recipe-progress-<slug>`, `recipe-steps-<slug>` (legacy, migrated into progress on first write), `recipe-draft-new` (new-recipe form autosave). Always wrap access in try/catch.
-- **Dark mode** is `prefers-color-scheme` only (see `globals.css`); no theme toggle.
+- **Single light theme — no dark mode.** Don't add `dark:` utilities or `prefers-color-scheme: dark` blocks; `globals.css` redefines `dark:` to a never-set `.dark` class so library dark styles stay inert.
 - **vaul pnpm patch** (`patches/vaul.patch`, registered in `pnpm-workspace.yaml`): forwards `modal` to Radix Dialog; needed by the non-modal `FlanSheet`. Drop when upstream fixes it. `packageManager` in `package.json` is pinned (`pnpm@11.5.0`).
 
 ---

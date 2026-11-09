@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Your recipes and flan map.",
     start_url: "/recipes",
     display: "standalone",
-    background_color: "#F5F7F4",
-    theme_color: "#2F6B47",
+    background_color: "#EDF1E8",
+    theme_color: "#3D6B50",
     icons: [
       { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
       { src: "/pwa-icon/192", sizes: "192x192", type: "image/png", purpose: "any" },

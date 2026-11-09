@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Single light theme. `dark:` only matches a `.dark` class that is never set, so library dark styles stay inert. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -15,6 +18,7 @@
   --color-paprika: var(--paprika);
   --color-on-basil: var(--on-basil);
   --color-panel: var(--panel);
+  --color-sage: var(--sage);
   --color-emerald-50: var(--emerald-50);
   --color-emerald-100: var(--emerald-100);
   --color-emerald-200: var(--emerald-200);
@@ -65,43 +69,57 @@
 }
 
 :root {
+  color-scheme: light;
   --tabbar-h: calc(56px + env(safe-area-inset-bottom));
-  --basil: #2f6b47;
+  --basil: #3d6b50;
   --yolk: #f2b630;
-  --enamel: #f5f7f4;
-  --ink: #1c2420;
-  --steam: #e3e8e4;
-  --paprika: #c2452d;
-  --on-basil: #ffffff;
-  --panel: #1c2420;
+  --enamel: #edf1e8;
+  --ink: #1f2a24;
+  --steam: #d8e0d2;
+  --paprika: #b23f29;
+  --on-basil: #f7f9f3;
+  --panel: #e1e9db;
+  --sage: #a9c2a6;
 
-  --emerald-50: #eef5f0;
-  --emerald-100: #dcebe1;
-  --emerald-200: #b9d6c4;
-  --emerald-300: #8fbba2;
-  --emerald-400: #5f9a7a;
-  --emerald-500: #3f8059;
-  --emerald-600: #2f6b47;
-  --emerald-700: #265739;
-  --emerald-800: #1d432c;
-  --emerald-900: #142f1f;
-  --emerald-950: #0c1d13;
+  --emerald-50: #eef3eb;
+  --emerald-100: #dde8da;
+  --emerald-200: #bcd2c3;
+  --emerald-300: #94b6a1;
+  --emerald-400: #689179;
+  --emerald-500: #4f7d62;
+  --emerald-600: #3d6b50;
+  --emerald-700: #2f5640;
+  --emerald-800: #254433;
+  --emerald-900: #1a3025;
+  --emerald-950: #0f1c15;
+
+  /* Sage-tinted greys: hardcoded gray-* utilities in admin CRUD screens. */
+  --color-gray-50: #f2f5ef;
+  --color-gray-100: #e8ede4;
+  --color-gray-200: #d8e0d2;
+  --color-gray-300: #c3cebf;
+  --color-gray-400: #7c8a80;
+  --color-gray-500: #5f6e65;
+  --color-gray-600: #4b5951;
+  --color-gray-700: #3a463f;
+  --color-gray-800: #2a352e;
+  --color-gray-900: #1f2a24;
 
   --radius: 0.625rem;
   --background: var(--enamel);
   --foreground: var(--ink);
-  --card: #ffffff;
+  --card: #f7f9f3;
   --card-foreground: var(--ink);
-  --popover: #ffffff;
+  --popover: #f7f9f3;
   --popover-foreground: var(--ink);
   --primary: var(--basil);
-  --primary-foreground: #ffffff;
-  --secondary: #eef1ee;
+  --primary-foreground: var(--on-basil);
+  --secondary: #e4eadf;
   --secondary-foreground: var(--ink);
-  --muted: #eef1ee;
-  --muted-foreground: #5b6760;
-  --accent: var(--emerald-50);
-  --accent-foreground: var(--emerald-700);
+  --muted: #e4eadf;
+  --muted-foreground: #5a675f;
+  --accent: #e1e9db;
+  --accent-foreground: #2f5640;
   --destructive: var(--paprika);
   --border: var(--steam);
   --input: var(--steam);
@@ -111,92 +129,14 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --basil: #5fa77c;
-    --enamel: #141a17;
-    --ink: #e8ede9;
-    --steam: #2a342f;
-    --paprika: #e0735c;
-    --on-basil: #0c1d13;
-    --panel: #0e1311;
-
-    --emerald-50: #1b2a22;
-    --emerald-100: #22352a;
-    --emerald-200: #2e4a3a;
-    --emerald-300: #3f6b52;
-    --emerald-400: #4f8b68;
-    --emerald-500: #5fa77c;
-    --emerald-600: #5fa77c;
-    --emerald-700: #7fbe98;
-    --emerald-800: #a5d2b7;
-    --emerald-900: #c8e5d3;
-    --emerald-950: #e3f2e9;
-
-    /* Hardcoded gray/red/amber utilities in the admin CRUD screens: invert so they stay readable. */
-    --color-gray-50: #1b2420;
-    --color-gray-100: #222c27;
-    --color-gray-200: #2f3a34;
-    --color-gray-300: #3f4b44;
-    --color-gray-400: #8a978f;
-    --color-gray-500: #a3b2a8;
-    --color-gray-600: #b9c5bd;
-    --color-gray-700: #ccd5cf;
-    --color-gray-800: #dfe6e1;
-    --color-gray-900: #eef2ef;
-    --color-red-50: #3a1d18;
-    --color-red-100: #4a231c;
-    --color-red-200: #6b2f25;
-    --color-red-500: #ef8a75;
-    --color-red-600: #f09a87;
-    --color-red-800: #f6b8aa;
-    --color-amber-50: #36290e;
-    --color-amber-100: #4a3812;
-    --color-amber-800: #f2c76a;
-
-    --background: var(--enamel);
-    --foreground: var(--ink);
-    --card: #1b2420;
-    --card-foreground: var(--ink);
-    --popover: #1b2420;
-    --popover-foreground: var(--ink);
-    --primary: var(--basil);
-    --primary-foreground: #0c1d13;
-    --secondary: #232d28;
-    --secondary-foreground: var(--ink);
-    --muted: #232d28;
-    --muted-foreground: #a3b2a8;
-    --accent: #232d28;
-    --accent-foreground: var(--ink);
-    --destructive: var(--paprika);
-    --border: var(--steam);
-    --input: #34403a;
-    --ring: var(--basil);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: #1b2420;
-    --sidebar-foreground: var(--ink);
-    --sidebar-primary: var(--basil);
-    --sidebar-primary-foreground: #0c1d13;
-    --sidebar-accent: #232d28;
-    --sidebar-accent-foreground: var(--ink);
-    --sidebar-border: var(--steam);
-    --sidebar-ring: var(--basil);
-  }
+  --sidebar: var(--panel);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--basil);
+  --sidebar-primary-foreground: var(--on-basil);
+  --sidebar-accent: #d5e0ce;
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--steam);
+  --sidebar-ring: var(--basil);
 }
 
 @layer base {

@@ -30,10 +30,10 @@ function SidebarNav() {
 
   return (
     <>
-      <div className="px-5 py-5 border-b border-white/10">
+      <div className="px-5 py-5 border-b border-steam">
         <Link href="/recipes" className="flex items-center gap-2.5">
-          <UtensilsCrossed className="w-5 h-5 text-yolk" />
-          <span className="font-bold text-white text-base tracking-tight">Foodyz</span>
+          <UtensilsCrossed className="w-5 h-5 text-basil" />
+          <span className="font-bold text-ink text-base tracking-tight">Foodyz</span>
         </Link>
       </div>
 
@@ -47,10 +47,10 @@ function SidebarNav() {
               key={href}
               href={href}
                   className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-basil focus-visible:ring-offset-1",
                 isActive
                   ? "bg-basil text-on-basil"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
+                  : "text-ink/70 hover:bg-basil/10 hover:text-ink"
               )}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -60,11 +60,11 @@ function SidebarNav() {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-white/10">
+      <div className="px-3 py-4 border-t border-steam">
         <form action={logoutAction}>
           <button
             type="submit"
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-ink/70 hover:bg-basil/10 hover:text-ink transition-colors w-full outline-none focus-visible:ring-2 focus-visible:ring-basil"
           >
             <LogOut className="w-4 h-4 shrink-0" />
             Sign out
