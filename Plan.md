@@ -26,8 +26,9 @@ history lives in git. Open work is in **Remaining work** at the bottom.
 | 17–18 Mobile / dark mode | Mobile layouts, share URL. Dark mode later removed in Phase 21. |
 | 19 FlanFan | `/flan` Leaflet map + filters, `/flans` CRUD for flans and pastry locations. |
 | 20 DB isolation | Docker dev DB `:5433` + disposable test DB `:5434`; `.env` points at dev, prod URL only in Vercel and gitignored `.env.production.local`; `.env.test` force-loaded by Playwright outside CI; `prisma/guard.ts` makes seed and Playwright refuse non-local hosts; seed adds 9 flans / 7 Lyon locations and tags every recipe. Scripts: `db:up/down/setup/test:setup/test:reset`. |
-| 22 Map pins + e2e | `parseGoogleMapsUrl` prefers the `!3d!4d` place pin over the `@` camera centre (fixes shops drawn in the river); short Maps links expanded on save (`lib/maps-url.ts`, allowlisted hosts); `slugify` strips accents properly; `/flan` revalidated on location create/delete; id validation on deletes; lookup forms now show server errors; e2e grew from 20 to 63 tests (auth, recipe delete, cook mode, lookups, full create/edit, flan quick-log + marker position); flan delete test race fixed. |
 | 21 Sage design | Sage-mist page `#EDF1E8`, paper cards `#F7F9F3` (no pure white), sage-basil primary `#3D6B50`, light leaf sidebar, sage-tinted gray overrides, contrast ≥ AA. **Dark mode removed — single light theme** (`dark:` variant neutralised). PR #15. |
+| 22 Map pins + e2e | `parseGoogleMapsUrl` prefers the `!3d!4d` place pin over the `@` camera centre (fixes shops drawn in the river); short Maps links expanded on save (`lib/maps-url.ts`, allowlisted hosts); `slugify` strips accents properly; `/flan` revalidated on location create/delete; id validation on deletes; lookup forms now show server errors; e2e grew from 20 to 63 tests (auth, recipe delete, cook mode, lookups, full create/edit, flan quick-log + marker position); flan delete test race fixed. |
+| 23 Shop editing + sidebar | `/flans/shops` (under Flans, in the Admin submenu): every shop with its flans (tried / not tried, read-only) and editable **name** + Maps URL via `updatePastryLocation` (live position preview, warning when no position found). Short links (`maps.app.goo.gl`) are expanded on save by following only the short-link hop(s) (the first redirect already holds the `!3d!4d` pin; fetching the full URL only bounces through `consent.google.com`), keeping the last good URL on any failure. Desktop sidebar split into everyday items + collapsible "Admin" submenu pinned at the bottom (shared `nav-items.ts` with the mobile More sheet). |
 
 **Manual follow-up for Phase 20:** open Prisma Studio against production and delete orphan `E2E Recipe …` rows left by past e2e runs.
 
@@ -35,18 +36,17 @@ history lives in git. Open work is in **Remaining work** at the bottom.
 
 ## Current test coverage
 
-- **Unit (Vitest):** 195 tests, 16 files — Server Actions (mocked `db`), pure libs (utils incl. Maps URL parsing + slugify, maps-url short-link expansion, rate-limit, steps, timers, parse-ingredients, filters, recipe-progress, form-draft).
-- **E2E (Playwright, test DB):** 63 tests — `public`, `auth`, `recipe-create` / `recipe-edit` / `recipe-delete`, `cook-mode`, `lookups`, `flan` (admin CRUD), `flan-map` (quick-log, marker position). Skipped: photo upload (needs Vercel Blob).
+- **Unit (Vitest):** 200 tests, 16 files — Server Actions (mocked `db`), pure libs (utils incl. Maps URL parsing + slugify, maps-url short-link expansion, rate-limit, steps, timers, parse-ingredients, filters, recipe-progress, form-draft).
+- **E2E (Playwright, test DB):** 70 tests — `public`, `auth`, `recipe-create` / `recipe-edit` / `recipe-delete`, `cook-mode`, `lookups`, `flan` (admin CRUD), `flan-map` (quick-log, marker position), `shops` (shop URL editing), `navigation` (sidebar). Skipped: photo upload (needs Vercel Blob).
 
 ---
 
 ## Remaining work (ordered by value)
 
-1. **Verify map fix on real data** (owner, 10 min): open `/flan` against production and check no pin sits in water. Locations saved from a short link *before* this change still have no coordinates — re-save them with the full URL. Optional: read-only script listing locations whose parsed pin moved.
+1. **Verify map fix on real data** (owner, 10 min): open `/flan` against production and check no pin sits in water. Fix wrong or missing pins from `/flans/shops` (paste a full or `maps.app.goo.gl` link and save). Optional: read-only script listing locations whose parsed pin moved.
 2. **Pre-existing lint error** — `IngredientCombobox.tsx:123` setState synchronously in an effect (React compiler rule). Fix or refactor.
 3. **Recipe delete from the list** gives no toast / redirect feedback (only delete from the edit page goes to `/recipes?deleted=1`). Consistency call.
-4. **Location update path** doesn't exist (`flan.ts` has create/delete only), so editing a Maps URL means delete + recreate. Add `updatePastryLocation` (reusing short-link expansion) if that gets annoying.
-5. **Tag click-through** (optional): link tags on the recipe detail page to `/recipes` pre-filtered.
-6. **Mobile Safari e2e logs** an uncaught `TypeError at measure` from the dev server on `/flan`; tests pass. Investigate if it shows up in real use.
+4. **Tag click-through** (optional): link tags on the recipe detail page to `/recipes` pre-filtered.
+5. **Mobile Safari e2e logs** an uncaught `TypeError at measure` from the dev server on `/flan`; tests pass. Investigate if it shows up in real use.
 
 **Dropped as not worth it:** OG image generation (app is private); Lighthouse audit.

@@ -14,7 +14,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project Overview
 
-Foodyz is a personal recipe manager. The entire app sits behind login (Auth.js) — there is no anonymous public browsing. One route group, `(admin)`, provides the app shell (not access control): desktop left sidebar + mobile bottom tab bar (Recipes, Flans, New, More sheet). It hosts the recipe detail page (`/recipes/[slug]`), CRUD screens for recipes, categories, ingredients, units, and flans, plus the personal `/flan` tasting-map page
+Foodyz is a personal recipe manager. The entire app sits behind login (Auth.js) — there is no anonymous public browsing. One route group, `(admin)`, provides the app shell (not access control): desktop left sidebar (everyday items on top, data-management items in a collapsible "Admin" submenu at the bottom) + mobile bottom tab bar (Recipes, Flans, New, More sheet). It hosts the recipe detail page (`/recipes/[slug]`), CRUD screens for recipes, categories, ingredients, units, and flans, plus the personal `/flan` tasting-map page
 
 Also includes `/flan`, a personal flan (custard tart) tasting map around Lyon with rated locations on a Leaflet map.
 
@@ -79,13 +79,14 @@ foodyz/
     │       │       └── edit/page.tsx # dedicated edit route
     │       ├── categories/, ingredients/, units/   # CRUD pages
     │       ├── flans/page.tsx    # admin CRUD for flans + pastry locations
+    │       │   └── shops/page.tsx    # /flans/shops: shops + their flans (read-only) + editable name and Maps URL
     │       └── flan/page.tsx     # personal flan tasting map
     ├── components/
     │   ├── ui/                   # shadcn/ui primitives — do not edit directly
-    │   ├── layout/               # BottomTabBar, MoreSheet
+    │   ├── layout/               # BottomTabBar, MoreSheet, nav-items.ts (shared nav config)
     │   ├── recipes/              # RecipeClientContent, CookMode, TimerViews, BackButton,
     │   │                         # IngredientChecklist, ServingsStepper
-    │   ├── admin/                # AdminSidebar, FlansClient, CategoriesClient, IngredientsClient,
+    │   ├── admin/                # AdminSidebar, FlansClient, ShopsClient, CategoriesClient, IngredientsClient,
     │   │                         # UnitsClient, ConfirmDialog
     │   │   ├── AdminRecipesClient/   # list, filters, RecentRecipes, RecipeViewDrawer (desktop)
     │   │   └── RecipeForm/       # sections, SaveBar, PasteIngredientsSheet, IngredientCombobox, DraftBanner...

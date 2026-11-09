@@ -5,10 +5,11 @@ import {
   createPastryLocation,
   deleteFlan,
   deletePastryLocation,
+  getPastryLocationsWithFlans,
   updateFlan,
+  updatePastryLocation,
   uploadFlanPhoto,
 } from "@/actions/flan";
-import { expandMapsShortUrl } from "@/lib/maps-url";
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -20,6 +21,8 @@ vi.mock("@/lib/db", () => ({
     pastryLocation: {
       create: vi.fn(),
       delete: vi.fn(),
+      update: vi.fn(),
+      findMany: vi.fn(),
     },
   },
 }));
@@ -192,64 +195,68 @@ describe("deletePastryLocation", () => {
   });
 });
 
-describe("expandMapsShortUrl", () => {
-  const short = "https://maps.app.goo.gl/abc";
-  const full = "https://www.google.com/maps/place/X/@1,2,17z/data=!3d1!4d2";
-  const redirect = (location: string) =>
-    new Response(null, { status: 302, headers: { location } });
+describe("getPastryLocationsWithFlans", () => {
+  it("lists shops by name with their flans", async () => {
+    vi.mocked(db.pastryLocation.findMany).mockResolvedValueOnce([] as never);
+    await getPastryLocationsWithFlans();
+    expect(db.pastryLocation.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: { name: "asc" },
+        include: { flans: expect.objectContaining({ orderBy: { name: "asc" } }) },
+      }),
+    );
+  });
+});
 
-  it("follows one hop", async () => {
-    const f = vi.fn().mockResolvedValueOnce(redirect(full)).mockResolvedValueOnce(new Response(null, { status: 200 }));
-    vi.stubGlobal("fetch", f);
-    expect(await expandMapsShortUrl(short)).toBe(full);
-    expect(f.mock.calls[0][1]).toMatchObject({ redirect: "manual" });
+describe("updatePastryLocation", () => {
+  const url = "https://www.google.com/maps/place/X/@1,2,17z/data=!3d1.5!4d2.5";
+
+  beforeEach(() => {
+    vi.mocked(db.pastryLocation.update).mockReset();
+    vi.mocked(revalidatePath).mockClear();
+  });
+
+  it("saves the trimmed name and URL and revalidates the map and shop pages", async () => {
+    vi.mocked(db.pastryLocation.update).mockResolvedValueOnce({ id: "loc-1", name: "Shop", mapsUrl: url } as never);
+    const result = await updatePastryLocation("loc-1", { name: "  Shop ", mapsUrl: `  ${url}  ` });
+    expect(db.pastryLocation.update).toHaveBeenCalledWith({
+      where: { id: "loc-1" },
+      data: { name: "Shop", mapsUrl: url },
+    });
+    expect(result).toEqual({ location: { id: "loc-1", name: "Shop", mapsUrl: url } });
+    for (const path of ["/flans", "/flan", "/flans/shops"]) {
+      expect(revalidatePath).toHaveBeenCalledWith(path);
+    }
+  });
+
+  it("expands a short link before saving", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: url } })),
+    );
+    vi.mocked(db.pastryLocation.update).mockResolvedValueOnce({ id: "loc-1" } as never);
+    await updatePastryLocation("loc-1", { name: "Shop", mapsUrl: "https://maps.app.goo.gl/abc" });
+    expect(db.pastryLocation.update).toHaveBeenCalledWith({
+      where: { id: "loc-1" },
+      data: { name: "Shop", mapsUrl: url },
+    });
     vi.unstubAllGlobals();
   });
 
-  it("follows two hops", async () => {
-    const mid = "https://goo.gl/maps/zzz";
-    const f = vi.fn().mockResolvedValueOnce(redirect(mid)).mockResolvedValueOnce(redirect(full)).mockResolvedValueOnce(new Response(null, { status: 200 }));
-    vi.stubGlobal("fetch", f);
-    expect(await expandMapsShortUrl(short)).toBe(full);
-    vi.unstubAllGlobals();
+  it("rejects an empty name, invalid URL or empty id without touching the db", async () => {
+    expect(await updatePastryLocation("loc-1", { name: "   ", mapsUrl: url })).toEqual({ error: expect.any(String) });
+    expect(await updatePastryLocation("loc-1", { name: "Shop", mapsUrl: "not a url" })).toEqual({
+      error: expect.any(String),
+    });
+    expect(await updatePastryLocation("", { name: "Shop", mapsUrl: url })).toEqual({ error: expect.any(String) });
+    expect(db.pastryLocation.update).not.toHaveBeenCalled();
   });
 
-  it("stops after 3 hops", async () => {
-    const f = vi.fn().mockImplementation(async () => redirect("https://goo.gl/maps/loop"));
-    vi.stubGlobal("fetch", f);
-    await expandMapsShortUrl(short);
-    expect(f).toHaveBeenCalledTimes(3);
-    vi.unstubAllGlobals();
-  });
-
-  it("does not follow a non-Google redirect target", async () => {
-    const f = vi.fn().mockResolvedValue(redirect("https://evil.example.com/x"));
-    vi.stubGlobal("fetch", f);
-    expect(await expandMapsShortUrl(short)).toBe(short);
-    expect(f).toHaveBeenCalledTimes(1);
-    vi.unstubAllGlobals();
-  });
-
-  it("does not follow a non-https redirect target", async () => {
-    const f = vi.fn().mockResolvedValue(redirect("http://www.google.com/maps"));
-    vi.stubGlobal("fetch", f);
-    expect(await expandMapsShortUrl(short)).toBe(short);
-    expect(f).toHaveBeenCalledTimes(1);
-    vi.unstubAllGlobals();
-  });
-
-  it("never fetches a host outside the allowlist", async () => {
-    const f = vi.fn();
-    vi.stubGlobal("fetch", f);
-    expect(await expandMapsShortUrl("https://evil.example.com/x")).toBe("https://evil.example.com/x");
-    expect(f).not.toHaveBeenCalled();
-    vi.unstubAllGlobals();
-  });
-
-  it("returns the original URL on fetch error or timeout", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new DOMException("timeout", "TimeoutError")));
-    expect(await expandMapsShortUrl(short)).toBe(short);
-    vi.unstubAllGlobals();
+  it("returns an error when the shop no longer exists", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(db.pastryLocation.update).mockRejectedValueOnce(new Error("P2025"));
+    expect(await updatePastryLocation("gone", { name: "Shop", mapsUrl: url })).toEqual({ error: expect.any(String) });
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
 
