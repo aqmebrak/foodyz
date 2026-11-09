@@ -14,7 +14,8 @@ import { type RecipeFormValues,recipeSchema } from "@/lib/validations/recipe";
 
 export async function getRecipeBySlug(slug: string) {
   return db.recipe.findUnique({
-    where: { slug, published: true },
+    // No published filter: the app is private, and create/update redirect here for drafts too.
+    where: { slug },
     include: {
       ingredients: {
         include: { ingredient: true, unit: true },

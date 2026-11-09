@@ -1,6 +1,6 @@
 import { beforeEach,describe, expect, it, vi } from "vitest";
 
-import { createRecipe, deleteRecipe, updateRecipe } from "@/actions/recipe";
+import { createRecipe, deleteRecipe, getRecipeBySlug, updateRecipe } from "@/actions/recipe";
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -37,6 +37,15 @@ const validRecipe = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+});
+
+describe("getRecipeBySlug", () => {
+  it("finds drafts too — create/update redirect to the detail page of unpublished recipes", async () => {
+    vi.mocked(db.recipe.findUnique).mockResolvedValueOnce(null);
+    await getRecipeBySlug("my-draft");
+    const where = vi.mocked(db.recipe.findUnique).mock.calls[0][0].where;
+    expect(where).toEqual({ slug: "my-draft" });
+  });
 });
 
 describe("createRecipe", () => {
