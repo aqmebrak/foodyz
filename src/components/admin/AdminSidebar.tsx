@@ -7,7 +7,13 @@ import { useState } from "react";
 
 import { logoutAction } from "@/actions/auth";
 import { adminNav, isNavActive, type NavItem, publicNav } from "@/components/layout/nav-items";
+import { clearOfflineCaches } from "@/lib/sw-client";
 import { cn } from "@/lib/utils";
+
+async function signOutAndClearCaches() {
+  await clearOfflineCaches();
+  await logoutAction();
+}
 
 const linkClass =
   "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-basil";
@@ -78,7 +84,7 @@ function SidebarNav() {
             ))}
           </nav>
         )}
-        <form action={logoutAction}>
+        <form action={signOutAndClearCaches}>
           <button
             type="submit"
             className={cn(

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Atkinson_Hyperlegible_Next, Bricolage_Grotesque } from "next/font/google";
 
+import { SwRegister } from "@/components/shared/SwRegister";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
@@ -50,6 +51,7 @@ export default function RootLayout({
         className={`${atkinson.variable} ${bricolage.variable} bg-background text-foreground font-sans antialiased`}
       >
         {children}
+        <SwRegister />
         <Toaster
           position="top-center"
           offset={{ top: "calc(env(safe-area-inset-top) + 12px)" }}

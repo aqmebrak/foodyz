@@ -13,7 +13,13 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { clearOfflineCaches } from "@/lib/sw-client";
 import { cn } from "@/lib/utils";
+
+async function signOutAndClearCaches() {
+  await clearOfflineCaches();
+  await logoutAction();
+}
 
 const rowClass =
   "flex min-h-12 w-full items-center gap-3 rounded-md px-3 text-base text-ink hover:bg-enamel focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-basil";
@@ -55,7 +61,7 @@ export function MoreSheet({ itemClass }: MoreSheetProps) {
                 {label}
               </Link>
             ))}
-            <form action={logoutAction}>
+            <form action={signOutAndClearCaches}>
               <button type="submit" className={rowClass}>
                 <LogOut className="size-5 text-ink/60" />
                 Sign out
