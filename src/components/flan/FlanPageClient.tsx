@@ -29,7 +29,9 @@ const FlanMap = dynamic(() => import("@/components/flan/FlanMap").then((m) => m.
 
 interface FlanPageClientProps {
   flans: FlanItem[];
-  locations: PastryLocation[];
+  locations?: PastryLocation[];
+  /** Public view: no logging UI. */
+  readOnly?: boolean;
 }
 
 const MOBILE_QUERY = "(max-width: 767px)";
@@ -46,7 +48,7 @@ function useIsMobile(): boolean {
   );
 }
 
-export function FlanPageClient({ flans, locations }: FlanPageClientProps) {
+export function FlanPageClient({ flans, locations = [], readOnly = false }: FlanPageClientProps) {
   const [filters, setFilters] = useState<FlanFilterState>({ query: "", minRating: 0, status: "all" });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [snapIndex, setSnapIndex] = useState(0);
@@ -110,27 +112,31 @@ export function FlanPageClient({ flans, locations }: FlanPageClientProps) {
         </div>
       </div>
 
-      {/* Floating "Log a flan" button: rides above the sheet (peek/half), hidden when it is full. */}
-      <div
-        id="flan-fab-slot"
-        className={cn(
-          "pointer-events-none absolute right-4 z-20 transition-[bottom] duration-200 motion-reduce:transition-none md:bottom-4 md:right-[376px]",
-          mobileSheet && snapIndex >= 2 && "hidden",
-        )}
-        style={fabBottom !== null ? { bottom: fabBottom } : undefined}
-      >
-        <button
-          type="button"
-          onClick={() => setLogOpen(true)}
-          aria-label="Log a flan"
-          className="pointer-events-auto flex size-14 cursor-pointer items-center justify-center rounded-full bg-basil text-on-basil shadow-lg transition-colors hover:bg-basil/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil focus-visible:ring-offset-2 md:h-12 md:w-auto md:gap-2 md:px-5"
-        >
-          <Plus className="size-6 md:size-5" />
-          <span className="hidden text-base font-medium md:inline">Log a flan</span>
-        </button>
-      </div>
+      {!readOnly && (
+        <>
+          {/* Floating "Log a flan" button: rides above the sheet (peek/half), hidden when it is full. */}
+          <div
+            id="flan-fab-slot"
+            className={cn(
+              "pointer-events-none absolute right-4 z-20 transition-[bottom] duration-200 motion-reduce:transition-none md:bottom-4 md:right-[376px]",
+              mobileSheet && snapIndex >= 2 && "hidden",
+            )}
+            style={fabBottom !== null ? { bottom: fabBottom } : undefined}
+          >
+            <button
+              type="button"
+              onClick={() => setLogOpen(true)}
+              aria-label="Log a flan"
+              className="pointer-events-auto flex size-14 cursor-pointer items-center justify-center rounded-full bg-basil text-on-basil shadow-lg transition-colors hover:bg-basil/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-basil focus-visible:ring-offset-2 md:h-12 md:w-auto md:gap-2 md:px-5"
+            >
+              <Plus className="size-6 md:size-5" />
+              <span className="hidden text-base font-medium md:inline">Log a flan</span>
+            </button>
+          </div>
 
-      <QuickLogSheet open={logOpen} onOpenChange={setLogOpen} locations={locations} isMobile={isMobile} />
+          <QuickLogSheet open={logOpen} onOpenChange={setLogOpen} locations={locations} isMobile={isMobile} />
+        </>
+      )}
 
       {/* Desktop: side panel */}
       <aside className="hidden w-[360px] shrink-0 flex-col border-l border-steam bg-card md:flex">
