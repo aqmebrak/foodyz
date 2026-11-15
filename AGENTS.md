@@ -69,6 +69,7 @@ foodyz/
     │   ├── login/page.tsx
     │   ├── robots.ts, sitemap.ts
     │   ├── api/auth/[...nextauth]/route.ts
+    │   ├── (public)/lyon-flans/page.tsx   # unauthenticated read-only flan map (noindex)
     │   └── (admin)/              # App shell (sidebar md+, bottom tab bar < md); loading.tsx/error.tsx per area
     │       ├── layout.tsx, not-found.tsx, error.tsx
     │       ├── recipes/
@@ -177,7 +178,7 @@ pnpm test:watch   # run unit tests with vitest in watch mode
 - **Form state with hooks.** Use `useFormState` + `useFormStatus` for loading and error states in Client Components.
 - **Auth at the proxy level.** `src/proxy.ts` (Next.js 16 rename of `middleware.ts`) requires a session on every route except `/login` and `/api/auth/*` — the whole app is private, not just `/admin`. Auth config is split: `auth.config.ts` (Edge-safe, no DB) used by proxy; `auth.ts` (Node.js, Credentials + Prisma) used by server components. Never put auth checks inside individual pages — the one exception is `(admin)/recipes/[slug]/page.tsx`, which calls `auth()` itself to conditionally show an "Edit recipe" link to `ADMIN`-role sessions (this makes that route fully dynamic — no more static generation for recipe slugs, a deliberate trade-off).
 - **Leaflet maps in client components only.** Use `next/dynamic(..., { ssr: false })` inside a `"use client"` file — not in Server Components.
-- **Proxy matcher exemptions.** Besides `/login` and `/api/auth/*`, the matcher skips `manifest.webmanifest`, `icon.svg`, `apple-icon`, `pwa-icon` so the PWA manifest/icons load without a session.
+- **Proxy matcher exemptions.** Besides `/login` and `/api/auth/*`, the matcher skips `manifest.webmanifest`, `icon.svg`, `apple-icon`, `pwa-icon` so the PWA manifest/icons load without a session, and `lyon-flans` (exact path) — the one deliberately public page: a read-only, noindex flan map in `(public)/lyon-flans`, fed by `lib/public-flans.ts` (explicit `select`, not a server action) and `FlanPageClient readOnly`. Keep it that way: never import actions into it.
 - **Toasts via redirect flags.** Server actions redirect with `?saved=1` / `?created=1` (recipe update/create); delete redirects to `/recipes?deleted=1`. `components/shared/FlagToast` shows the toast and strips the flag.
 - **localStorage keys:** `foodyz:recent-recipes`, `recipe-progress-<slug>`, `recipe-steps-<slug>` (legacy, migrated into progress on first write), `recipe-draft-new` (new-recipe form autosave). Always wrap access in try/catch.
 - **Single light theme — no dark mode.** Don't add `dark:` utilities or `prefers-color-scheme: dark` blocks; `globals.css` redefines `dark:` to a never-set `.dark` class so library dark styles stay inert.
