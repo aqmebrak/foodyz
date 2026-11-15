@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#EDF1E8" />
+    <title>Offline | Foodyz</title>
+    <style>
+      body { margin: 0; min-height: 100dvh; display: grid; place-items: center; padding: 24px;
+        background: #EDF1E8; color: #1f2a24; font-family: system-ui, sans-serif; text-align: center; }
+      h1 { font-size: 1.5rem; margin: 0 0 8px; }
+      p { margin: 0 0 20px; opacity: 0.7; }
+      button { background: #3D6B50; color: #F7F9F3; border: 0; border-radius: 999px;
+        padding: 12px 24px; font-size: 1rem; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>You're offline</h1>
+      <p>This page isn't saved on your device yet. Recipes you opened recently still work.</p>
+      <button type="button" onclick="location.reload()">Retry</button>
+    </main>
+  </body>
+</html>
